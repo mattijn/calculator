@@ -1,8 +1,9 @@
 import streamlit as st
 import sessionstore
+from copy import copy
 from eval import evaluate
 
-store = sessionstore.get(display=[], eval=[])
+store = sessionstore.get(display=[], eval=[], last_operator=None, last_item=None)
 
 def reset_store():
     global store
@@ -11,17 +12,37 @@ def reset_store():
 
 def pop_store():
     global store
-    del store.display[-1]
-    del store.eval[-1]
+    store.display.pop()
+    store.eval.pop()
+    output_field.write(''.join(store.display)) 
+
+def last_item_store():
+    global store
+    item = ''
+    for idx, i in enumerate(copy(store.display[::-1])):
+        try:
+            int(i)
+            item += i
+            store.display.pop(len(store.display)-1-idx)
+            store.eval.pop(len(store.display)-1-idx)
+        except:
+            break
+        item = item[::-1]
+    store.last_item = item 
 
 def append_store(item_disp, item_eval=None):
     global store
     store.display.append(item_disp)
-    if item_eval:
-        store.eval.append(item_eval)
-    else:
-        store.eval.append(item_disp)
-    output_field.write(store.display)    
+    if not item_eval:
+        item_eval = item_disp
+    
+    if item_disp in ['+','-','x','÷','x','↑','↓','⇓','(',')']:
+        if store.last_operator in ['↓','⇓']:
+            item_eval = ')' + item_eval
+        store.last_operator = item_disp
+    
+    store.eval.append(item_eval)      
+    output_field.write(''.join(store.display))    
 
 
 output, delete, ac = st.beta_columns((3,1,2))
@@ -113,24 +134,28 @@ if divi_button:
     append_store('÷', '/')
 
 if pwr_up_button:
-    append_store('↑', '^')
+    append_store('↑', '**')
 
 if pwr_down_button:
-    output_field.write('↓')
-    store.input.append('wortel') 
+    append_store('↑', '**(1/')
 
 if pwr_db_down_button:
-    output_field.write('⇓')
-    store.input.append('log') 
+    last_item_store()
+    append_store('⇓', 'log('+store.last_item+')/log(')
 
 if bracket_l_button:
-    output_field.write('(')
-    store.input.append('(') 
+    append_store('(')
 
 if bracket_r_button:
-    output_field.write(')')
-    store.input.append(')')         
+    append_store(')')        
 
 if equals_button:
-    output_field.write(evaluate(''.join(store.input)))
+    output_field.write(evaluate(''.join(store.eval)))
     
+# optrekken
+# aftrekken
+# vermenigvuldigen 
+# delen
+# macht omhoog
+# macht omlaag
+# dubbel macht omlaag
