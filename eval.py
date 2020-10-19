@@ -1,22 +1,40 @@
-import math
-from parser import Parser
+from spi import Lexer, Parser, SemanticAnalyzer, Interpreter
+class TestCallStack:
+    def __init__(self):
+        self._records = []
 
-def evaluate(expression, vars = None):
-    try:
-        p = Parser(expression, vars)
-        value = p.getValue()
-    except Exception as ex:
-        msg = ex.message
-        raise Exception(msg)
+    def push(self, ar):
+        self._records.append(ar)
 
-    # Return an integer type if the answer is an integer 
-    if int(value) == value:
-        return int(value)
+    def pop(self):
+        # do nothing
+        pass
 
-    # If Python made some silly precision error like x.99999999999996, just return x+1 as an integer 
-    epsilon = 0.0000000001
-    if int(value + epsilon) != int(value):
-        return int(value + epsilon)
-    if int(value - epsilon) != int(value):
-        return int(value)
+    def peek(self):
+        return self._records[-1]
+
+def interpreter(text):
+    
+    lexer = Lexer(text)
+    parser = Parser(lexer)
+    tree = parser.parse()
+
+    semantic_analyzer = SemanticAnalyzer()
+    semantic_analyzer.visit(tree)
+
+    interpreter = Interpreter(tree)
+    interpreter.call_stack = TestCallStack()
+    return interpreter
+
+def evaluate(expression):
+    text = f"""PROGRAM CustomCalculator;
+        VAR
+            formula : REAL;
+        BEGIN
+            formula := {expression}
+        END.
+    """
+    ipt = interpreter(text)
+    ipt.interpret()
+    value = ipt.call_stack.peek()['formula']
     return value

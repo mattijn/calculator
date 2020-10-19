@@ -134,14 +134,13 @@ if divi_button:
     append_store('÷', '/')
 
 if pwr_up_button:
-    append_store('↑', '**')
+    append_store('↑', '↑')
 
 if pwr_down_button:
-    append_store('↑', '**(1/')
+    append_store('↓', '↓')
 
 if pwr_db_down_button:
-    last_item_store()
-    append_store('⇓', 'log('+store.last_item+')/log(')
+    append_store('⇓', '⇓')
 
 if bracket_l_button:
     append_store('(')
