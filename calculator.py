@@ -37,8 +37,6 @@ def append_store(item_disp, item_eval=None):
         item_eval = item_disp
     
     if item_disp in ['+','-','x','÷','x','↑','↓','⇓','(',')']:
-        if store.last_operator in ['↓','⇓']:
-            item_eval = ')' + item_eval
         store.last_operator = item_disp
     
     store.eval.append(item_eval)      
