@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import math
 from enum import Enum
 
 _SHOULD_LOG_SCOPE = False  # see '--scope' command line option
@@ -47,6 +48,9 @@ class TokenType(Enum):
     MINUS         = '-'
     MUL           = '*'
     FLOAT_DIV     = '/'
+    PWR_UP        = '↑'
+    PWR_DOWN      = '↓'
+    PWR_DB_DOWN   = '⇓'
     LPAREN        = '('
     RPAREN        = ')'
     SEMI          = ';'
@@ -631,37 +635,44 @@ class Parser:
 
     def expr(self):
         """
-        expr : term ((PLUS | MINUS) term)*
+        expr : term ((PLUS | MINUS | MUL | FLOAT_DIV) term)*
         """
         node = self.term()
 
-        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
+        while self.current_token.type in (TokenType.PLUS, TokenType.MINUS, TokenType.MUL, TokenType.FLOAT_DIV):
             token = self.current_token
             if token.type == TokenType.PLUS:
                 self.eat(TokenType.PLUS)
             elif token.type == TokenType.MINUS:
                 self.eat(TokenType.MINUS)
+            elif token.type == TokenType.MUL:
+                self.eat(TokenType.MUL)  
+            elif token.type == TokenType.FLOAT_DIV:
+                self.eat(TokenType.FLOAT_DIV)                                
 
             node = BinOp(left=node, op=token, right=self.term())
 
         return node
 
     def term(self):
-        """term : factor ((MUL | INTEGER_DIV | FLOAT_DIV) factor)*"""
+        """term : factor ((INTEGER_DIV | PWR_UP | PWR_DOWN | PWR_DB_DOWN) factor)*"""
         node = self.factor()
 
         while self.current_token.type in (
-                TokenType.MUL,
                 TokenType.INTEGER_DIV,
-                TokenType.FLOAT_DIV,
+                TokenType.PWR_UP,
+                TokenType.PWR_DOWN,
+                TokenType.PWR_DB_DOWN               
         ):
             token = self.current_token
-            if token.type == TokenType.MUL:
-                self.eat(TokenType.MUL)
-            elif token.type == TokenType.INTEGER_DIV:
+            if token.type == TokenType.INTEGER_DIV:
                 self.eat(TokenType.INTEGER_DIV)
-            elif token.type == TokenType.FLOAT_DIV:
-                self.eat(TokenType.FLOAT_DIV)
+            elif token.type == TokenType.PWR_UP:
+                self.eat(TokenType.PWR_UP)
+            elif token.type == TokenType.PWR_DOWN:
+                self.eat(TokenType.PWR_DOWN)  
+            elif token.type == TokenType.PWR_DB_DOWN:
+                self.eat(TokenType.PWR_DB_DOWN)                                
 
             node = BinOp(left=node, op=token, right=self.factor())
             
@@ -671,6 +682,8 @@ class Parser:
     def factor(self):
         """factor : PLUS factor
                   | MINUS factor
+                  | MUL factor
+                  | FLOAT_DIV factor                  
                   | INTEGER_CONST
                   | REAL_CONST
                   | LPAREN expr RPAREN
@@ -685,6 +698,10 @@ class Parser:
             self.eat(TokenType.MINUS)
             node = UnaryOp(token, self.factor())
             return node
+        elif token.type == TokenType.MUL:
+            self.eat(TokenType.MUL)
+            node = UnaryOp(token, self.factor())
+            return node            
         elif token.type == TokenType.FLOAT_DIV:
             self.eat(TokenType.FLOAT_DIV)  
             node = UnaryOp(token, self.factor())
@@ -740,12 +757,14 @@ class Parser:
 
         empty :
 
-        expr : term ((PLUS | MINUS) term)*
+        expr : term ((PLUS | MINUS | MUL | FLOAT_DIV) term)*
 
-        term : factor ((MUL | INTEGER_DIV | FLOAT_DIV) factor)*
+        term : factor ((INTEGER_DIV | PWR_UP | PWR_DOWN | PWR_DB_DOWN) factor)*
 
         factor : PLUS factor
                | MINUS factor
+               | MUL factor
+               | FLOAT_DIV factor
                | INTEGER_CONST
                | REAL_CONST
                | LPAREN expr RPAREN
@@ -1145,6 +1164,12 @@ class Interpreter(NodeVisitor):
             return self.visit(node.left) // self.visit(node.right)
         elif node.op.type == TokenType.FLOAT_DIV:
             return float(self.visit(node.left)) / float(self.visit(node.right))
+        elif node.op.type == TokenType.PWR_UP:
+            return self.visit(node.left) ** self.visit(node.right)  
+        elif node.op.type == TokenType.PWR_DOWN:
+            return self.visit(node.left) ** (1 / self.visit(node.right))
+        elif node.op.type == TokenType.PWR_DB_DOWN:
+            return math.log(self.visit(node.left), self.visit(node.right))           
 
     def visit_Num(self, node):
         return node.value
@@ -1156,9 +1181,7 @@ class Interpreter(NodeVisitor):
         elif op == TokenType.MINUS:
             return -self.visit(node.expr)
         elif op == TokenType.MUL:
-            return 1*self.visit(node.expr)             
-        elif op == TokenType.INTEGER_DIV:
-            return 1/self.visit(node.expr)             
+            return 1*self.visit(node.expr)                         
         elif op == TokenType.FLOAT_DIV:
             return 1/self.visit(node.expr)            
 
