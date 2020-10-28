@@ -2,8 +2,15 @@ import streamlit as st
 
 def header():
     link = '[Numbers](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)'
-    st.markdown(
-        f'Deze pagina implementeert de rekenmachine zoals beschreven in het boek {link}. Het boek _Numbers_ is geschreven door Steven Pemberton, docent CWI-Amsterdam.', 
+    st.markdown((
+        f'This pages implements the calculator is as described in the book {link}.'
+        'The book _Numbers_ is written by Steven Pemberton, reseacher at CWI-Amsterdam.  \n\n'
+        'The changes in notation introduced by Steven can be summarised as follow:  \n'
+        '- It is possible to write `÷÷2` and corresponds to `1÷1÷2=2`.  \nJust like `--2` corresponds to `0-0-2=2`  \n'
+        '- The `↑` is an operator for _power_ functions and pronounced as _power up_.  \nSo `2↑3` is traditionally written as `2³` and equals both to `8`.  \n'
+        '- The `↓` is an operator for _n-root_ functions and pronounced as _power down_.  \nSo `8↓3` is traditionally written as `∛8` and equals both to `2`  \n'
+        '- The `⇓` is an operator for _base-n log_ functions and pronounced as _power douwble down_.  \nSo `8⇓2` is traditionally written as `log₂8` and equals both to `3`.'        
+        ),
         unsafe_allow_html=True
     )
 
