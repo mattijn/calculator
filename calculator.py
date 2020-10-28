@@ -1,9 +1,8 @@
 import streamlit as st
 import sessionstore
-from copy import copy
 from evaluate import eval
 
-store = sessionstore.get(display=[], eval=[])
+store = sessionstore.get(display=[], eval=[], refresh=True)
   
 def calc():
     global store
@@ -11,6 +10,10 @@ def calc():
         global store
         store.display.clear()
         store.eval.clear()
+
+    if store.refresh is True:
+        reset_store()
+        store.refresh = False
 
     def pop_store():
         global store
@@ -30,8 +33,9 @@ def calc():
         store.eval.append(item_eval)      
         output_field.write(''.join(store.display))    
 
-    output, _, = st.beta_columns((3,3))
+    output, info_state, = st.beta_columns((3,3))
     output_field = output.empty()
+    info_state.write('please click `AC` first upon entering this website')
 
     answer, delete, ac = st.beta_columns((3,1,2))
     answer_field = answer.empty()
@@ -73,8 +77,7 @@ def calc():
         reset_store()
 
     if del_buttion:
-        pop_store()    
-        #output_field.write(store.display)
+        pop_store()
 
     if one_button:
         append_store('1')
