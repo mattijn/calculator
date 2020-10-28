@@ -1,7 +1,7 @@
 import streamlit as st
 import sessionstore
 from copy import copy
-from eval import evaluate
+from evaluate import eval
 
 store = sessionstore.get(display=[], eval=[])
   
@@ -9,15 +9,17 @@ def calc():
     global store
     def reset_store():
         global store
-        store.display = []
-        store.eval = []
+        store.display.clear()
+        store.eval.clear()
 
     def pop_store():
         global store
         if len(store.display):
-            store.display.pop()
-            store.eval.pop()
-            output_field.write(''.join(store.display)) 
+            del store.display[-1]
+            del store.eval[-1]
+            display_string = ''.join(store.display)
+            
+            output_field.write(display_string)
 
     def append_store(item_disp, item_eval=None):
         global store
@@ -28,8 +30,11 @@ def calc():
         store.eval.append(item_eval)      
         output_field.write(''.join(store.display))    
 
-    output, delete, ac = st.beta_columns((3,1,2))
+    output, _, = st.beta_columns((3,3))
     output_field = output.empty()
+
+    answer, delete, ac = st.beta_columns((3,1,2))
+    answer_field = answer.empty()
     del_buttion = delete.button('⌫')
     ac_button = ac.button('AC')
 
@@ -64,11 +69,12 @@ def calc():
 
     if ac_button:
         output_field.write('')
+        answer_field.write(' ')
         reset_store()
 
     if del_buttion:
         pop_store()    
-        output_field.write(store.display)
+        #output_field.write(store.display)
 
     if one_button:
         append_store('1')
@@ -131,7 +137,8 @@ def calc():
         append_store(')')        
 
     if equals_button:
-        output_field.write(evaluate(''.join(store.eval)))
+        answer_field.write(eval(''.join(store.eval)))
+        output_field.write(''.join(store.display))
     
 # optrekken
 # aftrekken

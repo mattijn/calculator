@@ -1,4 +1,5 @@
-from spi import Lexer, Parser, SemanticAnalyzer, Interpreter
+from spi import Lexer, Parser, SemanticAnalyzer, Interpreter, LexerError, ParserError, SemanticError
+
 class TestCallStack:
     def __init__(self):
         self._records = []
@@ -16,17 +17,24 @@ class TestCallStack:
 def interpreter(text):
     
     lexer = Lexer(text)
-    parser = Parser(lexer)
-    tree = parser.parse()
+    try:
+        parser = Parser(lexer)
+        tree = parser.parse()
+    except (LexerError, ParserError) as e:
+        return (None, e.message)
 
     semantic_analyzer = SemanticAnalyzer()
-    semantic_analyzer.visit(tree)
+    try:
+        semantic_analyzer.visit(tree)
+    except SemanticError as e:
+        return (None, e.message)
+
 
     interpreter = Interpreter(tree)
     interpreter.call_stack = TestCallStack()
     return interpreter
 
-def evaluate(expression):
+def eval(expression):
     text = f"""PROGRAM CustomCalculator;
         VAR
             formula : REAL;
@@ -34,7 +42,11 @@ def evaluate(expression):
             formula := {expression}
         END.
     """
+    
     ipt = interpreter(text)
-    ipt.interpret()
-    value = ipt.call_stack.peek()['formula']
-    return value
+    if not isinstance(ipt, tuple):
+        ipt.interpret()
+        value = ipt.call_stack.peek()['formula']
+        return value
+    else:
+        return ipt[1]
