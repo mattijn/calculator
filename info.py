@@ -3,7 +3,7 @@ import streamlit as st
 def header():
     link = '[Numbers](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)'
     st.markdown((
-        f'This pages implements the calculator is as described in the book {link}.'
+        f'This pages implements the calculator is as described in the book {link}. '
         'The book _Numbers_ is written by Steven Pemberton, reseacher at CWI-Amsterdam.  \n\n'
         'The changes in notation introduced by Steven can be summarised as follow:  \n'
         '- It is possible to write `÷÷2` and corresponds to `1÷1÷2=2`.  \nJust like `--2` corresponds to `0-0-2=2`  \n'
