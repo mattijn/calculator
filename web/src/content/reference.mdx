@@ -1,0 +1,30 @@
+# Language Reference
+
+v1 browser evaluator specification
+
+## Tokens
+
+- Numbers: integer or decimal (`2`, `1.03`)
+- Grouping: `(` and `)`
+- Binary operators: `+`, `-`, `×`/`x`/`*`, `÷`/`/`, `↑`, `↓`, `⇓`
+- Unary operators: prefix `+`, `-`, `÷`/`/` (reciprocal)
+
+## Precedence And Associativity
+
+1. Unary operators (right-associative chaining)
+2. `↑`, `↓`, `⇓` (left-associative)
+3. `+`, `-`, `×`, `÷` (left-associative)
+
+This ordering mirrors the legacy implementation behavior for compatibility, while adding explicit unary `÷` support.
+
+## Semantics
+
+- `a↑b` = `a ** b`
+- `a↓b` = `a ** (1 / b)`
+- `a⇓b` = `log(a) / log(b)`
+- `÷x` = `1 / x`
+
+## Error Behavior
+
+- Parse failures report invalid syntax for unexpected or missing tokens.
+- Non-finite results (for example division by zero) are rejected.

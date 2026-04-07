@@ -1,0 +1,833 @@
+:root {
+  --background: #fafaf9;
+  --foreground: #1c1917;
+  --surface: #ffffff;
+  --surface-muted: #f5f5f4;
+  --border: #e7e5e4;
+  --accent: #1d4ed8;
+  --accent-text: #ffffff;
+  --accent-light: #eff6ff;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), "Georgia", serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- Header --- */
+
+.siteHeader {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: inherit;
+}
+
+.pageContainer {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+/* --- Shared --- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.muted {
+  color: #78716c;
+  font-size: 0.9rem;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.primaryBtn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 1px solid var(--accent);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.88rem;
+}
+
+.secondaryBtn {
+  background: var(--surface-muted);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.88rem;
+}
+
+/* ═══════════════ Story page ═══════════════ */
+
+.storyPage {
+  display: grid;
+  gap: 0;
+}
+
+/* Hero */
+
+.storyHero {
+  padding: 3rem 1.5rem 2rem;
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.heroMeta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.readMeta {
+  font-size: 0.82rem;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.langToggle {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.heroTitle {
+  font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+  line-height: 1.15;
+  margin-bottom: 0.7rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.heroDek {
+  font-size: 1.15rem;
+  color: #57534e;
+  line-height: 1.65;
+}
+.tocNav {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--card-bg, #fafaf9);
+  border: 1px solid var(--border, #e7e5e4);
+  border-radius: 10px;
+}
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.5rem;
+}
+.tocList li {
+  font-size: 0.88rem;
+}
+.tocList a {
+  color: var(--accent, #2563eb);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.tocList a:hover {
+  border-bottom-color: var(--accent, #2563eb);
+}
+
+/* Body layout */
+
+.storyBody {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+.storyArticle {
+  display: grid;
+  gap: 0;
+  max-width: 680px;
+}
+
+/* Typography */
+
+.storyH2 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.storyH3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 1.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.storyP {
+  font-size: 1.06rem;
+  line-height: 1.85;
+  margin-bottom: 0.8rem;
+}
+
+.storyQuote {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  font-style: italic;
+  font-weight: 500;
+  border-left: 4px solid var(--accent);
+  padding: 0.8rem 1.2rem;
+  margin: 1rem 0 1.2rem;
+  color: #44403c;
+  background: var(--accent-light);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+/* Pair block (left → right) */
+
+.pairBlock {
+  margin: 0.8rem 0 1rem;
+  padding: 1rem 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+}
+
+.pairRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  font-size: 1.15rem;
+}
+
+.pairRow code {
+  font-family: var(--font-math), serif;
+  font-size: 1.15rem;
+  background: var(--surface-muted);
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.3rem;
+}
+
+.pairArrowText {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.pairCaption {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+}
+
+/* Levels table */
+
+.levelsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8rem 0 1rem;
+  font-size: 0.98rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+
+.levelsTable td {
+  padding: 0.6rem 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.levelsTable tr:first-child td {
+  border-top: none;
+}
+
+.levelsOp {
+  width: 100px;
+  text-align: center;
+}
+
+.levelsOp code {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.levelsNote {
+  text-align: right;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+/* Formula figure — stacked vertically */
+
+.formulaFig {
+  margin: 1rem 0;
+  padding: 1.2rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  text-align: center;
+  display: grid;
+  gap: 0.15rem;
+  justify-items: center;
+}
+
+.formulaLine {
+  font-family: var(--font-math), serif;
+  font-size: 1.25rem;
+  display: block;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0;
+}
+
+.mathArrow {
+  display: inline-block;
+  font-size: 0.82em;
+  line-height: 1;
+  vertical-align: middle;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.formulaFig figcaption {
+  font-size: 0.88rem;
+  margin-top: 0.4rem;
+}
+
+/* Symbol cards */
+
+.symbolFamily {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0 1.2rem;
+}
+
+.symbolCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.symbolGlyph {
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--accent);
+}
+.symbolGlyph .mathArrow {
+  font-size: 1em;
+}
+
+.symbolName {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.symbolEx {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+/* Try inline */
+
+.tryInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tryInline code {
+  font-family: var(--font-math), serif;
+  background: var(--surface-muted);
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.tryBtn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tryPronounce {
+  color: #78716c;
+  font-size: 0.85rem;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.tryResult {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.tryBlock {
+  margin: 0.3rem 0 1.2rem;
+}
+
+/* Proof block */
+
+.proofBlock {
+  margin: 1rem 0 1.5rem;
+  display: grid;
+  gap: 0;
+}
+
+.proofRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.proofRow:last-child {
+  border-bottom: none;
+}
+
+.proofIndex {
+  width: 1.7rem;
+  height: 1.7rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.proofContent {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.proofLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.proofContent code {
+  background: var(--surface-muted);
+  padding: 0.12rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.92rem;
+  justify-self: start;
+}
+
+/* Visualization */
+
+.vizWrap {
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+}
+
+.vizSvg {
+  width: 100%;
+  height: auto;
+  max-width: 520px;
+  display: block;
+  margin: 0 auto;
+}
+
+.vizSvg text {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.vizCaption {
+  text-align: center;
+  margin-top: 0.6rem;
+  font-size: 0.88rem;
+}
+
+/* Collapsible (details/summary) */
+
+.collapsibleBlock {
+  margin: 2rem 0;
+}
+
+.collapsibleSummary {
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.6rem 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.collapsibleSummary::before {
+  content: "▶";
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+  color: var(--accent);
+}
+
+.collapsibleBlock[open] > .collapsibleSummary::before {
+  transform: rotate(90deg);
+}
+
+.collapsibleSummary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsibleContent {
+  padding-top: 0.5rem;
+  display: grid;
+  gap: 0;
+}
+
+/* Challenge cards */
+
+.challengeCard {
+  margin: 0.8rem 0;
+}
+
+.challengeTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.challengeDesc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.6rem;
+  color: #44403c;
+}
+
+.challengeItems {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.challengeRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.challengeHint {
+  font-size: 0.85rem;
+}
+
+/* Inverse rule card */
+
+.inverseRuleCard {
+  margin: 1rem 0 1.2rem;
+}
+
+.inverseRuleTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inverseRuleTable td {
+  padding: 0.5rem 0.6rem;
+  vertical-align: middle;
+}
+
+.inverseRuleHeaderRow td {
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.inverseRuleRow td {
+  border-bottom: 1px solid var(--border);
+}
+
+.inverseRuleRow:last-child td {
+  border-bottom: none;
+}
+
+.inverseRuleFormula {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.inverseRuleFormula code {
+  font-family: var(--font-math), serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+}
+
+.inverseRuleLabel {
+  font-size: 0.95rem;
+}
+
+.inverseRuleHint {
+  font-size: 0.82rem;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.inverseRuleExample {
+  padding: 0.6rem 0.6rem 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.symbolHighlight {
+  display: inline-block;
+  font-size: 0.82em;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Examples intro grid */
+
+.examplesIntroGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.examplePreviewCard {
+  text-align: center;
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.8rem 0.5rem;
+}
+
+.examplePreviewIcon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.examplePreviewLabel {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.examplePreviewOps {
+  font-size: 1.1rem;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+/* Full calculator */
+
+.fullCalc {
+  margin: 1.5rem 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.fullCalc h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0;
+}
+
+.calcSubtitle {
+  font-size: 0.8rem;
+  margin-bottom: 0.2rem;
+}
+
+.calcDisplay {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  font-size: 1.05rem;
+  font-family: var(--font-geist-mono), monospace;
+  background: var(--surface);
+}
+
+.calcResult {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.calcError {
+  font-size: 0.92rem;
+  color: #991b1b;
+}
+
+.calcKeypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+
+.calcKey {
+  padding: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--surface);
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.1s;
+}
+
+.calcKey:active {
+  background: var(--surface-muted);
+}
+
+.calcKeyAccent {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+.calcKeyAccent:active {
+  opacity: 0.85;
+}
+
+.calcKeySpecial {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.calcKeySpecial:active {
+  background: #fde68a;
+}
+
+.calcOps {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.calcActions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+/* Sidebar / sticky calc */
+
+.storySidebar {
+  display: none;
+}
+
+.stickyCalc {
+  position: sticky;
+  top: 1rem;
+}
+
+@media (min-width: 1080px) {
+  .storyBody {
+    grid-template-columns: minmax(0, 680px) minmax(320px, 380px);
+    justify-content: center;
+  }
+
+  .storyArticle {
+    align-self: start;
+  }
+
+  .storyArticle > .fullCalc {
+    display: none;
+  }
+
+  .storySidebar {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .symbolFamily {
+    grid-template-columns: 1fr;
+  }
+
+  .examplesIntroGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .inverseRuleHint {
+    display: none;
+  }
+
+  .inverseRuleFormula code {
+    font-size: 1.05rem;
+  }
+
+  .pairRow {
+    font-size: 1rem;
+  }
+
+  .pairRow code {
+    font-size: 1rem;
+  }
+
+  .proofRow {
+    grid-template-columns: auto 1fr;
+  }
+
+  .proofRow .tryInline {
+    grid-column: 2;
+  }
+
+  .formulaLine {
+    font-size: 1.05rem;
+  }
+}
