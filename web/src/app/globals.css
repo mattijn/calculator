@@ -7,6 +7,29 @@
   --accent: #1d4ed8;
   --accent-text: #ffffff;
   --accent-light: #eff6ff;
+  --card-bg: #fafaf9;
+  --muted-text: #78716c;
+  --special-bg: #fef3c7;
+  --special-border: #f59e0b;
+  --special-text: #92400e;
+  --special-active: #fde68a;
+}
+
+[data-theme="dark"] {
+  --background: #0c0a09;
+  --foreground: #e7e5e4;
+  --surface: #1c1917;
+  --surface-muted: #292524;
+  --border: #3f3f46;
+  --accent: #60a5fa;
+  --accent-text: #0c0a09;
+  --accent-light: #172554;
+  --card-bg: #1c1917;
+  --muted-text: #a8a29e;
+  --special-bg: #422006;
+  --special-border: #b45309;
+  --special-text: #fde68a;
+  --special-active: #78350f;
 }
 
 * {
@@ -69,7 +92,7 @@ a {
 }
 
 .muted {
-  color: #78716c;
+  color: var(--muted-text);
   font-size: 0.9rem;
 }
 
@@ -103,6 +126,27 @@ button {
   gap: 0;
 }
 
+.progressBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+  z-index: 1000;
+  will-change: transform;
+}
+
+.reveal {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.revealed {
+  opacity: 1;
+}
+
 /* Hero */
 
 .storyHero {
@@ -127,9 +171,30 @@ button {
   letter-spacing: 0.07em;
 }
 
+.heroControls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
 .langToggle {
   display: flex;
   gap: 0.3rem;
+}
+.themeToggle {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.themeToggle:hover {
+  background: var(--border);
 }
 
 .heroTitle {
@@ -142,7 +207,7 @@ button {
 
 .heroDek {
   font-size: 1.15rem;
-  color: #57534e;
+  color: var(--muted-text);
   line-height: 1.65;
 }
 .tocNav {
@@ -212,6 +277,13 @@ button {
   line-height: 1.85;
   margin-bottom: 0.8rem;
 }
+.storyArticle code {
+  background: var(--surface-muted);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.3rem;
+  font-family: inherit;
+  font-size: 1.15em;
+}
 
 .storyQuote {
   font-size: 1.3rem;
@@ -221,7 +293,7 @@ button {
   border-left: 4px solid var(--accent);
   padding: 0.8rem 1.2rem;
   margin: 1rem 0 1.2rem;
-  color: #44403c;
+  color: var(--foreground);
   background: var(--accent-light);
   border-radius: 0 0.5rem 0.5rem 0;
 }
@@ -245,11 +317,10 @@ button {
 }
 
 .pairRow code {
-  font-family: var(--font-math), serif;
   font-size: 1.15rem;
   background: var(--surface-muted);
-  padding: 0.15rem 0.5rem;
-  border-radius: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.35rem;
 }
 
 .pairArrowText {
@@ -304,23 +375,25 @@ button {
 /* Formula figure — stacked vertically */
 
 .formulaFig {
-  margin: 1rem 0;
-  padding: 1.2rem 1rem;
+  margin: 0.8rem 0 1rem;
+  padding: 1rem 1.2rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.6rem;
-  text-align: center;
+  text-align: left;
   display: grid;
   gap: 0.15rem;
-  justify-items: center;
+  justify-items: start;
 }
 
 .formulaLine {
-  font-family: var(--font-math), serif;
-  font-size: 1.25rem;
-  display: block;
-  letter-spacing: 0.04em;
-  padding: 0.15rem 0;
+  font-size: 1.15rem;
+  display: inline-block;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.55rem;
+  margin: 0.15rem 0;
+  background: var(--surface-muted);
+  border-radius: 0.35rem;
 }
 
 .mathArrow {
@@ -333,7 +406,7 @@ button {
 }
 
 .formulaFig figcaption {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   margin-top: 0.4rem;
 }
 
@@ -384,11 +457,10 @@ button {
 }
 
 .tryInline code {
-  font-family: var(--font-math), serif;
   background: var(--surface-muted);
-  padding: 0.15rem 0.45rem;
-  border-radius: 0.25rem;
-  font-size: 0.95rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.35rem;
+  font-size: 1.15rem;
 }
 
 .tryBtn {
@@ -412,7 +484,7 @@ button {
 .tryResult {
   color: var(--accent);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
 }
 
 .tryBlock {
@@ -459,7 +531,7 @@ button {
 }
 
 .proofLabel {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 500;
 }
 
@@ -491,6 +563,132 @@ button {
 
 .vizSvg text {
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+.pianoBar rect,
+.vizSvg g[style*="pointer"] rect {
+  transition: opacity 0.15s;
+}
+
+.pianoBar:hover rect {
+  opacity: 1 !important;
+  filter: brightness(1.15);
+}
+
+/* ── Savings Explorer ── */
+
+.savingsExplorer {
+  background: var(--surface-muted);
+  border-radius: 0.75rem;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.savingsControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.savingsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.2rem;
+  transition: background 0.2s;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.4rem;
+}
+
+.savingsRow.savingsUnknown {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+}
+
+.savingsLabel {
+  font-size: 0.85rem;
+  color: var(--muted-text);
+  min-width: 5rem;
+  font-weight: 500;
+}
+
+.savingsToggle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  width: 2.4rem;
+  height: 2.0rem;
+  border-radius: 0.4rem;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  font-style: italic;
+}
+
+.savingsToggle:hover {
+  border-color: var(--accent);
+}
+
+.savingsToggleActive {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.savingsSlider {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+  height: 6px;
+}
+
+.savingsValue {
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 4rem;
+  text-align: right;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.savingsAnswer {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex: 1;
+}
+
+.savingsFormula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--surface);
+  border-radius: 0.4rem;
+}
+
+.savingsFormula code {
+  font-size: 1.05rem;
+  font-weight: 600;
+  background: var(--surface-muted);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+}
+
+.savingsOperatorHint {
+  font-size: 0.82rem;
+  color: var(--muted-text);
+  font-style: italic;
+}
+
+.savingsChart {
+  margin-top: 0.3rem;
 }
 
 .vizCaption {
@@ -550,7 +748,7 @@ button {
 }
 
 .challengeDesc {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   line-height: 1.6;
   margin-bottom: 0.6rem;
   color: #44403c;
@@ -602,24 +800,37 @@ button {
 }
 
 .inverseRuleFormula {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.inverseRuleArrow {
+  color: var(--muted-text);
+  padding: 0 0.4rem;
   text-align: center;
+  width: 1%;
   white-space: nowrap;
 }
 
 .inverseRuleFormula code {
-  font-family: var(--font-math), serif;
   font-size: 1.2rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
+  background: var(--surface-muted);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.35rem;
 }
 
 .inverseRuleLabel {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
 }
 
 .inverseRuleHint {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
+  color: var(--muted-text);
+  padding: 0 0.4rem;
+  line-height: 1.4;
+  width: 1%;
   white-space: nowrap;
-  text-align: right;
 }
 
 .inverseRuleExample {
@@ -635,6 +846,53 @@ button {
   vertical-align: middle;
   color: var(--accent);
   font-weight: 700;
+}
+
+/* Notation transform */
+
+.transformCard {
+  text-align: center;
+  padding: 1.5rem;
+}
+.transformRows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.transformRow {
+  display: flex;
+  justify-content: center;
+}
+.transformFormula {
+  font-size: 1.3rem;
+  letter-spacing: 0.03em;
+  background: var(--surface-muted);
+  padding: 0.25rem 0.7rem;
+  border-radius: 0.35rem;
+  display: inline-block;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.transformFade {
+  animation: transformPop 0.4s ease;
+}
+@keyframes transformPop {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.transformBtn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.transformBtn:hover {
+  opacity: 0.9;
 }
 
 /* Examples intro grid */
@@ -688,30 +946,45 @@ button {
   margin-bottom: 0.2rem;
 }
 
+.calcDisplayWrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
 .calcDisplay {
   width: 100%;
-  padding: 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 0.4rem;
+  padding: 0.4rem 0.2rem;
+  border: none;
   font-size: 1.05rem;
   font-family: var(--font-geist-mono), monospace;
-  background: var(--surface);
+  background: transparent;
+  text-align: right;
+  outline: none;
+  color: var(--foreground);
 }
 
 .calcResult {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--accent);
+  text-align: right;
+  min-height: 1.4em;
+  padding: 0 0.2rem;
 }
 
-.calcError {
-  font-size: 0.92rem;
-  color: #991b1b;
+.calcResultError {
+  color: #ef4444;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
-
 .calcKeypad {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.35rem;
 }
 
@@ -719,7 +992,8 @@ button {
   padding: 0.55rem;
   border: 1px solid var(--border);
   border-radius: 0.4rem;
-  background: var(--surface);
+  background: var(--surface-muted);
+  color: var(--foreground);
   font-size: 1rem;
   cursor: pointer;
   text-align: center;
@@ -727,7 +1001,7 @@ button {
 }
 
 .calcKey:active {
-  background: var(--surface-muted);
+  opacity: 0.8;
 }
 
 .calcKeyAccent {
@@ -737,33 +1011,45 @@ button {
   font-weight: 700;
 }
 
-.calcKeyAccent:active {
-  opacity: 0.85;
+.calcKeyOp {
+  background: var(--accent-light);
+  border-color: var(--border);
+  color: var(--foreground);
+  font-weight: 600;
 }
 
 .calcKeySpecial {
-  background: #fef3c7;
-  border-color: #f59e0b;
-  color: #92400e;
+  background: var(--special-bg);
+  border-color: var(--special-border);
+  color: var(--special-text);
   font-weight: 700;
   font-size: 1.1rem;
 }
 
 .calcKeySpecial:active {
-  background: #fde68a;
+  background: var(--special-active);
+}
+
+.calcKeyAction {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--muted-text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  flex: 1;
 }
 
 .calcOps {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.35rem;
-  flex-wrap: wrap;
 }
 
 .calcActions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.35rem;
 }
-
 /* Sidebar / sticky calc */
 
 .storySidebar {

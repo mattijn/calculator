@@ -18,4 +18,7 @@ export type Block =
   | { type: "inverseRule" }
   | { type: "examplesIntro" }
   | { type: "collapsible"; title: string; blocks: Block[] }
-  | { type: "challenge"; title: string; description: string; items: { expr: string; hint?: string }[] };
+  | { type: "challenge"; title: string; description: string; items: { expr: string; hint?: string }[] }
+  | { type: "notationTransform" }
+  | { type: "savingsExplorer" }
+  | { type: "repeatedMultViz" };

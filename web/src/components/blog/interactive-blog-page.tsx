@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { evaluateExpression } from "@/lib/evaluator";
-import { InterestChart, PianoChainViz, PianoFreqViz, EarthquakeViz } from "./visualizations";
+import { InterestChart, RepeatedMultViz, PianoChainViz, PianoFreqViz, EarthquakeViz, SavingsExplorer } from "./visualizations";
 import type { Language, Block } from "./types";
 
 export type { Language, Block };
 const LANGUAGE_KEY = "interactive-language-v1";
+const THEME_KEY = "interactive-theme-v1";
 
 /* ── Try-it widget ── */
 
 function pronounce(expr: string, lang: Language): string {
   const en = lang === "en";
   let out = expr;
-  out = out.split("⇓").join(en ? " double-down " : " dubbel\u2011omlaag ");
+  out = out.split("⇓").join(en ? " double\u2011down " : " dubbel\u2011omlaag ");
   out = out.split("↑").join(en ? " up " : " omhoog ");
   out = out.split("↓").join(en ? " down " : " omlaag ");
   out = out.split("×").join(en ? " times " : " keer ");
@@ -23,9 +24,14 @@ function pronounce(expr: string, lang: Language): string {
   return out.replace(/\s+/g, " ").trim();
 }
 
+function displayExpr(expr: string): string {
+  return expr.replace(/([↑↓⇓×÷+\-])/g, " $1 ").replace(/\s+/g, " ").trim();
+}
+
 function Try({ expression, lang }: { expression: string; lang: Language }) {
   const [result, setResult] = useState<string | null>(null);
   const pron = pronounce(expression, lang);
+  const display = displayExpr(expression);
   const run = () => {
     try {
       const v = evaluateExpression(expression);
@@ -40,7 +46,7 @@ function Try({ expression, lang }: { expression: string; lang: Language }) {
   };
   return (
     <span className="tryInline">
-      <code>{expression}</code>
+      <code>{mathFormat(display)}</code>
       <span className="tryPronounce">({pron})</span>
       <button className="tryBtn" onClick={run}>
         {lang === "en" ? "try it" : "probeer"}
@@ -52,6 +58,12 @@ function Try({ expression, lang }: { expression: string; lang: Language }) {
 
 /* ── Full calculator ── */
 
+function formatResult(v: number): string {
+  if (Number.isInteger(v)) return String(v);
+  return v.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+
 function FullCalc({ lang }: { lang: Language }) {
   const [expr, setExpr] = useState("");
   const [result, setResult] = useState("");
@@ -59,66 +71,55 @@ function FullCalc({ lang }: { lang: Language }) {
   const evaluate = () => {
     try {
       const v = evaluateExpression(expr);
-      setResult(
-        Number.isInteger(v)
-          ? String(v)
-          : v.toFixed(8).replace(/0+$/, "").replace(/\.$/, ""),
-      );
+      setResult(formatResult(v));
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid");
       setResult("");
     }
   };
-  const append = (v: string) => setExpr((c) => c + v);
+  const ops = new Set(["+", "-", "×", "÷", "↑", "↓", "⇓"]);
+  const append = (v: string) => setExpr((c) => ops.has(v) ? `${c} ${v} ` : c + v);
   return (
     <div className="fullCalc card">
       <h3>{lang === "en" ? "Calculator" : "Calculator"}</h3>
       <p className="calcSubtitle muted">{lang === "en" ? "Scrolls along with you as you read" : "Scrolt mee terwijl je leest"}</p>
-      <input
-        className="calcDisplay"
-        value={expr}
-        onChange={(e) => setExpr(e.target.value)}
-        placeholder={
-          lang === "en" ? "Type or tap buttons..." : "Typ of tik knoppen..."
-        }
-        onKeyDown={(e) => {
-          if (e.key === "Enter") evaluate();
-        }}
-      />
-      {result && <p className="calcResult">= {result}</p>}
-      {error && <p className="calcError">{error}</p>}
-      <div className="calcKeypad">
-        {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", "."].map((d) => (
-          <button key={d} className="calcKey" onClick={() => append(d)}>
-            {d}
-          </button>
-        ))}
-        <button className="calcKey calcKeyAccent" onClick={evaluate}>
-          =
-        </button>
+      <div className="calcDisplayWrap">
+        <input
+          className="calcDisplay"
+          value={expr}
+          onChange={(e) => setExpr(e.target.value)}
+          placeholder={
+            lang === "en" ? "Type or tap buttons..." : "Typ of tik knoppen..."
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") evaluate();
+          }}
+        />
+        <p className={`calcResult${error ? " calcResultError" : ""}`}>
+          {error || (result ? `= ${result}` : "\u00A0")}
+        </p>
       </div>
-      <div className="calcOps">
-        {["+", "-", "×", "÷", "(", ")"].map((o) => (
-          <button key={o} className="calcKey" onClick={() => append(o)}>
-            {o}
-          </button>
-        ))}
-        {["↑", "↓", "⇓"].map((o) => (
-          <button key={o} className="calcKey calcKeySpecial" onClick={() => append(o)}>
-            {o}
+      <div className="calcKeypad">
+        {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "="].map((d) => (
+          <button
+            key={d}
+            className={`calcKey${d === "=" ? " calcKeyAccent" : ""}`}
+            onClick={() => d === "=" ? evaluate() : append(d)}
+          >
+            {d}
           </button>
         ))}
       </div>
       <div className="calcActions">
         <button
-          className="calcKey"
+          className="calcKey calcKeyAction"
           onClick={() => setExpr((c) => c.slice(0, -1))}
         >
           {lang === "en" ? "Delete" : "Wis"}
         </button>
         <button
-          className="calcKey"
+          className="calcKey calcKeyAction"
           onClick={() => {
             setExpr("");
             setResult("");
@@ -127,6 +128,18 @@ function FullCalc({ lang }: { lang: Language }) {
         >
           AC
         </button>
+      </div>
+      <div className="calcOps">
+        {["↑", "↓", "⇓"].map((o) => (
+          <button key={o} className="calcKey calcKeySpecial" onClick={() => append(o)}>
+            {o}
+          </button>
+        ))}
+        {["+", "-", "×", "÷", "(", ")"].map((o) => (
+          <button key={o} className="calcKey calcKeyOp" onClick={() => append(o)}>
+            {o}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -161,6 +174,53 @@ function mathFormat(text: string): React.ReactNode[] {
     ARROW_RE.test(part)
       ? <span key={i} className="mathArrow">{part}</span>
       : part,
+  );
+}
+
+function RevealBlock({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className={`reveal${visible ? " revealed" : ""}`}>
+      {children}
+    </div>
+  );
+}
+
+function NotationTransform({ lang }: { lang: Language }) {
+  const [showNew, setShowNew] = useState(false);
+  const rows = [
+    { school: "2³ = 8", arrow: "2 ↑ 3 = 8" },
+    { school: "³√8 = 2", arrow: "8 ↓ 3 = 2" },
+    { school: "log₂(8) = 3", arrow: "8 ⇓ 2 = 3" },
+  ];
+  return (
+    <div className="transformCard card">
+      <div className="transformRows">
+        {rows.map((r, i) => (
+          <div key={i} className="transformRow">
+            <code className={`transformFormula${showNew ? " transformFade" : ""}`}>
+              {showNew ? mathFormat(r.arrow) : r.school}
+            </code>
+          </div>
+        ))}
+      </div>
+      <button className="transformBtn" onClick={() => setShowNew((s) => !s)}>
+        {showNew
+          ? (lang === "en" ? "← Show school notation" : "← Toon schoolnotatie")
+          : (lang === "en" ? "Transform →" : "Transformeer →")}
+      </button>
+    </div>
   );
 }
 
@@ -263,12 +323,18 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
       );
     case "interestViz":
       return <InterestChart lang={lang} />;
+    case "savingsExplorer":
+      return <SavingsExplorer lang={lang} />;
+    case "repeatedMultViz":
+      return <RepeatedMultViz lang={lang} />;
     case "pianoChainViz":
       return <PianoChainViz lang={lang} />;
     case "pianoFreqViz":
       return <PianoFreqViz lang={lang} />;
     case "earthquakeViz":
       return <EarthquakeViz lang={lang} />;
+    case "notationTransform":
+      return <NotationTransform lang={lang} />;
     case "inverseRule":
       return (
         <div className="inverseRuleCard card">
@@ -276,18 +342,21 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
             <tbody>
               <tr className="inverseRuleHeaderRow">
                 <td></td>
-                <td className="inverseRuleFormula"><code>a <span className="symbolHighlight">↑</span> b = c</code></td>
                 <td></td>
+                <td className="inverseRuleArrow"></td>
+                <td className="inverseRuleFormula"><code>a <span className="symbolHighlight">↑</span> b = c</code></td>
               </tr>
               <tr className="inverseRuleRow">
                 <td className="inverseRuleFormula"><code><strong>?</strong> ↑ b = c</code></td>
-                <td className="inverseRuleFormula"><code>→&ensp;c <span className="symbolHighlight">↓</span> b = <strong>?</strong></code></td>
-                <td className="inverseRuleHint muted">{lang === "en" ? "↓ finds the number left of ↑" : "↓ vindt het getal links van ↑"}</td>
+                <td className="inverseRuleHint">{lang === "en" ? <><em>Left missing?</em><br/>Use ↓ (down)</> : <><em>Links kwijt?</em><br/>Gebruik ↓ (omlaag)</>}</td>
+                <td className="inverseRuleArrow">→</td>
+                <td className="inverseRuleFormula"><code>c <span className="symbolHighlight">↓</span> b = <strong>?</strong></code></td>
               </tr>
               <tr className="inverseRuleRow">
                 <td className="inverseRuleFormula"><code>a ↑ <strong>?</strong> = c</code></td>
-                <td className="inverseRuleFormula"><code>→&ensp;c <span className="symbolHighlight">⇓</span> a = <strong>?</strong></code></td>
-                <td className="inverseRuleHint muted">{lang === "en" ? "⇓ finds the number right of ↑" : "⇓ vindt het getal rechts van ↑"}</td>
+                <td className="inverseRuleHint">{lang === "en" ? <><em>Right missing?</em><br/>Use ⇓ (double-down)</> : <><em>Rechts kwijt?</em><br/>Gebruik ⇓ (dubbel-omlaag)</>}</td>
+                <td className="inverseRuleArrow">→</td>
+                <td className="inverseRuleFormula"><code>c <span className="symbolHighlight">⇓</span> a = <strong>?</strong></code></td>
               </tr>
             </tbody>
           </table>
@@ -401,8 +470,8 @@ const en: Block[] = [
   { type: "heading", content: "What if we fix it?" },
   { type: "text", content: "The fix is surprisingly simple. Instead of three different visual systems, use three symbols that look like variations of each other:" },
   { type: "symbols" },
-  { type: "text", content: "Now let's rewrite that same relationship:" },
-  { type: "formula", lines: ["2 ↑ 3 = 8", "8 ↓ 3 = 2", "8 ⇓ 2 = 3"], label: "Power, root, and log — same relationship, same visual family." },
+  { type: "text", content: "Now let's rewrite that same relationship. Click the button to see the transformation:" },
+  { type: "notationTransform" },
   { type: "text", content: "Read them out loud: \"2 up 3 is 8\", \"8 down 3 is 2\", \"8 double-down 2 is 3.\" The symbols go up, down, double-down — a family you can see." },
   { type: "text", content: "And the table now has a pattern on every level:" },
   { type: "levels", rows: [
@@ -479,6 +548,9 @@ const en: Block[] = [
 
   { type: "text", content: "Three questions. In the old system, each one feels like a different trick: \"move the exponent down\", \"use a root sign\", \"use log and divide.\" In the new notation, every answer is the same move: check the rule card, pick the right inverse (↓ or ⇓), apply it. Done." },
 
+  { type: "text", content: "Try it yourself — click m, r, or n to choose what you want to find, and slide the others to see the answer change live:" },
+  { type: "savingsExplorer" },
+
   // ── Piano ──
   { type: "heading", content: "What does a piano sound like?" },
   { type: "text", content: "Play a C on the piano. That note vibrates 262 times per second (262 Hz)." },
@@ -487,7 +559,7 @@ const en: Block[] = [
   { type: "text", content: "Let's call that unknown factor r. You start at 262 Hz and multiply by r for each key:" },
   { type: "pianoChainViz" },
   { type: "text", content: "After 12 keys you arrive at 524 Hz, which is exactly 2 × 262. So those twelve multiplications by r together multiply by 2:" },
-  { type: "formula", lines: ["r × r × r × ... × r = 2", "└──── 12 times ────┘"], label: "" },
+  { type: "repeatedMultViz" },
   { type: "text", content: "Repeated multiplication by the same number — that's a power:" },
   { type: "formula", lines: ["r ↑ 12 = 2"], label: "" },
   { type: "text", content: "Now the question answers itself. We want r. The inverse of ↑ is ↓:" },
@@ -535,7 +607,7 @@ const en: Block[] = [
     { expr: "2↑0.5", hint: "power with exponent ½" },
     { expr: "2↓2", hint: "square root of 2" },
   ] },
-  { type: "challenge", title: "Radioactive decay", description: "Some materials slowly fall apart. Carbon-14 is one of them: every 5730 years, half of it is gone. You start with 100%. After halving once, you have 0.5 (= 50%) left. After halving twice: 0.5 × 0.5 = 0.5↑2 = 0.25 (= 25%). After n halvings you have 0.5↑n left. The question: after how many halvings is only 1% (= 0.01) left? You're looking for n in 0.5↑n = 0.01. The number right of ↑ is missing — so use ⇓:", items: [
+  { type: "challenge", title: "Radioactive decay", description: "Some materials slowly fall apart. Carbon-14 is one of them: every 5730 years, half of it is gone. You start with 100%. After halving once, you have 0.5 (= 50%) left. After halving twice: 0.5 × 0.5 = 0.5 ↑ 2 = 0.25 (= 25%). After n halvings you have 0.5 ↑ n left. The question: after how many halvings is only 1% (= 0.01) left? You're looking for n in 0.5 ↑ n = 0.01. The number right of ↑ is missing — so use ⇓:", items: [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 halvings, or about 38,000 years" },
   ] },
 
@@ -555,43 +627,43 @@ const en: Block[] = [
     { type: "heading3", content: "Translating to our notation" },
     { type: "text", content: "We write the square root as ↓2. Let's translate both sides, piece by piece." },
     { type: "text", content: "The right side is easy. It says: 1 + √2. The only thing to translate is √2, the square root of 2:" },
-    { type: "formula", lines: ["√2  →  2↓2"], label: "Read: \"2 down 2\". The first number (2) is what you're taking the root of. The second number (2) says it's a square root." },
-    { type: "text", content: "So the right side becomes: 1 + 2↓2." },
+    { type: "formula", lines: ["√2  →  2 ↓ 2"], label: "Read: \"2 down 2\". The first number (2) is what you're taking the root of. The second number (2) says it's a square root." },
+    { type: "text", content: "So the right side becomes: 1 + 2 ↓ 2." },
     { type: "text", content: "Now the left side. It says: √(3 + 2√2). That's a root of something, and that \"something\" itself contains another root. We work from the inside out:" },
     { type: "formula", lines: [
-      "Inner √2               →  2↓2",
-      "2 × √2                 →  2 × 2↓2",
-      "3 + 2 × √2             →  3 + 2 × 2↓2",
-      "√(3 + 2 × √2)          →  (3 + 2 × 2↓2) ↓ 2",
+      "Inner √2               →  2 ↓ 2",
+      "2 × √2                 →  2 × 2 ↓ 2",
+      "3 + 2 × √2             →  3 + 2 × 2 ↓ 2",
+      "√(3 + 2 × √2)          →  (3 + 2 × 2 ↓ 2) ↓ 2",
     ], label: "The outer √ becomes ↓2 at the very end — it takes the root of everything inside." },
     { type: "formula", lines: [
-      "Left side:   (3 + 2 × 2↓2) ↓ 2",
-      "Right side:  1 + 2↓2",
+      "Left side:   (3 + 2 × 2 ↓ 2) ↓ 2",
+      "Right side:  1 + 2 ↓ 2",
     ], label: "This is what we want to show: left side = right side." },
 
     { type: "heading3", content: "The plan" },
-    { type: "text", content: "Look at the left side: it says (something) ↓ 2. That means: \"the square root of what's inside.\" The \"something\" inside is 3 + 2 × 2↓2." },
-    { type: "text", content: "If we square the right side (↑2), and end up with exactly 3 + 2 × 2↓2, then we know the left side equals the right side. Why? Because ↑2 and ↓2 are inverses — they cancel each other." },
+    { type: "text", content: "Look at the left side: it says (something) ↓ 2. That means: \"the square root of what's inside.\" The \"something\" inside is 3 + 2 × 2 ↓ 2." },
+    { type: "text", content: "If we square the right side (↑ 2), and end up with exactly 3 + 2 × 2 ↓ 2, then we know the left side equals the right side. Why? Because ↑ 2 and ↓ 2 are inverses — they cancel each other." },
 
     { type: "heading3", content: "Step by step" },
     { type: "text", content: "Let's square the right side:" },
-    { type: "formula", lines: ["(1 + 2↓2) ↑ 2"], label: "We use the \"square of a sum\" rule with a = 1 and b = 2↓2." },
+    { type: "formula", lines: ["(1 + 2 ↓ 2) ↑ 2"], label: "We use the \"square of a sum\" rule with a = 1 and b = 2 ↓ 2." },
     { type: "try", expr: "(1+2↓2)↑2" },
     { type: "text", content: "Expanding with the rule gives us three pieces:" },
-    { type: "formula", lines: ["1↑2 + 2 × 1 × 2↓2 + (2↓2)↑2"], label: "a↑2 + 2×a×b + b↑2, where a = 1 and b = 2↓2." },
+    { type: "formula", lines: ["1 ↑ 2 + 2 × 1 × 2 ↓ 2 + (2 ↓ 2) ↑ 2"], label: "a ↑ 2 + 2 × a × b + b ↑ 2, where a = 1 and b = 2 ↓ 2." },
     { type: "try", expr: "1↑2+2×1×2↓2+(2↓2)↑2" },
-    { type: "text", content: "Now comes the magic. Look at the last piece: (2↓2) ↑ 2. That's ↓ followed by ↑, with the same number (2). They're inverses — they cancel! So (2↓2) ↑ 2 = 2. And 1↑2 is just 1. So we get:" },
-    { type: "formula", lines: ["1 + 2 × 2↓2 + 2"], label: "The inverses cancelled: (2↓2)↑2 became just 2." },
+    { type: "text", content: "Now comes the magic. Look at the last piece: (2 ↓ 2) ↑ 2. That's ↓ followed by ↑, with the same number (2). They're inverses — they cancel! So (2 ↓ 2) ↑ 2 = 2. And 1 ↑ 2 is just 1. So we get:" },
+    { type: "formula", lines: ["1 + 2 × 2 ↓ 2 + 2"], label: "The inverses cancelled: (2 ↓ 2) ↑ 2 became just 2." },
     { type: "try", expr: "1+2×2↓2+2" },
     { type: "text", content: "Rearranging 1 + 2 = 3:" },
-    { type: "formula", lines: ["3 + 2 × 2↓2"], label: "That's exactly what's inside the ↓2 on the left side!" },
+    { type: "formula", lines: ["3 + 2 × 2 ↓ 2"], label: "That's exactly what's inside the ↓ 2 on the left side!" },
     { type: "try", expr: "3+2×2↓2" },
     { type: "text", content: "We squared the right side and got exactly the left side's contents. That means:" },
-    { type: "formula", lines: ["(3 + 2 × 2↓2) ↓ 2 = 1 + 2↓2  ✓"], label: "Both sides are equal. Done!" },
+    { type: "formula", lines: ["(3 + 2 × 2 ↓ 2) ↓ 2 = 1 + 2 ↓ 2  ✓"], label: "Both sides are equal. Done!" },
     { type: "try", expr: "(3+2×2↓2)↓2" },
 
     { type: "heading3", content: "Why this matters" },
-    { type: "text", content: "The entire proof hinged on one moment: seeing that (2↓2) ↑ 2 = 2, because ↓ and ↑ cancel. In school notation, that same step would be written as (√2)² = 2. Can you see the cancellation there? Not really — √ and ² look nothing alike. But ↓ and ↑? They're the same arrow, pointing opposite ways. The cancellation is staring you in the face." },
+    { type: "text", content: "The entire proof hinged on one moment: seeing that (2 ↓ 2) ↑ 2 = 2, because ↓ and ↑ cancel. In school notation, that same step would be written as (√2)² = 2. Can you see the cancellation there? Not really — √ and ² look nothing alike. But ↓ and ↑? They're the same arrow, pointing opposite ways. The cancellation is staring you in the face." },
     { type: "text", content: "That's the point of the whole article. Better notation doesn't just look nicer — it makes hard things easy to see." },
     { type: "text", content: "You can both sit back down now. 🪑" },
   ] },
@@ -649,8 +721,8 @@ const nl: Block[] = [
   { type: "heading", content: "Wat als we het repareren?" },
   { type: "text", content: "De oplossing is verrassend simpel. In plaats van drie verschillende systemen, gebruik drie symbolen die op variaties van elkaar lijken:" },
   { type: "symbols" },
-  { type: "text", content: "Laten we diezelfde relatie herschrijven:" },
-  { type: "formula", lines: ["2 ↑ 3 = 8", "8 ↓ 3 = 2", "8 ⇓ 2 = 3"], label: "Macht, wortel en logaritme — dezelfde relatie, dezelfde visuele familie." },
+  { type: "text", content: "Laten we diezelfde relatie herschrijven. Klik op de knop om de transformatie te zien:" },
+  { type: "notationTransform" },
   { type: "text", content: "Zeg het hardop: \"2 omhoog 3 is 8\", \"8 omlaag 3 is 2\", \"8 dubbel-omlaag 2 is 3.\" De symbolen gaan omhoog, omlaag, dubbel-omlaag — een familie die je kunt zien." },
   { type: "text", content: "En het patroon klopt nu op alle drie de niveaus:" },
   { type: "levels", rows: [
@@ -727,6 +799,9 @@ const nl: Block[] = [
 
   { type: "text", content: "Drie vragen. In het oude systeem voelt elk antwoord als een ander trucje. In de nieuwe notatie is elk antwoord dezelfde stap: kijk op de regelkaart, kies de juiste inverse (↓ of ⇓), pas toe. Klaar." },
 
+  { type: "text", content: "Probeer het zelf — klik op m, r of n om te kiezen wat je wilt vinden, en verschuif de rest om het antwoord live te zien veranderen:" },
+  { type: "savingsExplorer" },
+
   // ── Piano ──
   { type: "heading", content: "Hoe klinkt een piano?" },
   { type: "text", content: "Sla een C aan op de piano. Die noot trilt 262 keer per seconde (262 Hz)." },
@@ -735,7 +810,7 @@ const nl: Block[] = [
   { type: "text", content: "Noem die onbekende factor r. Je begint bij 262 Hz en vermenigvuldigt met r voor elke toets:" },
   { type: "pianoChainViz" },
   { type: "text", content: "Na 12 toetsen kom je uit op 524 Hz, en dat is precies 2 × 262. Dus die twaalf vermenigvuldigingen met r samen vermenigvuldigen met 2:" },
-  { type: "formula", lines: ["r × r × r × ... × r = 2", "└──── 12 keer ────┘"], label: "" },
+  { type: "repeatedMultViz" },
   { type: "text", content: "Herhaald vermenigvuldigen met hetzelfde getal — dat is een macht:" },
   { type: "formula", lines: ["r ↑ 12 = 2"], label: "" },
   { type: "text", content: "Nu beantwoordt de vraag zichzelf. We zoeken r. De inverse van ↑ is ↓:" },
@@ -783,7 +858,7 @@ const nl: Block[] = [
     { expr: "2↑0.5", hint: "macht met exponent ½" },
     { expr: "2↓2", hint: "wortel van 2" },
   ] },
-  { type: "challenge", title: "Radioactief verval", description: "Sommige stoffen vallen langzaam uit elkaar. Koolstof-14 is er daar één van: elke 5730 jaar is de helft weg. Je begint met 100%. Na één keer halveren heb je 0.5 (= 50%) over. Na twee keer halveren: 0.5 × 0.5 = 0.5↑2 = 0.25 (= 25%). Na n keer halveren heb je dus 0.5↑n over. De vraag is: na hoeveel keer halveren is nog maar 1% (= 0.01) over? Je zoekt n in 0.5↑n = 0.01. Het getal rechts van ↑ ontbreekt — dus gebruik ⇓:", items: [
+  { type: "challenge", title: "Radioactief verval", description: "Sommige stoffen vallen langzaam uit elkaar. Koolstof-14 is er daar één van: elke 5730 jaar is de helft weg. Je begint met 100%. Na één keer halveren heb je 0.5 (= 50%) over. Na twee keer halveren: 0.5 × 0.5 = 0.5 ↑ 2 = 0.25 (= 25%). Na n keer halveren heb je dus 0.5 ↑ n over. De vraag is: na hoeveel keer halveren is nog maar 1% (= 0.01) over? Je zoekt n in 0.5 ↑ n = 0.01. Het getal rechts van ↑ ontbreekt — dus gebruik ⇓:", items: [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 halveringen, oftewel zo'n 38.000 jaar" },
   ] },
 
@@ -803,43 +878,43 @@ const nl: Block[] = [
     { type: "heading3", content: "Vertalen naar onze notatie" },
     { type: "text", content: "De wortel schrijven we als ↓2. Laten we de twee kanten stukje voor stukje vertalen." },
     { type: "text", content: "De rechterkant is makkelijk. Daar staat: 1 + √2. Het enige dat we hoeven te vertalen is √2, de wortel van 2:" },
-    { type: "formula", lines: ["√2  →  2↓2"], label: "Lees: \"2 omlaag 2\". Het eerste getal (2) is waar je de wortel van neemt. Het tweede getal (2) zegt dat het een wortel is (de 2e-machtswortel)." },
-    { type: "text", content: "Dus de rechterkant wordt: 1 + 2↓2." },
+    { type: "formula", lines: ["√2  →  2 ↓ 2"], label: "Lees: \"2 omlaag 2\". Het eerste getal (2) is waar je de wortel van neemt. Het tweede getal (2) zegt dat het een wortel is (de 2e-machtswortel)." },
+    { type: "text", content: "Dus de rechterkant wordt: 1 + 2 ↓ 2." },
     { type: "text", content: "Nu de linkerkant. Daar staat: √(3 + 2√2). Dat is een wortel van iets, en dat \"iets\" bevat zelf ook weer een wortel. We werken van binnen naar buiten:" },
     { type: "formula", lines: [
-      "Binnenste √2          →  2↓2",
-      "2 × √2                →  2 × 2↓2",
-      "3 + 2 × √2            →  3 + 2 × 2↓2",
-      "√(3 + 2 × √2)         →  (3 + 2 × 2↓2) ↓ 2",
+      "Binnenste √2          →  2 ↓ 2",
+      "2 × √2                →  2 × 2 ↓ 2",
+      "3 + 2 × √2            →  3 + 2 × 2 ↓ 2",
+      "√(3 + 2 × √2)         →  (3 + 2 × 2 ↓ 2) ↓ 2",
     ], label: "De buitenste √ wordt ↓2 helemaal aan het einde — die pakt de wortel van alles erbinnen." },
     { type: "formula", lines: [
-      "Linkerkant:   (3 + 2 × 2↓2) ↓ 2",
-      "Rechterkant:  1 + 2↓2",
+      "Linkerkant:   (3 + 2 × 2 ↓ 2) ↓ 2",
+      "Rechterkant:  1 + 2 ↓ 2",
     ], label: "Dit willen we laten zien: linkerkant = rechterkant." },
 
     { type: "heading3", content: "Het plan" },
-    { type: "text", content: "Kijk naar de linkerkant: daar staat (iets) ↓ 2. Dat betekent: \"de wortel van wat erbinnen staat.\" Het \"iets\" erbinnen is 3 + 2 × 2↓2." },
-    { type: "text", content: "Als we nu de rechterkant kwadrateren (↑2), en we komen precies uit op 3 + 2 × 2↓2, dan weten we dat de linkerkant gelijk is aan de rechterkant. Waarom? Omdat ↑2 en ↓2 inverses zijn — ze heffen elkaar op." },
+    { type: "text", content: "Kijk naar de linkerkant: daar staat (iets) ↓ 2. Dat betekent: \"de wortel van wat erbinnen staat.\" Het \"iets\" erbinnen is 3 + 2 × 2 ↓ 2." },
+    { type: "text", content: "Als we nu de rechterkant kwadrateren (↑ 2), en we komen precies uit op 3 + 2 × 2 ↓ 2, dan weten we dat de linkerkant gelijk is aan de rechterkant. Waarom? Omdat ↑ 2 en ↓ 2 inverses zijn — ze heffen elkaar op." },
 
     { type: "heading3", content: "Stap voor stap" },
     { type: "text", content: "Laten we de rechterkant kwadrateren:" },
-    { type: "formula", lines: ["(1 + 2↓2) ↑ 2"], label: "We gebruiken de \"kwadraat van een som\" regel met a = 1 en b = 2↓2." },
+    { type: "formula", lines: ["(1 + 2 ↓ 2) ↑ 2"], label: "We gebruiken de \"kwadraat van een som\" regel met a = 1 en b = 2 ↓ 2." },
     { type: "try", expr: "(1+2↓2)↑2" },
     { type: "text", content: "Uitwerken met de regel geeft drie stukken:" },
-    { type: "formula", lines: ["1↑2 + 2 × 1 × 2↓2 + (2↓2)↑2"], label: "a↑2 + 2×a×b + b↑2, met a = 1 en b = 2↓2." },
+    { type: "formula", lines: ["1 ↑ 2 + 2 × 1 × 2 ↓ 2 + (2 ↓ 2) ↑ 2"], label: "a ↑ 2 + 2 × a × b + b ↑ 2, met a = 1 en b = 2 ↓ 2." },
     { type: "try", expr: "1↑2+2×1×2↓2+(2↓2)↑2" },
-    { type: "text", content: "Nu komt de magie. Kijk naar het laatste stuk: (2↓2) ↑ 2. Dat is ↓ gevolgd door ↑, met hetzelfde getal (2). Het zijn inverses — ze heffen elkaar op! Dus (2↓2) ↑ 2 = 2. En 1↑2 is gewoon 1. Dan krijgen we:" },
-    { type: "formula", lines: ["1 + 2 × 2↓2 + 2"], label: "De inverses hebben elkaar opgeheven: (2↓2)↑2 werd gewoon 2." },
+    { type: "text", content: "Nu komt de magie. Kijk naar het laatste stuk: (2 ↓ 2) ↑ 2. Dat is ↓ gevolgd door ↑, met hetzelfde getal (2). Het zijn inverses — ze heffen elkaar op! Dus (2 ↓ 2) ↑ 2 = 2. En 1 ↑ 2 is gewoon 1. Dan krijgen we:" },
+    { type: "formula", lines: ["1 + 2 × 2 ↓ 2 + 2"], label: "De inverses hebben elkaar opgeheven: (2 ↓ 2) ↑ 2 werd gewoon 2." },
     { type: "try", expr: "1+2×2↓2+2" },
     { type: "text", content: "Herschikken: 1 + 2 = 3:" },
-    { type: "formula", lines: ["3 + 2 × 2↓2"], label: "Dat is precies wat er bínnen de ↓2 aan de linkerkant staat!" },
+    { type: "formula", lines: ["3 + 2 × 2 ↓ 2"], label: "Dat is precies wat er bínnen de ↓ 2 aan de linkerkant staat!" },
     { type: "try", expr: "3+2×2↓2" },
     { type: "text", content: "We hebben de rechterkant gekwadrateerd en komen precies uit op de inhoud van de linkerkant. Dat betekent:" },
-    { type: "formula", lines: ["(3 + 2 × 2↓2) ↓ 2 = 1 + 2↓2  ✓"], label: "Beide kanten zijn gelijk. Klaar!" },
+    { type: "formula", lines: ["(3 + 2 × 2 ↓ 2) ↓ 2 = 1 + 2 ↓ 2  ✓"], label: "Beide kanten zijn gelijk. Klaar!" },
     { type: "try", expr: "(3+2×2↓2)↓2" },
 
     { type: "heading3", content: "Waarom dit ertoe doet" },
-    { type: "text", content: "Het hele bewijs draaide om één moment: zien dat (2↓2) ↑ 2 = 2, omdat ↓ en ↑ elkaar opheffen. In schoolnotatie zou diezelfde stap geschreven worden als (√2)² = 2. Kun je daar de opheffing zien? Niet echt — √ en ² lijken nergens op elkaar. Maar ↓ en ↑? Het is dezelfde pijl, de andere kant op. De opheffing springt je in het gezicht." },
+    { type: "text", content: "Het hele bewijs draaide om één moment: zien dat (2 ↓ 2) ↑ 2 = 2, omdat ↓ en ↑ elkaar opheffen. In schoolnotatie zou diezelfde stap geschreven worden als (√2)² = 2. Kun je daar de opheffing zien? Niet echt — √ en ² lijken nergens op elkaar. Maar ↓ en ↑? Het is dezelfde pijl, de andere kant op. De opheffing springt je in het gezicht." },
     { type: "text", content: "Dat is het punt van dit hele artikel. Betere notatie is niet alleen mooier — het maakt moeilijke dingen makkelijk te zien." },
     { type: "text", content: "Jullie mogen nu allebei weer rustig gaan zitten. 🪑" },
   ] },
@@ -858,17 +933,41 @@ const heroNl = {
   time: "15 min lezen",
 };
 
+type Theme = "light" | "dark";
+
 function getInitialLanguage(): Language {
   if (typeof window === "undefined") return "en";
   return window.localStorage.getItem(LANGUAGE_KEY) === "nl" ? "nl" : "en";
 }
 
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  const stored = window.localStorage.getItem(THEME_KEY);
+  if (stored === "dark" || stored === "light") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 export function InteractiveBlogPage() {
   const [language, setLanguage] = useState<Language>(getInitialLanguage);
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [progress, setProgress] = useState(0);
   useEffect(() => {
     document.documentElement.lang = language;
     window.localStorage.setItem(LANGUAGE_KEY, language);
   }, [language]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+  const onScroll = useCallback(() => {
+    const h = document.documentElement;
+    const scrollable = h.scrollHeight - h.clientHeight;
+    setProgress(scrollable > 0 ? Math.min(h.scrollTop / scrollable, 1) : 0);
+  }, []);
+  useEffect(() => {
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [onScroll]);
   const hero = useMemo(() => (language === "en" ? heroEn : heroNl), [language]);
   const blocks = useMemo(() => (language === "en" ? en : nl), [language]);
   const toc = useMemo(() =>
@@ -880,12 +979,22 @@ export function InteractiveBlogPage() {
 
   return (
     <article className="storyPage">
+      <div className="progressBar" style={{ transform: `scaleX(${progress})` }} />
       <header className="storyHero">
         <div className="heroMeta">
           <span className="readMeta">{hero.time}</span>
-          <div className="langToggle">
-            <button className={language === "en" ? "primaryBtn" : "secondaryBtn"} onClick={() => setLanguage("en")}>EN</button>
-            <button className={language === "nl" ? "primaryBtn" : "secondaryBtn"} onClick={() => setLanguage("nl")}>NL</button>
+          <div className="heroControls">
+            <div className="langToggle">
+              <button className={language === "en" ? "primaryBtn" : "secondaryBtn"} onClick={() => setLanguage("en")}>EN</button>
+              <button className={language === "nl" ? "primaryBtn" : "secondaryBtn"} onClick={() => setLanguage("nl")}>NL</button>
+            </div>
+            <button
+              className="themeToggle"
+              onClick={() => setTheme((t) => t === "light" ? "dark" : "light")}
+              aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            >
+              {theme === "light" ? "☾" : "☀"}
+            </button>
           </div>
         </div>
         <h1 className="heroTitle">{hero.title}</h1>
@@ -901,7 +1010,9 @@ export function InteractiveBlogPage() {
       <div className="storyBody">
         <div className="storyArticle">
           {blocks.map((block, i) => (
-            <RenderBlock key={i} block={block} lang={language} />
+            <RevealBlock key={i}>
+              <RenderBlock block={block} lang={language} />
+            </RevealBlock>
           ))}
           <FullCalc lang={language} />
         </div>
