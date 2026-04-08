@@ -1315,6 +1315,32 @@ button {
 }
 
 @media (max-width: 480px) {
+  .levelsTable {
+    table-layout: fixed;
+    font-size: 0.92rem;
+  }
+
+  .levelsTable td {
+    padding: 0.5rem 0.45rem;
+    vertical-align: top;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .levelsTable td:nth-child(1) { width: 22%; }
+  .levelsTable td:nth-child(2) { width: 50%; }
+  .levelsTable td:nth-child(3) { width: 28%; }
+
+  .levelsOp {
+    width: auto;
+    text-align: left;
+  }
+
+  .levelsNote {
+    text-align: left;
+    line-height: 1.3;
+  }
+
   .symbolFamily {
     grid-template-columns: 1fr;
   }
