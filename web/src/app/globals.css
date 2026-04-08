@@ -640,6 +640,7 @@ button {
 .proofContent {
   display: grid;
   gap: 0.2rem;
+  min-width: 0;
 }
 
 .proofLabel {
@@ -653,6 +654,9 @@ button {
   border-radius: 0.25rem;
   font-size: 0.92rem;
   justify-self: start;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* Visualization */
@@ -863,6 +867,7 @@ button {
   padding-top: 0.5rem;
   display: grid;
   gap: 0;
+  overflow-x: clip;
 }
 
 .collapsibleClose {
@@ -1089,13 +1094,15 @@ button {
   color: inherit;
 }
 
-.examplePreviewCard:hover {
-  transform: scale(1.04);
-  border-color: var(--accent);
-}
+@media (hover: hover) and (pointer: fine) {
+  .examplePreviewCard:hover {
+    transform: scale(1.04);
+    border-color: var(--accent);
+  }
 
-.examplePreviewCard:hover .examplePreviewIcon {
-  animation: iconWiggle 0.5s ease;
+  .examplePreviewCard:hover .examplePreviewIcon {
+    animation: iconWiggle 0.5s ease;
+  }
 }
 
 @keyframes iconWiggle {
@@ -1337,6 +1344,10 @@ button {
 
   .proofRow {
     grid-template-columns: auto 1fr;
+  }
+
+  .proofContent {
+    min-width: 0;
   }
 
   .proofRow .tryInline {
