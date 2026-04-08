@@ -1044,6 +1044,7 @@ export function InteractiveBlogPage() {
   const [progress, setProgress] = useState(0);
   const [mobileCalc, setMobileCalc] = useState(false);
   const [fabPulsed, setFabPulsed] = useState(false);
+  const progressRef = useRef(0);
   useEffect(() => {
     const onFirstScroll = () => {
       setFabPulsed(true);
@@ -1063,7 +1064,11 @@ export function InteractiveBlogPage() {
   const onScroll = useCallback(() => {
     const h = document.documentElement;
     const scrollable = h.scrollHeight - h.clientHeight;
-    setProgress(scrollable > 0 ? Math.min(h.scrollTop / scrollable, 1) : 0);
+    const next = scrollable > 0 ? Math.min(h.scrollTop / scrollable, 1) : 0;
+    // Avoid tiny scroll deltas causing full-page rerenders.
+    if (Math.abs(next - progressRef.current) < 0.002) return;
+    progressRef.current = next;
+    setProgress(next);
   }, []);
   useEffect(() => {
     window.addEventListener("scroll", onScroll, { passive: true });
