@@ -696,7 +696,7 @@ const en: Block[] = [
 
   // ── Proof (appendix) ──
   { type: "collapsible", title: "Appendix: A proof that becomes simple", blocks: [
-    { type: "text", content: "⚠️ This section is for maths teachers and maths enthusiasts. Show it to them. Chances are they haven't seen this notation before, and once they read through this proof they'll be cheering across the classroom." },
+    { type: "text", content: "Note — This section is for maths teachers and maths enthusiasts. Show it to them. Chances are they haven't seen this notation before, and once they read through this proof they'll be cheering across the classroom." },
     { type: "text", content: "Wikipedia has a page about [nested radicals](https://en.wikipedia.org/wiki/Nested_radical) — expressions where a square root contains another square root. Don't worry if that page looks intimidating: it's full of advanced maths. We're only going to look at one tiny example, and we'll keep it simple." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia says: \"It is not immediately obvious\" that these two are equal." },
     { type: "text", content: "In school notation, proving this requires you to know special rules about roots. But with our notation, it's just a puzzle. Let's solve it — you only need one thing you probably already know:" },
@@ -743,7 +743,7 @@ const en: Block[] = [
     { type: "heading3", content: "Why this matters" },
     { type: "text", content: "The entire proof hinged on one moment: seeing that (2 ↓ 2) ↑ 2 = 2, because ↓ and ↑ cancel. In school notation, that same step would be written as (√2)² = 2. Can you see the cancellation there? Not really — √ and ² look nothing alike. But ↓ and ↑? They're the same arrow, pointing opposite ways. The cancellation is staring you in the face." },
     { type: "text", content: "That's the point of the whole article. Better notation doesn't just look nicer — it makes hard things easy to see." },
-    { type: "text", content: "You can both sit back down now. 🪑" },
+    { type: "text", content: "You can both sit back down now." },
   ] },
 ];
 
@@ -946,7 +946,7 @@ const nl: Block[] = [
 
   // ── Bewijs (bijlage) ──
   { type: "collapsible", title: "Bijlage: Een bewijs dat simpel wordt", blocks: [
-    { type: "text", content: "⚠️ Dit stuk is voor wiskundedocenten en wiskundeliefhebbers. Laat het ze zien. De kans is groot dat ze deze notatie nog niet kennen, en als ze dit bewijs doorlezen gaan ze juichend door de klas." },
+    { type: "text", content: "NB — Dit stuk is voor wiskundedocenten en wiskundeliefhebbers. Laat het ze zien. De kans is groot dat ze deze notatie nog niet kennen, en als ze dit bewijs doorlezen gaan ze juichend door de klas." },
     { type: "text", content: "Wikipedia heeft een pagina over [geneste wortels](https://en.wikipedia.org/wiki/Nested_radical) — uitdrukkingen waarin een wortel nóg een wortel bevat. Schrik niet als die pagina er ingewikkeld uitziet: die staat vol met zware wiskunde. Wij pakken er slechts één klein voorbeeldje uit, en houden het simpel." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia zegt: \"Het is niet meteen duidelijk\" dat deze twee gelijk zijn." },
     { type: "text", content: "In schoolnotatie moet je speciale regels over wortels kennen om dit te bewijzen. Maar met onze notatie is het gewoon een puzzel. We hebben maar één ding nodig dat je waarschijnlijk al kent:" },
@@ -993,7 +993,7 @@ const nl: Block[] = [
     { type: "heading3", content: "Waarom dit ertoe doet" },
     { type: "text", content: "Het hele bewijs draaide om één moment: zien dat (2 ↓ 2) ↑ 2 = 2, omdat ↓ en ↑ elkaar opheffen. In schoolnotatie zou diezelfde stap geschreven worden als (√2)² = 2. Kun je daar de opheffing zien? Niet echt — √ en ² lijken nergens op elkaar. Maar ↓ en ↑? Het is dezelfde pijl, de andere kant op. De opheffing springt je in het gezicht." },
     { type: "text", content: "Dat is het punt van dit hele artikel. Betere notatie is niet alleen mooier — het maakt moeilijke dingen makkelijk te zien." },
-    { type: "text", content: "Jullie mogen nu allebei weer rustig gaan zitten. 🪑" },
+    { type: "text", content: "Jullie mogen nu allebei weer rustig gaan zitten." },
   ] },
 ];
 
