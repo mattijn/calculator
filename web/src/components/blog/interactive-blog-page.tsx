@@ -1011,7 +1011,10 @@ type Theme = "light" | "dark";
 
 function getInitialLanguage(): Language {
   if (typeof window === "undefined") return "en";
-  return window.localStorage.getItem(LANGUAGE_KEY) === "nl" ? "nl" : "en";
+  const stored = window.localStorage.getItem(LANGUAGE_KEY);
+  if (stored === "en" || stored === "nl") return stored;
+  const browserLang = navigator.language?.toLowerCase() ?? "";
+  return browserLang.startsWith("nl") ? "nl" : "en";
 }
 
 function getInitialTheme(): Theme {
