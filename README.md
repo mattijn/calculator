@@ -1,6 +1,6 @@
-# Why Do They Make Something So Simple So Difficult?
+# ↑ ↓ ⇓ — What Math Should Look Like
 
-An interactive article about the hidden pattern in powers, roots, and logarithms — and a notation that makes it visible.
+An interactive article about powers, roots, and logarithms — and a notation that makes their hidden connection visible.
 
 In school, powers (`2³`), roots (`³√8`), and logarithms (`log₂8`) look like they come from three different worlds. But they're the same relationship, written three different ways. This project presents an alternative notation using **↑** (power), **↓** (root), and **⇓** (log) — three symbols from the same visual family — and explores what happens when notation actually helps you think.
 

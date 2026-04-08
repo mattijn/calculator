@@ -848,13 +848,13 @@ const nl: Block[] = [
 /* ── Page ── */
 
 const heroEn = {
-  title: "Why do they make something so simple so difficult?",
-  byline: "An interactive article about the hidden pattern in powers, roots, and logarithms",
+  title: "↑ ↓ ⇓ — What math should look like",
+  byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
   time: "15 min read",
 };
 const heroNl = {
-  title: "Waarom maken ze iets simpels zo moeilijk?",
-  byline: "Een interactief artikel over het verborgen patroon in machten, wortels en logaritmen",
+  title: "↑ ↓ ⇓ — Hoe wiskunde eruit zou moeten zien",
+  byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
   time: "15 min lezen",
 };
 
