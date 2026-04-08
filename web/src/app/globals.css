@@ -48,7 +48,7 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 html,
@@ -62,7 +62,7 @@ body {
   font-family: var(--font-geist-sans), "Georgia", serif;
   -webkit-font-smoothing: antialiased;
   line-height: 1.7;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a {
@@ -317,7 +317,7 @@ button {
   display: grid;
   gap: 0;
   max-width: 680px;
-  overflow-x: hidden;
+  overflow-x: clip;
   word-break: break-word;
 }
 

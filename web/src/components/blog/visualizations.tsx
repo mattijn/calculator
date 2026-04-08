@@ -2,6 +2,8 @@
 import { useCallback, useRef, useState } from "react";
 import type { Language } from "./types";
 
+const R = (v: number) => Math.round(v * 100) / 100;
+
 export function InterestChart({ lang }: { lang: Language }) {
   const years = Array.from({ length: 26 }, (_, i) => i);
   const amounts = years.map((y) => 100 * 1.03 ** y);
@@ -14,8 +16,8 @@ export function InterestChart({ lang }: { lang: Language }) {
   const plotW = w - pL - pR;
   const plotH = h - pT - pB;
   const maxA = 220;
-  const x = (yr: number) => pL + (yr / 25) * plotW;
-  const y = (a: number) => pT + plotH - ((a - 80) / (maxA - 80)) * plotH;
+  const x = (yr: number) => R(pL + (yr / 25) * plotW);
+  const y = (a: number) => R(pT + plotH - ((a - 80) / (maxA - 80)) * plotH);
 
   const line = years
     .map((yr, i) => `${i === 0 ? "M" : "L"}${x(yr)},${y(amounts[i])}`)
@@ -181,8 +183,8 @@ export function PianoFreqViz({ lang }: { lang: Language }) {
           const isSharp = names[i].includes("♯");
           return (
             <g key={i} className="pianoBar" onClick={() => playTone(freq, i)} style={{ cursor: "pointer" }}>
-              <rect x={xPos} y={pT + maxH - barH} width={barW} height={barH}
-                fill={isSharp ? "#1e293b" : "var(--accent)"} opacity={isSharp ? 0.8 : 0.15 + 0.06 * i}
+              <rect x={R(xPos)} y={R(pT + maxH - barH)} width={R(barW)} height={R(barH)}
+                fill={isSharp ? "#1e293b" : "var(--accent)"} opacity={R(isSharp ? 0.8 : 0.15 + 0.06 * i)}
                 stroke="var(--accent)" strokeWidth="1" rx="3" />
               <text x={xPos + barW / 2} y={pT + maxH + 16} textAnchor="middle" fontSize="11" fontWeight="600" fill="var(--foreground)">{names[i]}</text>
               <text x={xPos + barW / 2} y={pT + maxH + 30} textAnchor="middle" fontSize="9" fill="#78716c">{Math.round(freq)}</text>
@@ -424,33 +426,34 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
 
       <svg viewBox="0 0 480 130" className="vizSvg savingsChart">
         {yearData.map((val, i) => {
-          const barH = Math.max(2, (val / maxVal) * 95);
-          const barW = Math.max(2, Math.min(16, 400 / (maxYear + 1) - 2));
-          const xPos = 40 + i * (400 / (maxYear + 1));
+          const barH = R(Math.max(2, (val / maxVal) * 95));
+          const barW = R(Math.max(2, Math.min(16, 400 / (maxYear + 1) - 2)));
+          const xPos = R(40 + i * (400 / (maxYear + 1)));
           const atGoal = val >= goal;
           const isLast = i === maxYear;
+          const opacity = R(atGoal ? 0.9 : 0.3 + 0.5 * (val / maxVal));
           return (
             <g key={i}>
-              <rect x={xPos} y={105 - barH} width={barW} height={barH}
+              <rect x={xPos} y={R(105 - barH)} width={barW} height={barH}
                 fill={atGoal ? "#22c55e" : "var(--accent)"}
-                opacity={atGoal ? 0.9 : 0.3 + 0.5 * (val / maxVal)} rx="2"
+                opacity={opacity} rx="2"
                 style={{ transition: "height 0.3s ease, y 0.3s ease" }} />
               {isLast && (
-                <text x={xPos + barW / 2} y={105 - barH - 4} textAnchor="middle" fontSize="8" fontWeight="700"
+                <text x={R(xPos + barW / 2)} y={R(105 - barH - 4)} textAnchor="middle" fontSize="8" fontWeight="700"
                   fill={atGoal ? "#22c55e" : "var(--accent)"}>
                   €{Math.round(val)}
                 </text>
               )}
               {(i === 0 || i === maxYear || (maxYear <= 25 && i % 5 === 0) || (maxYear > 25 && i % 10 === 0)) && (
-                <text x={xPos + barW / 2} y={120} textAnchor="middle" fontSize="8" fill="var(--muted-text)">{i}</text>
+                <text x={R(xPos + barW / 2)} y={120} textAnchor="middle" fontSize="8" fill="var(--muted-text)">{i}</text>
               )}
             </g>
           );
         })}
-        <line x1={40} y1={105 - (goal / maxVal) * 95} x2={440} y2={105 - (goal / maxVal) * 95}
+        <line x1={40} y1={R(105 - (goal / maxVal) * 95)} x2={440} y2={R(105 - (goal / maxVal) * 95)}
           stroke="#22c55e" strokeDasharray="4,3" strokeWidth="1.2"
           style={{ transition: "y1 0.3s ease, y2 0.3s ease" }} />
-        <text x={36} y={105 - (goal / maxVal) * 95 + 3} textAnchor="end" fontSize="8" fill="#22c55e" fontWeight="600">€{goal}</text>
+        <text x={36} y={R(105 - (goal / maxVal) * 95 + 3)} textAnchor="end" fontSize="8" fill="#22c55e" fontWeight="600">€{goal}</text>
         <text x={240} y={10} textAnchor="middle" fontSize="9" fill="var(--muted-text)">
           {en ? "Click m, r, or n to change what you're solving for" : "Klik m, r of n om te kiezen wat je zoekt"}
         </text>
