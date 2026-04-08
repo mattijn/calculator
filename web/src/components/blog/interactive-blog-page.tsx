@@ -995,13 +995,13 @@ const nl: Block[] = [
 /* ── Page ── */
 
 const heroEn = {
-  title: "↑ ↓ ⇓ — What math should look like",
+  title: "↑ ↓ ⇓ — The hidden pattern behind powers, roots, and logarithms",
   byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
   audience: "For students, teachers, and anyone who ever felt that mathematical notation is unnecessarily complicated. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.",
   time: "15 min read",
 };
 const heroNl = {
-  title: "↑ ↓ ⇓ — Hoe wiskunde eruit zou moeten zien",
+  title: "↑ ↓ ⇓ — Het verborgen patroon achter machten, wortels en logaritmen",
   byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
   audience: "Voor leerlingen, docenten en iedereen die ooit het gevoel had dat wiskundige notatie onnodig ingewikkeld is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
   time: "15 min lezen",

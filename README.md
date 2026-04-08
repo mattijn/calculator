@@ -1,4 +1,4 @@
-# ↑ ↓ ⇓ — What Math Should Look Like
+# ↑ ↓ ⇓ — The Hidden Pattern Behind Powers, Roots, and Logarithms
 
 An interactive article about powers, roots, and logarithms — and a notation that makes their hidden connection visible.
 
