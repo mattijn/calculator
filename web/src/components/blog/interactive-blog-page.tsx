@@ -141,6 +141,11 @@ function FullCalc({ lang }: { lang: Language }) {
           </button>
         ))}
       </div>
+      <div className="calcRuleCard">
+        <code>a ↑ b = c</code><span></span>
+        <code>c ↓ b = a</code><span className="calcRuleHint">{lang === "en" ? "left unknown" : "links onbekend"}</span>
+        <code>c ⇓ a = b</code><span className="calcRuleHint">{lang === "en" ? "right unknown" : "rechts onbekend"}</span>
+      </div>
     </div>
   );
 }
@@ -606,7 +611,7 @@ const en: Block[] = [
   { type: "heading3", content: "Question 2: What interest rate do I need to double my money in 10 years?" },
   { type: "text", content: "Doubling means going from m to 2 × m. Our formula says m × r ↑ 10 = 2 × m. The m appears on both sides, so it cancels out. We are left with:" },
   { type: "formula", lines: ["r ↑ 10 = 2"], label: "We want r (the left side of ↑)." },
-  { type: "text", content: "The r is the left side of ↑. From the rule card above: to get the left side back, we use ↓ (down):" },
+  { type: "text", content: "Compare with the rule card: this has the shape a ↑ b = c, and r is in the position of a — the left side. Left side unknown → use ↓:" },
   { type: "formula", lines: ["r = 2 ↓ 10"], label: "" },
   { type: "try", expr: "2↓10" },
   { type: "text", content: "About 1.072 — meaning an interest rate of about 7.2%. In school notation, this would be written as ¹⁰√2. Same answer, but you can't see where the root came from or why." },
@@ -614,7 +619,7 @@ const en: Block[] = [
   { type: "heading3", content: "Question 3: How many years does it take for my money to double at 3% interest?" },
   { type: "text", content: "Again: m × 1.03 ↑ y = 2 × m. The m's cancel:" },
   { type: "formula", lines: ["1.03 ↑ y = 2"], label: "We want y (the right side of ↑)." },
-  { type: "text", content: "Now y is the right side of ↑. From the rule card: to get the right side back, we use ⇓ (double-down):" },
+  { type: "text", content: "Compare with the rule card: a ↑ b = c, and y is in the position of b — the right side. Right side unknown → use ⇓:" },
   { type: "formula", lines: ["y = 2 ⇓ 1.03"], label: "" },
   { type: "try", expr: "2⇓1.03" },
   { type: "text", content: "About 23.4 years. In school, this would be log(2) / log(1.03) — correct, but it doesn't show you why. The ⇓ tells you: it's the inverse that recovers the right side of ↑." },
@@ -635,7 +640,7 @@ const en: Block[] = [
   { type: "repeatedMultViz" },
   { type: "text", content: "Repeated multiplication by the same number — that's a power:" },
   { type: "formula", lines: ["r ↑ 12 = 2"], label: "" },
-  { type: "text", content: "Now the question answers itself. We want r. The inverse of ↑ is ↓:" },
+  { type: "text", content: "Look at this formula: it has the shape a ↑ b = c, where r is in the position of a — the left side of ↑. From the rule card: left side unknown → use ↓." },
   { type: "formula", lines: ["r = 2 ↓ 12"], label: "" },
   { type: "try", expr: "2↓12" },
   { type: "text", content: "About 1.0595. Each piano key is roughly 6% higher in pitch than the previous one. Here's what that looks like in practice:" },
@@ -658,7 +663,7 @@ const en: Block[] = [
   { type: "formula", lines: ["energy ratio = 10 ↑ (1.5 × Δ)"], label: "Δ is how much the magnitude increases." },
   { type: "text", content: "Now the question: for which Δ does the energy exactly double? We fill in 2:" },
   { type: "formula", lines: ["10 ↑ (1.5 × Δ) = 2"], label: "We're looking for Δ." },
-  { type: "text", content: "The exponent 1.5 × Δ is the right side of ↑. From the rule card: to find the right side, use ⇓:" },
+  { type: "text", content: "This has the shape a ↑ b = c, where 1.5 × Δ is in the position of b — the right side of ↑. From the rule card: right side unknown → use ⇓." },
   { type: "formula", lines: ["1.5 × Δ = 2 ⇓ 10"], label: "" },
   { type: "try", expr: "2⇓10" },
   { type: "text", content: "That gives about 0.301. But that's 1.5 × Δ, not Δ itself. To get Δ alone, divide by 1.5:" },
@@ -856,7 +861,7 @@ const nl: Block[] = [
   { type: "heading3", content: "Vraag 2: Welke rente heb ik nodig om mijn geld te verdubbelen in 10 jaar?" },
   { type: "text", content: "Verdubbelen betekent van m naar 2 × m gaan. Onze formule zegt m × r ↑ 10 = 2 × m. De m staat aan beide kanten, dus die valt weg. Er blijft over:" },
   { type: "formula", lines: ["r ↑ 10 = 2"], label: "We zoeken r (de linkerkant van ↑)." },
-  { type: "text", content: "De r is de linkerkant van ↑. Uit de regelkaart hierboven: om de linkerkant terug te krijgen, gebruiken we ↓ (omlaag):" },
+  { type: "text", content: "Vergelijk met de regelkaart: dit heeft de vorm a ↑ b = c, en r staat op de plek van a — de linkerkant. Links onbekend → gebruik ↓:" },
   { type: "formula", lines: ["r = 2 ↓ 10"], label: "" },
   { type: "try", expr: "2↓10" },
   { type: "text", content: "Ongeveer 1.072 — dat betekent een rente van zo'n 7.2%. Op school schrijf je ¹⁰√2. Hetzelfde antwoord, maar je kunt niet zien waar die wortel vandaan komt of waarom." },
@@ -864,7 +869,7 @@ const nl: Block[] = [
   { type: "heading3", content: "Vraag 3: Hoeveel jaar duurt het voordat mijn geld verdubbelt bij 3% rente?" },
   { type: "text", content: "Weer: m × 1.03 ↑ y = 2 × m. De m's vallen weg:" },
   { type: "formula", lines: ["1.03 ↑ y = 2"], label: "We zoeken y (de rechterkant van ↑)." },
-  { type: "text", content: "Nu is y de rechterkant van ↑. Uit de regelkaart: om de rechterkant terug te krijgen, gebruiken we ⇓ (dubbel-omlaag):" },
+  { type: "text", content: "Vergelijk met de regelkaart: a ↑ b = c, en y staat op de plek van b — de rechterkant. Rechts onbekend → gebruik ⇓:" },
   { type: "formula", lines: ["y = 2 ⇓ 1.03"], label: "" },
   { type: "try", expr: "2⇓1.03" },
   { type: "text", content: "Ongeveer 23.4 jaar. Op school schrijf je log(2) / log(1.03) — klopt, maar het laat niet zien waarom. Het ⇓-symbool vertelt je: het is de inverse die de rechterkant van ↑ teruggeeft." },
@@ -885,7 +890,7 @@ const nl: Block[] = [
   { type: "repeatedMultViz" },
   { type: "text", content: "Herhaald vermenigvuldigen met hetzelfde getal — dat is een macht:" },
   { type: "formula", lines: ["r ↑ 12 = 2"], label: "" },
-  { type: "text", content: "Nu beantwoordt de vraag zichzelf. We zoeken r. De inverse van ↑ is ↓:" },
+  { type: "text", content: "Kijk naar deze formule: hij heeft de vorm a ↑ b = c, waarbij r op de plek van a staat — de linkerkant van ↑. Uit de regelkaart: links onbekend → gebruik ↓." },
   { type: "formula", lines: ["r = 2 ↓ 12"], label: "" },
   { type: "try", expr: "2↓12" },
   { type: "text", content: "Ongeveer 1.0595. Elke pianotoets is ruwweg 6% hoger in toonhoogte. Zo ziet dat er in de praktijk uit:" },
@@ -908,7 +913,7 @@ const nl: Block[] = [
   { type: "formula", lines: ["energieverhouding = 10 ↑ (1.5 × Δ)"], label: "Δ is hoeveel de magnitude stijgt." },
   { type: "text", content: "Nu de vraag: bij welke Δ verdubbelt de energie precies? We vullen 2 in:" },
   { type: "formula", lines: ["10 ↑ (1.5 × Δ) = 2"], label: "We zoeken Δ." },
-  { type: "text", content: "De exponent 1.5 × Δ is de rechterkant van ↑. Uit de regelkaart: om de rechterkant te vinden, gebruik ⇓:" },
+  { type: "text", content: "Dit heeft de vorm a ↑ b = c, waarbij 1.5 × Δ op de plek van b staat — de rechterkant van ↑. Uit de regelkaart: rechts onbekend → gebruik ⇓." },
   { type: "formula", lines: ["1.5 × Δ = 2 ⇓ 10"], label: "" },
   { type: "try", expr: "2⇓10" },
   { type: "text", content: "Dat geeft ongeveer 0.301. Maar dat is 1.5 × Δ, niet Δ zelf. Om Δ alleen te krijgen, delen we door 1.5:" },
@@ -1118,11 +1123,9 @@ export function InteractiveBlogPage() {
       >
         {mobileCalc ? "✕" : "⌘"}
       </button>
-      {mobileCalc && (
-        <div className="calcDrawer">
-          <FullCalc lang={language} />
-        </div>
-      )}
+      <div className={`calcDrawer${mobileCalc ? " calcDrawerOpen" : ""}`}>
+        <FullCalc lang={language} />
+      </div>
     </article>
   );
 }
