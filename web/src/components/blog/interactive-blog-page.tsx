@@ -199,25 +199,51 @@ function RevealBlock({ children }: { children: React.ReactNode }) {
 
 function NotationTransform({ lang }: { lang: Language }) {
   const [showNew, setShowNew] = useState(false);
+  const [autoTriggered, setAutoTriggered] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6 && !autoTriggered) {
+          setAutoTriggered(true);
+          setTimeout(() => setShowNew(true), 600);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [autoTriggered]);
+
   const rows = [
     { school: "2³ = 8", arrow: "2 ↑ 3 = 8" },
     { school: "³√8 = 2", arrow: "8 ↓ 3 = 2" },
     { school: "log₂(8) = 3", arrow: "8 ⇓ 2 = 3" },
   ];
   return (
-    <div className="transformCard card">
+    <div className="transformCard card" ref={ref}>
       <div className="transformRows">
         {rows.map((r, i) => (
-          <div key={i} className="transformRow">
-            <code className={`transformFormula${showNew ? " transformFade" : ""}`}>
-              {showNew ? mathFormat(r.arrow) : r.school}
-            </code>
+          <div key={i} className="transformRow" style={{ transitionDelay: `${i * 120}ms` }}>
+            <div className="transformFlip">
+              <code className={`transformFormula transformFront${showNew ? " transformHidden" : ""}`}
+                style={{ transitionDelay: `${i * 120}ms` }}>
+                {r.school}
+              </code>
+              <code className={`transformFormula transformBack${showNew ? "" : " transformHidden"}`}
+                style={{ transitionDelay: `${i * 120 + 150}ms` }}>
+                {mathFormat(r.arrow)}
+              </code>
+            </div>
           </div>
         ))}
       </div>
       <button className="transformBtn" onClick={() => setShowNew((s) => !s)}>
         {showNew
-          ? (lang === "en" ? "← Show school notation" : "← Toon schoolnotatie")
+          ? (lang === "en" ? "← School notation" : "← Schoolnotatie")
           : (lang === "en" ? "Transform →" : "Transformeer →")}
       </button>
     </div>
@@ -367,26 +393,64 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
           </p>
         </div>
       );
-    case "examplesIntro":
+    case "examplesIntro": {
+      const en = lang === "en";
+      const examples = [
+        {
+          href: `#${slugify(en ? "Saving money" : "Sparen")}`,
+          label: en ? "Saving money" : "Sparen",
+          ops: "÷  ↓  ⇓",
+          icon: (
+            <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6v28M12 14l8-8 8 8" />
+              <rect x="8" y="24" width="24" height="10" rx="2" fill="var(--accent-light)" />
+              <line x1="14" y1="27" x2="14" y2="31" /><line x1="20" y1="27" x2="20" y2="31" /><line x1="26" y1="27" x2="26" y2="31" />
+            </svg>
+          ),
+        },
+        {
+          href: `#${slugify(en ? "What does a piano sound like?" : "Hoe klinkt een piano?")}`,
+          label: en ? "Piano tuning" : "Pianostemming",
+          ops: "↓",
+          icon: (
+            <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round">
+              <rect x="4" y="12" width="5" height="22" rx="1" fill="var(--accent)" opacity="0.15" />
+              <rect x="10" y="16" width="4" height="18" rx="1" fill="var(--foreground)" opacity="0.7" />
+              <rect x="15" y="14" width="5" height="20" rx="1" fill="var(--accent)" opacity="0.25" />
+              <rect x="21" y="10" width="4" height="24" rx="1" fill="var(--foreground)" opacity="0.7" />
+              <rect x="26" y="12" width="5" height="22" rx="1" fill="var(--accent)" opacity="0.4" />
+              <rect x="32" y="8" width="4" height="26" rx="1" fill="var(--foreground)" opacity="0.7" />
+              <path d="M6 8c6 0 10 2 14 2s8-3 14-3" stroke="var(--accent)" strokeWidth="1.5" fill="none" />
+            </svg>
+          ),
+        },
+        {
+          href: `#${slugify(en ? "Earthquakes and the Richter scale" : "Aardbevingen en de Richterschaal")}`,
+          label: en ? "Earthquakes" : "Aardbevingen",
+          ops: "↑  ⇓",
+          icon: (
+            <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" strokeLinecap="round">
+              <path d="M4 30 Q10 28 14 30 Q18 32 22 30 Q26 28 30 30 Q34 32 38 30" stroke="var(--accent)" strokeWidth="2" />
+              <path d="M8 26 Q12 24 16 26 Q20 28 24 26 Q28 24 32 26" stroke="var(--accent)" strokeWidth="1.5" opacity="0.5" />
+              <path d="M12 22 Q16 20 20 22 Q24 24 28 22" stroke="var(--accent)" strokeWidth="1" opacity="0.3" />
+              <circle cx="20" cy="18" r="3" fill="var(--accent)" opacity="0.2" />
+              <circle cx="20" cy="18" r="1" fill="var(--accent)" />
+            </svg>
+          ),
+        },
+      ];
       return (
         <div className="examplesIntroGrid">
-          <div className="examplePreviewCard card">
-            <span className="examplePreviewIcon">💰</span>
-            <span className="examplePreviewLabel">{lang === "en" ? "Saving money" : "Sparen"}</span>
-            <span className="examplePreviewOps">{mathFormat("÷  ↓  ⇓")}</span>
-          </div>
-          <div className="examplePreviewCard card">
-            <span className="examplePreviewIcon">🎹</span>
-            <span className="examplePreviewLabel">{lang === "en" ? "Piano tuning" : "Pianostemming"}</span>
-            <span className="examplePreviewOps">{mathFormat("↓")}</span>
-          </div>
-          <div className="examplePreviewCard card">
-            <span className="examplePreviewIcon">🌍</span>
-            <span className="examplePreviewLabel">{lang === "en" ? "Earthquakes" : "Aardbevingen"}</span>
-            <span className="examplePreviewOps">{mathFormat("↑  ⇓")}</span>
-          </div>
+          {examples.map((ex) => (
+            <a key={ex.href} href={ex.href} className="examplePreviewCard card">
+              {ex.icon}
+              <span className="examplePreviewLabel">{ex.label}</span>
+              <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
+            </a>
+          ))}
         </div>
       );
+    }
     case "collapsible":
       return (
         <details className="collapsibleBlock card">
@@ -395,6 +459,16 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
             {block.blocks.map((b, i) => (
               <RenderBlock key={i} block={b} lang={lang} />
             ))}
+            <button
+              className="collapsibleClose"
+              onClick={(e) => {
+                const details = (e.target as HTMLElement).closest("details");
+                if (details) details.open = false;
+                details?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
+              {lang === "en" ? "▲ Close appendix" : "▲ Bijlage sluiten"}
+            </button>
           </div>
         </details>
       );
@@ -425,8 +499,7 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
 const en: Block[] = [
   { type: "text", content: "A researcher in Amsterdam was checking his son's maths homework. The assignment covered powers, roots, and logarithms. He looked at the formulas and thought:" },
   { type: "quote", content: "\"Why do they make something so simple so difficult?\"" },
-  { type: "text", content: "That question turned into a book. This article is based on it. We are going to show you a pattern that is already in your head — you just haven't noticed it yet — and then show how a small change in notation makes that pattern visible." },
-  { type: "text", content: "No prior knowledge of logarithms required. If you know what 3 + 5 is, you can follow this article to the end." },
+  { type: "text", content: "That question turned into a [book](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf). This interactive article is based on it. We are going to show you a pattern that is already in your head — you just haven't noticed it yet — and then show how a small change in notation makes that pattern visible." },
 
   // ── Pattern ──
   { type: "heading", content: "A pattern you already know" },
@@ -618,7 +691,7 @@ const en: Block[] = [
 
   // ── Proof (appendix) ──
   { type: "collapsible", title: "Appendix: A proof that becomes simple", blocks: [
-    { type: "text", content: "⚠️ This section isn't for you — it's for your maths teacher. Show it to them. Chances are they haven't seen this notation before, and once they read through this proof they'll be cheering across the classroom." },
+    { type: "text", content: "⚠️ This section is for maths teachers and maths enthusiasts. Show it to them. Chances are they haven't seen this notation before, and once they read through this proof they'll be cheering across the classroom." },
     { type: "text", content: "Wikipedia has a page about [nested radicals](https://en.wikipedia.org/wiki/Nested_radical) — expressions where a square root contains another square root. Don't worry if that page looks intimidating: it's full of advanced maths. We're only going to look at one tiny example, and we'll keep it simple." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia says: \"It is not immediately obvious\" that these two are equal." },
     { type: "text", content: "In school notation, proving this requires you to know special rules about roots. But with our notation, it's just a puzzle. Let's solve it — you only need one thing you probably already know:" },
@@ -676,8 +749,7 @@ const en: Block[] = [
 const nl: Block[] = [
   { type: "text", content: "Een onderzoeker in Amsterdam keek het wiskundehuiswerk van zijn zoon na. De opdracht ging over machten, wortels en logaritmen. Hij bekeek de formules en dacht:" },
   { type: "quote", content: "\"Waarom maken ze iets simpels zo moeilijk?\"" },
-  { type: "text", content: "Die vraag werd een boek, en dit artikel is daarop gebaseerd. We laten je een patroon zien dat al in je hoofd zit — je hebt het alleen nog niet opgemerkt — en dan laten we zien hoe een kleine verandering in notatie dat patroon zichtbaar maakt." },
-  { type: "text", content: "Voorkennis van logaritmen is niet nodig. Als je weet wat 3 + 5 is, kun je dit artikel tot het einde volgen." },
+  { type: "text", content: "Die vraag werd een [boek](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf), en dit interactieve artikel is daarop gebaseerd. We laten je een patroon zien dat al in je hoofd zit — je hebt het alleen nog niet opgemerkt — en dan laten we zien hoe een kleine verandering in notatie dat patroon zichtbaar maakt." },
 
   // ── Patroon ──
   { type: "heading", content: "Een patroon dat je al kent" },
@@ -869,7 +941,7 @@ const nl: Block[] = [
 
   // ── Bewijs (bijlage) ──
   { type: "collapsible", title: "Bijlage: Een bewijs dat simpel wordt", blocks: [
-    { type: "text", content: "⚠️ Dit stuk is niet voor jou — het is voor je wiskundedocent. Laat het ze zien. De kans is groot dat ze deze notatie nog niet kennen, en als ze dit bewijs doorlezen gaan ze juichend door de klas." },
+    { type: "text", content: "⚠️ Dit stuk is voor wiskundedocenten en wiskundeliefhebbers. Laat het ze zien. De kans is groot dat ze deze notatie nog niet kennen, en als ze dit bewijs doorlezen gaan ze juichend door de klas." },
     { type: "text", content: "Wikipedia heeft een pagina over [geneste wortels](https://en.wikipedia.org/wiki/Nested_radical) — uitdrukkingen waarin een wortel nóg een wortel bevat. Schrik niet als die pagina er ingewikkeld uitziet: die staat vol met zware wiskunde. Wij pakken er slechts één klein voorbeeldje uit, en houden het simpel." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia zegt: \"Het is niet meteen duidelijk\" dat deze twee gelijk zijn." },
     { type: "text", content: "In schoolnotatie moet je speciale regels over wortels kennen om dit te bewijzen. Maar met onze notatie is het gewoon een puzzel. We hebben maar één ding nodig dat je waarschijnlijk al kent:" },
@@ -925,11 +997,13 @@ const nl: Block[] = [
 const heroEn = {
   title: "↑ ↓ ⇓ — What math should look like",
   byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
+  audience: "For students, teachers, and anyone who ever felt that mathematical notation is unnecessarily complicated. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.",
   time: "15 min read",
 };
 const heroNl = {
   title: "↑ ↓ ⇓ — Hoe wiskunde eruit zou moeten zien",
   byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
+  audience: "Voor leerlingen, docenten en iedereen die ooit het gevoel had dat wiskundige notatie onnodig ingewikkeld is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
   time: "15 min lezen",
 };
 
@@ -951,6 +1025,16 @@ export function InteractiveBlogPage() {
   const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [progress, setProgress] = useState(0);
+  const [mobileCalc, setMobileCalc] = useState(false);
+  const [fabPulsed, setFabPulsed] = useState(false);
+  useEffect(() => {
+    const onFirstScroll = () => {
+      setFabPulsed(true);
+      window.removeEventListener("scroll", onFirstScroll);
+    };
+    window.addEventListener("scroll", onFirstScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onFirstScroll);
+  }, []);
   useEffect(() => {
     document.documentElement.lang = language;
     window.localStorage.setItem(LANGUAGE_KEY, language);
@@ -997,14 +1081,17 @@ export function InteractiveBlogPage() {
             </button>
           </div>
         </div>
-        <h1 className="heroTitle">{hero.title}</h1>
+        <h1 className="heroTitle">{mathFormat(hero.title)}</h1>
         <p className="heroDek">{hero.byline}</p>
+        <p className="heroAudience">{hero.audience}</p>
         <nav className="tocNav" aria-label="Table of contents">
-          <ol className="tocList">
-            {toc.map((item) => (
-              <li key={item.id}><a href={`#${item.id}`}>{item.label}</a></li>
-            ))}
-          </ol>
+          {toc.map((item, i) => (
+            <a key={item.id} href={`#${item.id}`} className="tocChip"
+              style={{ animationDelay: `${0.3 + i * 0.06}s` }}>
+              <span className="tocChipNum">{i + 1}</span>
+              {item.label}
+            </a>
+          ))}
         </nav>
       </header>
       <div className="storyBody">
@@ -1014,7 +1101,6 @@ export function InteractiveBlogPage() {
               <RenderBlock block={block} lang={language} />
             </RevealBlock>
           ))}
-          <FullCalc lang={language} />
         </div>
         <aside className="storySidebar">
           <div className="stickyCalc">
@@ -1022,6 +1108,18 @@ export function InteractiveBlogPage() {
           </div>
         </aside>
       </div>
+      <button
+        className={`calcFab${fabPulsed && !mobileCalc ? " calcFabPulse" : ""}`}
+        onClick={() => setMobileCalc((s) => !s)}
+        aria-label="Calculator"
+      >
+        {mobileCalc ? "✕" : "⌘"}
+      </button>
+      {mobileCalc && (
+        <div className="calcDrawer">
+          <FullCalc lang={language} />
+        </div>
+      )}
     </article>
   );
 }

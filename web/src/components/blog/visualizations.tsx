@@ -213,12 +213,44 @@ export function EarthquakeViz({ lang }: { lang: Language }) {
   const barW = (w - pL - pR - 5 * 16) / 6;
   const maxE = 32;
   const wrapRef = useRef<HTMLDivElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const playRumble = useCallback((intensity: number) => {
+    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+    const ctx = audioCtxRef.current;
+    const dur = 0.3 + (intensity / 32) * 1.5;
+    const vol = 0.08 + (intensity / 32) * 0.35;
+
+    const bufSize = Math.ceil(ctx.sampleRate * dur);
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) {
+      const t = i / bufSize;
+      const decay = 1 - t * t;
+      data[i] = (Math.random() * 2 - 1) * decay;
+    }
+
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 60 + (intensity / 32) * 120;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    src.connect(lp);
+    lp.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+    src.stop(ctx.currentTime + dur);
+  }, []);
 
   const triggerShake = useCallback((intensity: number) => {
     const el = wrapRef.current;
     if (!el) return;
     const article = el.closest(".storyArticle") || el.parentElement;
     if (!article) return;
+    playRumble(intensity);
     const px = 2 + intensity * 1.5;
     const dur = 300 + intensity * 60;
     const steps = Math.ceil(dur / 25);
@@ -240,7 +272,7 @@ export function EarthquakeViz({ lang }: { lang: Language }) {
       requestAnimationFrame(shake);
     };
     requestAnimationFrame(shake);
-  }, []);
+  }, [playRumble]);
 
   return (
     <div className="vizWrap" ref={wrapRef}>
@@ -288,6 +320,14 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
   const [ratePercent, setRatePercent] = useState(3);
   const [years, setYears] = useState(10);
   const [goal, setGoal] = useState(1000);
+  const [formulaPulse, setFormulaPulse] = useState(false);
+  const pulseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const triggerPulse = useCallback(() => {
+    setFormulaPulse(true);
+    if (pulseTimer.current) clearTimeout(pulseTimer.current);
+    pulseTimer.current = setTimeout(() => setFormulaPulse(false), 400);
+  }, []);
 
   const r = 1 + ratePercent / 100;
 
@@ -323,7 +363,7 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
         <div className="savingsRow">
           <span className="savingsLabel">{en ? "Goal (€)" : "Doel (€)"}</span>
           <input type="range" min={200} max={5000} step={50} value={goal}
-            onChange={(e) => setGoal(+e.target.value)} className="savingsSlider" />
+            onChange={(e) => { setGoal(+e.target.value); triggerPulse(); }} className="savingsSlider" />
           <span className="savingsValue">€{goal}</span>
         </div>
 
@@ -336,7 +376,7 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
             ? <span className="savingsAnswer">= €{solvedM.toFixed(0)}</span>
             : <>
                 <input type="range" min={10} max={2000} step={10} value={startAmount}
-                  onChange={(e) => setStartAmount(+e.target.value)} className="savingsSlider" />
+                  onChange={(e) => { setStartAmount(+e.target.value); triggerPulse(); }} className="savingsSlider" />
                 <span className="savingsValue">€{startAmount}</span>
               </>
           }
@@ -351,7 +391,7 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
             ? <span className="savingsAnswer">= {solvedR.toFixed(2)}%</span>
             : <>
                 <input type="range" min={0.5} max={15} step={0.1} value={ratePercent}
-                  onChange={(e) => setRatePercent(+e.target.value)} className="savingsSlider" />
+                  onChange={(e) => { setRatePercent(+e.target.value); triggerPulse(); }} className="savingsSlider" />
                 <span className="savingsValue">{ratePercent}%</span>
               </>
           }
@@ -366,14 +406,14 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
             ? <span className="savingsAnswer">= {solvedN.toFixed(1)} {en ? "years" : "jaar"}</span>
             : <>
                 <input type="range" min={1} max={50} step={1} value={years}
-                  onChange={(e) => setYears(+e.target.value)} className="savingsSlider" />
+                  onChange={(e) => { setYears(+e.target.value); triggerPulse(); }} className="savingsSlider" />
                 <span className="savingsValue">{years} {en ? "yr" : "jr"}</span>
               </>
           }
         </div>
       </div>
 
-      <div className="savingsFormula">
+      <div className={`savingsFormula${formulaPulse ? " savingsFormulaPulse" : ""}`}>
         <code>{formula}</code>
         <span className="savingsOperatorHint">
           {unknown === "m" && (en ? "division undoes multiplication" : "delen is de inverse van vermenigvuldigen")}
@@ -382,25 +422,35 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
         </span>
       </div>
 
-      <svg viewBox="0 0 480 120" className="vizSvg savingsChart">
+      <svg viewBox="0 0 480 130" className="vizSvg savingsChart">
         {yearData.map((val, i) => {
-          const barH = Math.max(2, (val / maxVal) * 90);
+          const barH = Math.max(2, (val / maxVal) * 95);
           const barW = Math.max(2, Math.min(16, 400 / (maxYear + 1) - 2));
           const xPos = 40 + i * (400 / (maxYear + 1));
           const atGoal = val >= goal;
+          const isLast = i === maxYear;
           return (
             <g key={i}>
-              <rect x={xPos} y={100 - barH} width={barW} height={barH}
-                fill={atGoal ? "#22c55e" : "var(--accent)"} opacity={atGoal ? 0.9 : 0.3 + 0.5 * (val / maxVal)} rx="2" />
+              <rect x={xPos} y={105 - barH} width={barW} height={barH}
+                fill={atGoal ? "#22c55e" : "var(--accent)"}
+                opacity={atGoal ? 0.9 : 0.3 + 0.5 * (val / maxVal)} rx="2"
+                style={{ transition: "height 0.3s ease, y 0.3s ease" }} />
+              {isLast && (
+                <text x={xPos + barW / 2} y={105 - barH - 4} textAnchor="middle" fontSize="8" fontWeight="700"
+                  fill={atGoal ? "#22c55e" : "var(--accent)"}>
+                  €{Math.round(val)}
+                </text>
+              )}
               {(i === 0 || i === maxYear || (maxYear <= 25 && i % 5 === 0) || (maxYear > 25 && i % 10 === 0)) && (
-                <text x={xPos + barW / 2} y={115} textAnchor="middle" fontSize="8" fill="var(--muted-text)">{i}</text>
+                <text x={xPos + barW / 2} y={120} textAnchor="middle" fontSize="8" fill="var(--muted-text)">{i}</text>
               )}
             </g>
           );
         })}
-        <line x1={40} y1={100 - (goal / maxVal) * 90} x2={440} y2={100 - (goal / maxVal) * 90}
-          stroke="#22c55e" strokeDasharray="4,3" strokeWidth="1.2" />
-        <text x={36} y={100 - (goal / maxVal) * 90 + 3} textAnchor="end" fontSize="8" fill="#22c55e" fontWeight="600">€{goal}</text>
+        <line x1={40} y1={105 - (goal / maxVal) * 95} x2={440} y2={105 - (goal / maxVal) * 95}
+          stroke="#22c55e" strokeDasharray="4,3" strokeWidth="1.2"
+          style={{ transition: "y1 0.3s ease, y2 0.3s ease" }} />
+        <text x={36} y={105 - (goal / maxVal) * 95 + 3} textAnchor="end" fontSize="8" fill="#22c55e" fontWeight="600">€{goal}</text>
         <text x={240} y={10} textAnchor="middle" fontSize="9" fill="var(--muted-text)">
           {en ? "Click m, r, or n to change what you're solving for" : "Klik m, r of n om te kiezen wat je zoekt"}
         </text>
