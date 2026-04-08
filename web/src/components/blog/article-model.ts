@@ -59,8 +59,12 @@ export function useInteractiveArticleModel({
   useEffect(() => {
     const preferredLanguage = getPreferredLanguage();
     const preferredTheme = getPreferredTheme();
-    setLanguage((current) => (current === preferredLanguage ? current : preferredLanguage));
-    setTheme((current) => (current === preferredTheme ? current : preferredTheme));
+    const syncPreferred = () => {
+      setLanguage((current) => (current === preferredLanguage ? current : preferredLanguage));
+      setTheme((current) => (current === preferredTheme ? current : preferredTheme));
+    };
+    const taskId = window.setTimeout(syncPreferred, 0);
+    return () => window.clearTimeout(taskId);
   }, []);
 
   useEffect(() => {
