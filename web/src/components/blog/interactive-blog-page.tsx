@@ -188,12 +188,21 @@ function RevealBlock({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      const fallback = window.setTimeout(() => setVisible(true), 0);
+      return () => window.clearTimeout(fallback);
+    }
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
       { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    // Safari/WebView can occasionally skip observer callbacks; reveal anyway.
+    const fallback = window.setTimeout(() => setVisible(true), 1200);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, []);
   return (
     <div ref={ref} className={`reveal${visible ? " revealed" : ""}`}>
@@ -691,7 +700,7 @@ const en: Block[] = [
 
   // ── Origin ──
   { type: "heading", content: "Where this comes from" },
-  { type: "text", content: "This notation was developed by Steven Pemberton, a computer scientist at CWI Amsterdam. His book \"A Mathematician's Lament... about Conditions at School\" starts from the very beginning — counting with sticks — and builds up through addition, multiplication, and powers, showing that each level follows the same pattern. The notation isn't arbitrary: it was designed to make that pattern visible." },
+  { type: "text", content: "This notation was developed by Steven Pemberton, a computer scientist at CWI Amsterdam. In his book \"Numbers,\" he starts from the very beginning — counting with sticks — and builds up through addition, multiplication, and powers, showing that each level follows the same pattern. The notation isn't arbitrary: it was designed to make that pattern visible." },
   { type: "text", content: "Want to read more? The full book \"Numbers\" is [available as a PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
 
   // ── Proof (appendix) ──

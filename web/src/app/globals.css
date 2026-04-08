@@ -1319,6 +1319,10 @@ button {
     display: none;
   }
 
+  .inverseRuleHeaderRow td:nth-child(2) {
+    display: none;
+  }
+
   .inverseRuleFormula code {
     font-size: 1.05rem;
   }
@@ -1409,6 +1413,16 @@ button {
 }
 
 @media (max-width: 1079px) {
+  .storyHero {
+    padding-inline: max(1.25rem, env(safe-area-inset-left, 0px))
+      max(1.7rem, env(safe-area-inset-right, 0px));
+  }
+
+  .storyBody {
+    padding-inline: max(1.25rem, env(safe-area-inset-left, 0px))
+      max(1.7rem, env(safe-area-inset-right, 0px));
+  }
+
   .calcFab {
     display: flex;
     align-items: center;
