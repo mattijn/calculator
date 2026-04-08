@@ -1,4 +1,4 @@
-# ↑ ↓ ⇓ — The Hidden Pattern Behind Powers, Roots, and Logarithms
+# Why Powers, Roots, and Logarithms Are Really the Same Pattern
 
 An interactive article about powers, roots, and logarithms — and a notation that makes their hidden connection visible.
 

@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { evaluateExpression } from "@/lib/evaluator";
+import { useEffect, useRef, useState } from "react";
 import { InterestChart, RepeatedMultViz, PianoChainViz, PianoFreqViz, EarthquakeViz, SavingsExplorer } from "./visualizations";
+import { useInteractiveArticleModel } from "./article-model";
+import { evaluateTryExpression, useCalculatorModel } from "./calculator-model";
 import type { Language, Block } from "./types";
+import type { CalculatorViewModel } from "./calculator-model";
 
 export type { Language, Block };
-const LANGUAGE_KEY = "interactive-language-v1";
-const THEME_KEY = "interactive-theme-v1";
 
 /* ── Try-it widget ── */
 
@@ -33,16 +33,7 @@ function Try({ expression, lang }: { expression: string; lang: Language }) {
   const pron = pronounce(expression, lang);
   const display = displayExpr(expression);
   const run = () => {
-    try {
-      const v = evaluateExpression(expression);
-      setResult(
-        Number.isInteger(v)
-          ? String(v)
-          : v.toFixed(6).replace(/0+$/, "").replace(/\.$/, ""),
-      );
-    } catch {
-      setResult("error");
-    }
+    setResult(evaluateTryExpression(expression));
   };
   return (
     <span className="tryInline">
@@ -57,29 +48,8 @@ function Try({ expression, lang }: { expression: string; lang: Language }) {
 }
 
 /* ── Full calculator ── */
-
-function formatResult(v: number): string {
-  if (Number.isInteger(v)) return String(v);
-  return v.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
-}
-
-
-function FullCalc({ lang }: { lang: Language }) {
-  const [expr, setExpr] = useState("");
-  const [result, setResult] = useState("");
-  const [error, setError] = useState("");
-  const evaluate = () => {
-    try {
-      const v = evaluateExpression(expr);
-      setResult(formatResult(v));
-      setError("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Invalid");
-      setResult("");
-    }
-  };
-  const ops = new Set(["+", "-", "×", "÷", "↑", "↓", "⇓"]);
-  const append = (v: string) => setExpr((c) => ops.has(v) ? `${c} ${v} ` : c + v);
+function FullCalc({ lang, model }: { lang: Language; model: CalculatorViewModel }) {
+  const { expr, result, error, setExpr, evaluate, append, backspace, clear } = model;
   return (
     <div className="fullCalc card">
       <h3>{lang === "en" ? "Calculator" : "Calculator"}</h3>
@@ -114,17 +84,13 @@ function FullCalc({ lang }: { lang: Language }) {
       <div className="calcActions">
         <button
           className="calcKey calcKeyAction"
-          onClick={() => setExpr((c) => c.slice(0, -1))}
+          onClick={backspace}
         >
           {lang === "en" ? "Delete" : "Wis"}
         </button>
         <button
           className="calcKey calcKeyAction"
-          onClick={() => {
-            setExpr("");
-            setResult("");
-            setError("");
-          }}
+          onClick={clear}
         >
           AC
         </button>
@@ -148,6 +114,33 @@ function FullCalc({ lang }: { lang: Language }) {
       </div>
     </div>
   );
+}
+
+function ProgressBar() {
+  const barRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const h = document.documentElement;
+      const scrollable = h.scrollHeight - h.clientHeight;
+      const progress = scrollable > 0 ? Math.min(h.scrollTop / scrollable, 1) : 0;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${progress})`;
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+  return <div ref={barRef} className="progressBar" />;
 }
 
 /* ── Block rendering helpers ── */
@@ -1009,83 +1002,41 @@ const nl: Block[] = [
 /* ── Page ── */
 
 const heroEn = {
-  title: "↑ ↓ ⇓ — The hidden pattern behind powers, roots, and logarithms",
+  title: "Why Powers, Roots, and Logarithms Are Really the Same Pattern",
   byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
   audience: "For students, teachers, and anyone who ever felt that mathematical notation is unnecessarily complicated. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.",
   time: "15 min read",
 };
 const heroNl = {
-  title: "↑ ↓ ⇓ — Het verborgen patroon achter machten, wortels en logaritmen",
+  title: "Waarom machten, wortels en logaritmen eigenlijk hetzelfde patroon zijn",
   byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
   audience: "Voor leerlingen, docenten en iedereen die ooit het gevoel had dat wiskundige notatie onnodig ingewikkeld is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
   time: "15 min lezen",
 };
 
-type Theme = "light" | "dark";
-
-function getInitialLanguage(): Language {
-  if (typeof window === "undefined") return "en";
-  const stored = window.localStorage.getItem(LANGUAGE_KEY);
-  if (stored === "en" || stored === "nl") return stored;
-  const browserLang = navigator.language?.toLowerCase() ?? "";
-  return browserLang.startsWith("nl") ? "nl" : "en";
-}
-
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem(THEME_KEY);
-  if (stored === "dark" || stored === "light") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
 export function InteractiveBlogPage() {
-  const [language, setLanguage] = useState<Language>(getInitialLanguage);
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
-  const [progress, setProgress] = useState(0);
-  const [mobileCalc, setMobileCalc] = useState(false);
-  const [fabPulsed, setFabPulsed] = useState(false);
-  const progressRef = useRef(0);
-  useEffect(() => {
-    const onFirstScroll = () => {
-      setFabPulsed(true);
-      window.removeEventListener("scroll", onFirstScroll);
-    };
-    window.addEventListener("scroll", onFirstScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onFirstScroll);
-  }, []);
-  useEffect(() => {
-    document.documentElement.lang = language;
-    window.localStorage.setItem(LANGUAGE_KEY, language);
-  }, [language]);
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
-  const onScroll = useCallback(() => {
-    const h = document.documentElement;
-    const scrollable = h.scrollHeight - h.clientHeight;
-    const next = scrollable > 0 ? Math.min(h.scrollTop / scrollable, 1) : 0;
-    // Avoid tiny scroll deltas causing full-page rerenders.
-    if (Math.abs(next - progressRef.current) < 0.002) return;
-    progressRef.current = next;
-    setProgress(next);
-  }, []);
-  useEffect(() => {
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [onScroll]);
-  const hero = useMemo(() => (language === "en" ? heroEn : heroNl), [language]);
-  const blocks = useMemo(() => (language === "en" ? en : nl), [language]);
-  const toc = useMemo(() =>
-    blocks
-      .filter((b): b is Block & { type: "heading" } => b.type === "heading")
-      .map((b) => ({ label: b.content, id: slugify(b.content) })),
-    [blocks],
-  );
+  const {
+    language,
+    setLanguage,
+    theme,
+    setTheme,
+    mobileCalc,
+    setMobileCalc,
+    fabPulsed,
+    hero,
+    blocks,
+    toc,
+  } = useInteractiveArticleModel({
+    heroEn,
+    heroNl,
+    enBlocks: en,
+    nlBlocks: nl,
+  });
+  const calcModel = useCalculatorModel();
 
   return (
     <article className="storyPage">
-      <div className="progressBar" style={{ transform: `scaleX(${progress})` }} />
+      <ProgressBar />
       <header className="storyHero">
         <div className="heroMeta">
           <span className="readMeta">{hero.time}</span>
@@ -1126,7 +1077,7 @@ export function InteractiveBlogPage() {
         </div>
         <aside className="storySidebar">
           <div className="stickyCalc">
-            <FullCalc lang={language} />
+            <FullCalc lang={language} model={calcModel} />
           </div>
         </aside>
       </div>
@@ -1138,7 +1089,7 @@ export function InteractiveBlogPage() {
         {mobileCalc ? "✕" : "⌘"}
       </button>
       <div className={`calcDrawer${mobileCalc ? " calcDrawerOpen" : ""}`}>
-        <FullCalc lang={language} />
+        <FullCalc lang={language} model={calcModel} />
       </div>
     </article>
   );
