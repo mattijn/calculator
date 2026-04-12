@@ -34,3 +34,4 @@ venv/
 
 # Generated parser (rebuilt on build)
 web/src/lib/generated/
+package-lock.json

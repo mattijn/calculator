@@ -1003,13 +1003,13 @@ const nl: Block[] = [
 
 const heroEn = {
   title: "Why Powers, Roots, and Logarithms Are Really the Same Pattern",
-  byline: "An interactive guide to the one pattern behind powers, roots, and logarithms — no textbook required",
+  byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
   audience: "For students, teachers, and the simply curious. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.",
   time: "15 min read",
 };
 const heroNl = {
   title: "Waarom machten, wortels en logaritmen eigenlijk hetzelfde patroon zijn",
-  byline: "Een interactieve gids over het ene patroon achter machten, wortels en logaritmen — geen schoolboek nodig",
+  byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
   audience: "Voor leerlingen, docenten en iedereen die gewoon nieuwsgierig is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
   time: "15 min lezen",
 };
