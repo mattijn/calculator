@@ -578,11 +578,11 @@ const en: Block[] = [
   { type: "text", content: "And for ↑ and ⇓:" },
   { type: "formula", lines: ["(5 ↑ 3) ⇓ 5 = 3"], label: "Raise 5 to a power, then log base 5 — you get the exponent back." },
   { type: "try", expr: "(5↑3)⇓5" },
-  { type: "text", content: "In school notation, that first cancellation would be written as ³√(5³) = 5. But look at it: can you see that ³√ and ³ cancel? Not really — they look completely different. With ↓ and ↑, the cancellation is visible: they're the same symbol pointing in opposite directions. That's the whole point of the notation: it doesn't just label the operations — it shows you how they relate." },
+  { type: "text", content: "In school notation, that first cancellation would be written as ³√(5³) = 5, and the second as log₅(5³) = 3. But look at them: can you see that ³√ and ³ cancel? Or that log₅ and 5³ cancel? Not really — they look completely different. With ↓ and ↑, the cancellation is visible: they're the same symbol pointing in opposite directions. And ⇓ and ↑ work the same way. That's the whole point of the notation: it doesn't just label the operations — it shows you how they relate." },
 
   // ── Examples intro ──
   { type: "heading", content: "Three problems, one pattern" },
-  { type: "text", content: "Nice theory — but does it actually help? Let's test it with three problems from three completely different worlds: finance, music, and geology. In school, each of these would require a different technique. With our notation, they all follow the same pattern: set up an equation with ↑, figure out which number is missing, and pick the matching inverse (↓ or ⇓)." },
+  { type: "text", content: "Theory is one thing. Let's see if it holds up in the real world — with three problems from three completely different worlds: finance, music, and geology. In school, each of these would require a different technique. With our notation, they all follow the same pattern: set up an equation with ↑, figure out which number is missing, and pick the matching inverse (↓ or ⇓)." },
   { type: "examplesIntro" },
 
   // ── Interest ──
@@ -694,12 +694,12 @@ const en: Block[] = [
   // ── Origin ──
   { type: "heading", content: "Where this comes from" },
   { type: "text", content: "This notation was developed by Steven Pemberton, a computer scientist at CWI Amsterdam. In his book \"Numbers,\" he starts from the very beginning — counting with sticks — and builds up through addition, multiplication, and powers, showing that each level follows the same pattern. The notation isn't arbitrary: it was designed to make that pattern visible." },
-  { type: "text", content: "Want to read more? The full book \"Numbers\" is [available as a PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
+  { type: "text", content: "If this notation made something click for you — or if you want to share it with a student or teacher — the full book by Steven Pemberton is [available as a PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
 
   // ── Proof (appendix) ──
   { type: "collapsible", title: "Appendix: A proof that becomes simple", blocks: [
-    { type: "text", content: "Note — This section is for maths teachers and maths enthusiasts. Show it to them. Chances are they haven't seen this notation before, and once they read through this proof they'll be cheering across the classroom." },
-    { type: "text", content: "Wikipedia has a page about [nested radicals](https://en.wikipedia.org/wiki/Nested_radical) — expressions where a square root contains another square root. Don't worry if that page looks intimidating: it's full of advanced maths. We're only going to look at one tiny example, and we'll keep it simple." },
+    { type: "text", content: "Note — This section is for maths teachers and maths enthusiasts. Share it with them — this notation often surprises even experienced maths teachers, and the proof tends to spark a good discussion." },
+    { type: "text", content: "Wikipedia has a page about [nested radicals](https://en.wikipedia.org/wiki/Nested_radical) — expressions where a square root contains another square root. That page is full of advanced maths — but we're only looking at one small corner of it, and we'll keep it simple." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia says: \"It is not immediately obvious\" that these two are equal." },
     { type: "text", content: "In school notation, proving this requires you to know special rules about roots. But with our notation, it's just a puzzle. Let's solve it — you only need one thing you probably already know:" },
     { type: "formula", lines: ["(a + b) ↑ 2 = a↑2 + 2×a×b + b↑2"], label: "The \"square of a sum\" rule, which works in any notation." },
@@ -822,17 +822,17 @@ const nl: Block[] = [
   { type: "formula", lines: ["(5 + 3) − 3 = 5"], label: "Tel 3 erbij op, trek 3 eraf — je bent terug bij het begin." },
   { type: "text", content: "En dat × en ÷ elkaar opheffen:" },
   { type: "formula", lines: ["(5 × 3) ÷ 3 = 5"], label: "Vermenigvuldig met 3, deel door 3 — terug bij het begin." },
-  { type: "text", content: "Met de nieuwe notatie werkt precies hetzelfde voor ↑ en ↓:" },
+  { type: "text", content: "Met de nieuwe notatie werkt dat precies hetzelfde voor ↑ en ↓:" },
   { type: "formula", lines: ["(5 ↑ 3) ↓ 3 = 5"], label: "Verhef tot de 3e macht, neem de 3e-machtswortel — terug bij het begin." },
   { type: "try", expr: "(5↑3)↓3" },
   { type: "text", content: "En voor ↑ en ⇓:" },
   { type: "formula", lines: ["(5 ↑ 3) ⇓ 5 = 3"], label: "Verhef 5 tot een macht, neem dan het logaritme grondtal 5 — je krijgt de exponent terug." },
   { type: "try", expr: "(5↑3)⇓5" },
-  { type: "text", content: "In schoolnotatie zou die eerste opheffing geschreven worden als ³√(5³) = 5. Maar kijk ernaar: kun je zien dat ³√ en ³ elkaar opheffen? Niet echt — ze zien er compleet anders uit. Met ↓ en ↑ is de opheffing zichtbaar: het zijn hetzelfde symbool dat de andere kant op wijst. Dat is het hele punt van de notatie: ze labelt niet alleen de bewerkingen — ze laat zien hoe ze zich tot elkaar verhouden." },
+  { type: "text", content: "In schoolnotatie zou die eerste opheffing geschreven worden als ³√(5³) = 5, en de tweede als log₅(5³) = 3. Maar kijk ernaar: kun je zien dat ³√ en ³ elkaar opheffen? Of dat log₅ en 5³ elkaar opheffen? Niet echt — ze zien er compleet anders uit. Met ↓ en ↑ is de opheffing zichtbaar: het zijn hetzelfde symbool dat de andere kant op wijst. En ⇓ en ↑ werken op dezelfde manier. Dat is het hele punt van de notatie: ze labelt niet alleen de bewerkingen — ze laat zien hoe ze zich tot elkaar verhouden." },
 
   // ── Voorbeelden intro ──
   { type: "heading", content: "Drie problemen, een patroon" },
-  { type: "text", content: "Leuke theorie — maar helpt het ook echt? Laten we het testen met drie problemen uit drie totaal verschillende werelden: geld, muziek en geologie. Op school zou elk probleem een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste inverse (↓ of ⇓)." },
+  { type: "text", content: "Theorie is één ding. Laten we kijken of het standhoudt in de echte wereld — met drie problemen uit drie totaal verschillende werelden: geld, muziek en geologie. Op school zou elk probleem een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste inverse (↓ of ⇓)." },
   { type: "examplesIntro" },
 
   // ── Sparen ──
@@ -943,13 +943,13 @@ const nl: Block[] = [
 
   // ── Herkomst ──
   { type: "heading", content: "Waar dit vandaan komt" },
-  { type: "text", content: "Deze notatie is ontwikkeld door Steven Pemberton, een informaticus bij CWI Amsterdam. Zijn boek begint helemaal bij het begin — tellen met streepjes — en bouwt op via optellen, vermenigvuldigen en machten, en laat zien dat elk niveau hetzelfde patroon volgt. De notatie is niet willekeurig: ze is ontworpen om dat patroon zichtbaar te maken." },
-  { type: "text", content: "Meer lezen? Het volledige boek \"Numbers\" is [beschikbaar als PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
+  { type: "text", content: "Deze notatie is ontwikkeld door Steven Pemberton, een informaticus bij CWI Amsterdam. Zijn boek begint helemaal bij het begin — tellen met streepjes — en bouwt op via optellen, vermenigvuldigen en machten, en laat zien dat elk niveau hetzelfde patroon volgt. De notatie is niet willekeurig: die is ontworpen om dat patroon zichtbaar te maken." },
+  { type: "text", content: "Als deze notatie iets voor je heeft opgehelderd — of als je het wilt delen met een leerling of docent — het volledige boek van Steven Pemberton is [beschikbaar als PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
 
   // ── Bewijs (bijlage) ──
   { type: "collapsible", title: "Bijlage: Een bewijs dat simpel wordt", blocks: [
-    { type: "text", content: "NB — Dit stuk is voor wiskundedocenten en wiskundeliefhebbers. Laat het ze zien. De kans is groot dat ze deze notatie nog niet kennen, en als ze dit bewijs doorlezen gaan ze juichend door de klas." },
-    { type: "text", content: "Wikipedia heeft een pagina over [geneste wortels](https://en.wikipedia.org/wiki/Nested_radical) — uitdrukkingen waarin een wortel nóg een wortel bevat. Schrik niet als die pagina er ingewikkeld uitziet: die staat vol met zware wiskunde. Wij pakken er slechts één klein voorbeeldje uit, en houden het simpel." },
+    { type: "text", content: "NB — Dit stuk is voor wiskundedocenten en wiskundeliefhebbers. Deel het met ze — deze notatie verrast zelfs ervaren wiskundedocenten, en het bewijs leidt vaak tot een goed gesprek." },
+    { type: "text", content: "Wikipedia heeft een pagina over [geneste wortels](https://en.wikipedia.org/wiki/Nested_radical) — uitdrukkingen waarin een wortel nóg een wortel bevat. Die pagina staat vol met zware wiskunde — maar wij pakken er slechts één klein voorbeeldje uit en houden het simpel." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia zegt: \"Het is niet meteen duidelijk\" dat deze twee gelijk zijn." },
     { type: "text", content: "In schoolnotatie moet je speciale regels over wortels kennen om dit te bewijzen. Maar met onze notatie is het gewoon een puzzel. We hebben maar één ding nodig dat je waarschijnlijk al kent:" },
     { type: "formula", lines: ["(a + b) ↑ 2 = a↑2 + 2×a×b + b↑2"], label: "De \"kwadraat van een som\" regel, die in elke notatie werkt." },
@@ -1003,14 +1003,14 @@ const nl: Block[] = [
 
 const heroEn = {
   title: "Why Powers, Roots, and Logarithms Are Really the Same Pattern",
-  byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
-  audience: "For students, teachers, and anyone who ever felt that mathematical notation is unnecessarily complicated. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.",
+  byline: "An interactive guide to the one pattern behind powers, roots, and logarithms — no textbook required",
+  audience: "For students, teachers, and the simply curious. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.",
   time: "15 min read",
 };
 const heroNl = {
   title: "Waarom machten, wortels en logaritmen eigenlijk hetzelfde patroon zijn",
-  byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
-  audience: "Voor leerlingen, docenten en iedereen die ooit het gevoel had dat wiskundige notatie onnodig ingewikkeld is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
+  byline: "Een interactieve gids over het ene patroon achter machten, wortels en logaritmen — geen schoolboek nodig",
+  audience: "Voor leerlingen, docenten en iedereen die gewoon nieuwsgierig is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
   time: "15 min lezen",
 };
 
