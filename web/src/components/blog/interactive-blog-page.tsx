@@ -108,9 +108,9 @@ function FullCalc({ lang, model }: { lang: Language; model: CalculatorViewModel 
         ))}
       </div>
       <div className="calcRuleCard">
-        <code>a ↑ b = c</code><span></span>
-        <code>c ↓ b = a</code><span className="calcRuleHint">{lang === "en" ? "left unknown" : "links onbekend"}</span>
-        <code>c ⇓ a = b</code><span className="calcRuleHint">{lang === "en" ? "right unknown" : "rechts onbekend"}</span>
+        <code><span className="calcNum calcNumA">2</span> ↑ <span className="calcNum calcNumB">3</span> = <span className="calcNum calcNumC">8</span></code><span></span>
+        <code><span className="calcNum calcNumA">2</span> = <span className="calcNum calcNumC">8</span> ↓ <span className="calcNum calcNumB">3</span></code><span className="calcRuleHint">{lang === "en" ? "left unknown? use down" : "links onbekend? gebruik omlaag"}</span>
+        <code><span className="calcNum calcNumB">3</span> = <span className="calcNum calcNumC">8</span> ⇓ <span className="calcNum calcNumA">2</span></code><span className="calcRuleHint">{lang === "en" ? "right unknown? use double-down" : "rechts onbekend? gebruik dubbel-omlaag"}</span>
       </div>
     </div>
   );
@@ -374,29 +374,29 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
           <table className="inverseRuleTable">
             <tbody>
               <tr className="inverseRuleHeaderRow">
-                <td></td>
+                <td className="inverseRuleFormula"><code><span className="inverseVar inverseVarA">a</span> <span className="symbolHighlight">↑</span> <span className="inverseVar inverseVarB">b</span> = <span className="inverseVar inverseVarC">c</span></code></td>
                 <td></td>
                 <td className="inverseRuleArrow"></td>
-                <td className="inverseRuleFormula"><code>a <span className="symbolHighlight">↑</span> b = c</code></td>
+                <td></td>
               </tr>
               <tr className="inverseRuleRow">
-                <td className="inverseRuleFormula"><code><strong>?</strong> ↑ b = c</code></td>
+                <td className="inverseRuleFormula"><code><strong className="inverseVar inverseVarA">?</strong> <span className="symbolHighlight">↑</span> <span className="inverseVar inverseVarB">b</span> = <span className="inverseVar inverseVarC">c</span></code></td>
                 <td className="inverseRuleHint">{lang === "en" ? <><em>Left missing?</em><br/>Use ↓ (down)</> : <><em>Links kwijt?</em><br/>Gebruik ↓ (omlaag)</>}</td>
                 <td className="inverseRuleArrow">→</td>
-                <td className="inverseRuleFormula"><code>c <span className="symbolHighlight">↓</span> b = <strong>?</strong></code></td>
+                <td className="inverseRuleFormula"><code><strong className="inverseVar inverseVarA">?</strong> = <span className="inverseVar inverseVarC">c</span> <span className="symbolHighlight">↓</span> <span className="inverseVar inverseVarB">b</span></code></td>
               </tr>
               <tr className="inverseRuleRow">
-                <td className="inverseRuleFormula"><code>a ↑ <strong>?</strong> = c</code></td>
+                <td className="inverseRuleFormula"><code><span className="inverseVar inverseVarA">a</span> <span className="symbolHighlight">↑</span> <strong className="inverseVar inverseVarB">?</strong> = <span className="inverseVar inverseVarC">c</span></code></td>
                 <td className="inverseRuleHint">{lang === "en" ? <><em>Right missing?</em><br/>Use ⇓ (double-down)</> : <><em>Rechts kwijt?</em><br/>Gebruik ⇓ (dubbel-omlaag)</>}</td>
                 <td className="inverseRuleArrow">→</td>
-                <td className="inverseRuleFormula"><code>c <span className="symbolHighlight">⇓</span> a = <strong>?</strong></code></td>
+                <td className="inverseRuleFormula"><code><strong className="inverseVar inverseVarB">?</strong> = <span className="inverseVar inverseVarC">c</span> <span className="symbolHighlight">⇓</span> <span className="inverseVar inverseVarA">a</span></code></td>
               </tr>
             </tbody>
           </table>
           <p className="inverseRuleExample muted">
             {lang === "en"
-              ? "Example: 2 ↑ 3 = 8.  Missing the 2? → 8 ↓ 3 = 2.  Missing the 3? → 8 ⇓ 2 = 3."
-              : "Voorbeeld: 2 ↑ 3 = 8.  Mis je de 2? → 8 ↓ 3 = 2.  Mis je de 3? → 8 ⇓ 2 = 3."}
+              ? <>Example: <span className="inverseVar inverseVarA">2</span> ↑ <span className="inverseVar inverseVarB">3</span> = <span className="inverseVar inverseVarC">8</span>. Missing the <span className="inverseVar inverseVarA">2</span>? → <span className="inverseVar inverseVarC">8</span> ↓ <span className="inverseVar inverseVarB">3</span> = <span className="inverseVar inverseVarA">2</span>. Missing the <span className="inverseVar inverseVarB">3</span>? → <span className="inverseVar inverseVarC">8</span> ⇓ <span className="inverseVar inverseVarA">2</span> = <span className="inverseVar inverseVarB">3</span>.</>
+              : <>Voorbeeld: <span className="inverseVar inverseVarA">2</span> ↑ <span className="inverseVar inverseVarB">3</span> = <span className="inverseVar inverseVarC">8</span>. Mis je de <span className="inverseVar inverseVarA">2</span>? → <span className="inverseVar inverseVarC">8</span> ↓ <span className="inverseVar inverseVarB">3</span> = <span className="inverseVar inverseVarA">2</span>. Mis je de <span className="inverseVar inverseVarB">3</span>? → <span className="inverseVar inverseVarC">8</span> ⇓ <span className="inverseVar inverseVarA">2</span> = <span className="inverseVar inverseVarB">3</span>.</>}
           </p>
         </div>
       );
@@ -510,10 +510,11 @@ const en: Block[] = [
 
   // ── Pattern ──
   { type: "heading", content: "A pattern you already know" },
-  { type: "text", content: "Let's start with something obvious. Addition and subtraction are partners:" },
-  { type: "pair", left: "3 + 5 = 8", right: "8 − 5 = 3", arrow: "Subtraction undoes addition. It's called the inverse." },
-  { type: "text", content: "If you know the answer (8) and one of the inputs (5), subtraction gives you the other input back. That's what \"inverse\" means: it reverses the operation." },
-  { type: "text", content: "Notice how the symbols look: + and −. They're visual siblings. A horizontal line, with or without a vertical stroke. Nobody has to tell you they belong together — you can see it." },
+  { type: "text", content: "Let's start with something simple. Addition and subtraction belong together:" },
+  { type: "pair", left: "3 + 5 = 8", right: "8 − 5 = 3", arrow: "Subtraction helps you go back to the other number." },
+  { type: "text", content: "Look: 3 + 5 = 8. If you know 8 and 5, then 8 − 5 gives you 3." },
+  { type: "text", content: "Candy example: you had 3 candies and you get 5 more, so 3 + 5 = 8. Then you give 5 candies away: 8 − 5 = 3." },
+  { type: "text", content: "This pattern is important in maths. You can also see it in the signs: + and − belong together." },
 
   { type: "text", content: "Now go one level up. Multiplication and division are partners in exactly the same way:" },
   { type: "pair", left: "3 × 4 = 12", right: "12 ÷ 4 = 3", arrow: "Division is the inverse of multiplication." },
@@ -538,13 +539,7 @@ const en: Block[] = [
   { type: "formula", lines: ["2³ = 8", "³√8 = 2", "log₂(8) = 3"], label: "Three ways to write the same relationship: the power, the root, and the log." },
   { type: "text", content: "Do these three look related to you? Do they look like they belong to the same family?" },
   { type: "text", content: "They don't. The first uses a tiny superscript. The second uses a √ sign with a little number in the crook. The third spells out the word \"log\" and puts the base as a subscript. Three completely different visual systems for three operations that are supposed to be inverses of each other." },
-  { type: "text", content: "Compare that with the first two levels:" },
-  { type: "levels", rows: [
-    { op: "+  −", desc: "Addition ↔ Subtraction", note: "Symbols look related ✓" },
-    { op: "×  ÷", desc: "Multiplication ↔ Division", note: "Symbols look related ✓" },
-    { op: "²  √  log", desc: "Power ↔ Root ↔ Log", note: "Symbols look unrelated ✗" },
-  ] },
-  { type: "text", content: "This is the problem. Not that the maths is hard — the maths is the same pattern as before. The notation hides that pattern." },
+  { type: "text", content: "This is the problem: the maths still follows the same pattern, but these three very different symbols make that pattern much harder to see." },
 
   // ── Fix ──
   { type: "heading", content: "What if we fix it?" },
@@ -760,41 +755,36 @@ const nl: Block[] = [
 
   // ── Patroon ──
   { type: "heading", content: "Een patroon dat je al kent" },
-  { type: "text", content: "Laten we beginnen met iets voor de hand liggends. Optellen en aftrekken zijn partners:" },
-  { type: "pair", left: "3 + 5 = 8", right: "8 − 5 = 3", arrow: "Aftrekken maakt optellen ongedaan. Dit heet de inverse." },
-  { type: "text", content: "Als je het antwoord kent (8) en een van de invoeren (5), dan geeft de inverse (aftrekken) je de andere invoer terug. Dat is wat \"inverse\" betekent: het draait de bewerking om." },
-  { type: "text", content: "Let op hoe de symbolen eruitzien: + en −. Het zijn visuele familieleden. Een horizontale streep, met of zonder verticale streep. Niemand hoeft je te vertellen dat ze bij elkaar horen — je ziet het." },
+  { type: "text", content: "We beginnen met iets simpels. Optellen en aftrekken horen bij elkaar:" },
+  { type: "pair", left: "3 + 5 = 8", right: "8 − 5 = 3", arrow: "Met aftrekken ga je terug naar het andere getal." },
+  { type: "text", content: "Kijk: 3 + 5 = 8. Weet je 8 en 5? Dan doe je 8 − 5 en krijg je 3." },
+  { type: "text", content: "Voorbeeld met snoepjes: je had 3 snoepjes en krijgt er 5 bij, dus 3 + 5 = 8. Daarna geef je 5 snoepjes weg: 8 − 5 = 3." },
+  { type: "text", content: "Dit verband is belangrijk in wiskunde. Je ziet het ook aan de tekens: + en − horen bij elkaar." },
 
   { type: "text", content: "Nu een niveau hoger. Vermenigvuldigen en delen zijn op precies dezelfde manier partners:" },
-  { type: "pair", left: "3 × 4 = 12", right: "12 ÷ 4 = 3", arrow: "Delen is de inverse van vermenigvuldigen." },
-  { type: "text", content: "Ook hier: als je het resultaat (12) en een invoer (4) kent, krijg je met de inverse (delen) de andere invoer terug. En de symbolen × en ÷ lijken op familie — allebei gebaseerd op een kruisvorm." },
+  { type: "pair", left: "3 × 4 = 12", right: "12 ÷ 4 = 3", arrow: "Delen is omgekeerd vermenigvuldigen." },
+  { type: "text", content: "Ook hier: als je het resultaat (12) en een invoer (4) kent, dan kun je met delen het andere getal terugvinden. En de symbolen × en ÷ lijken op familie — allebei gebaseerd op een kruisvorm." },
 
   { type: "text", content: "We hebben dus een mooi patroon:" },
   { type: "levels", rows: [
     { op: "+  −", desc: "Optellen ↔ Aftrekken", note: "Symbolen lijken op elkaar ✓" },
     { op: "×  ÷", desc: "Vermenigvuldigen ↔ Delen", note: "Symbolen lijken op elkaar ✓" },
   ] },
-  { type: "text", content: "Elk niveau heeft een bewerking en zijn inverse, en je kunt zien dat ze bij elkaar horen omdat ze op elkaar lijken." },
+  { type: "text", content: "Elk niveau heeft een bewerking en een omgekeerde bewerking, en je kunt zien dat ze bij elkaar horen omdat ze op elkaar lijken." },
 
   // ── Breuk ──
   { type: "heading", content: "Waar schoolnotatie het patroon breekt" },
   { type: "text", content: "Er is een derde niveau. Vermenigvuldigen is herhaald optellen (3 × 4 = 3 + 3 + 3 + 3). Op dezelfde manier bestaat er een bewerking die \"herhaald vermenigvuldigen\" betekent:" },
   { type: "pair", left: "2 × 2 × 2 = 8", right: "geschreven als 2³ = 8", arrow: "Dit is \"machtsverheffen.\" Die kleine 3 betekent \"vermenigvuldig 2 drie keer met zichzelf.\"" },
-  { type: "text", content: "Tot zover prima. Maar nu: wat is de inverse? Als je weet dat het antwoord 8 is en de exponent 3, hoe krijg je dan het grondtal (2) terug? Op school schrijf je dit met een wortelteken:" },
+  { type: "text", content: "Tot zover prima. Maar nu: wat is de omgekeerde bewerking? Als je weet dat het antwoord 8 is en de exponent 3, hoe krijg je dan het grondtal (2) terug? Op school schrijf je dit met een wortelteken:" },
   { type: "formula", lines: ["³√8 = 2"], label: "Lees als: \"de derdemachtswortel van 8 is 2.\"" },
   { type: "text", content: "En als je het antwoord 8 en het grondtal 2 kent, en je wilt de exponent (3) terugvinden? Dat heet een logaritme:" },
   { type: "formula", lines: ["log₂(8) = 3"], label: "Lees als: \"het logaritme met grondtal 2 van 8 is 3.\"" },
   { type: "text", content: "Zet nu alle drie de notaties onder elkaar:" },
   { type: "formula", lines: ["2³ = 8", "³√8 = 2", "log₂(8) = 3"], label: "Drie manieren om dezelfde relatie te schrijven: de macht, de wortel en de logaritme." },
   { type: "text", content: "Lijken die drie op elkaar? Zien ze eruit als familie?" },
-  { type: "text", content: "Nee. De eerste gebruikt een klein verhoogd getal. De tweede een √-teken met een indexcijfer. De derde spelt het woord \"log\" en zet het grondtal als subscript. Drie compleet verschillende systemen voor drie bewerkingen die elkaars inverse zouden moeten zijn." },
-  { type: "text", content: "Vergelijk dat met de eerste twee niveaus:" },
-  { type: "levels", rows: [
-    { op: "+  −", desc: "Optellen ↔ Aftrekken", note: "Symbolen lijken op elkaar ✓" },
-    { op: "×  ÷", desc: "Vermenigvuldigen ↔ Delen", note: "Symbolen lijken op elkaar ✓" },
-    { op: "²  √  log", desc: "Macht ↔ Wortel ↔ Log", note: "Symbolen lijken niet op elkaar ✗" },
-  ] },
-  { type: "text", content: "Dat is het probleem. Niet dat de wiskunde moeilijk is — de wiskunde volgt hetzelfde patroon als daarvoor. De notatie verbergt dat patroon." },
+  { type: "text", content: "Nee. De eerste gebruikt een klein verhoogd getal. De tweede een √-teken met een indexcijfer. De derde spelt het woord \"log\" en zet het grondtal als subscript. Drie compleet verschillende systemen voor drie bewerkingen die elkaars omgekeerde bewerking zouden moeten zijn." },
+  { type: "text", content: "Dat is het probleem: de wiskunde volgt nog steeds hetzelfde patroon, maar door deze drie heel verschillende tekens zie je dat patroon veel minder goed." },
 
   // ── Oplossing ──
   { type: "heading", content: "Wat als we het repareren?" },
@@ -809,15 +799,15 @@ const nl: Block[] = [
     { op: "×  ÷", desc: "Vermenigvuldigen ↔ Delen", note: "Symbolen lijken op elkaar ✓" },
     { op: "↑  ↓  ⇓", desc: "Macht ↔ Wortel ↔ Log", note: "Symbolen lijken op elkaar ✓" },
   ] },
-  { type: "text", content: "Drie niveaus. Overal dezelfde structuur: de inverse draait de bewerking terug, en de symbolen vertellen je dat ze bij elkaar horen. Dat is het hele idee." },
+  { type: "text", content: "Drie niveaus. Overal dezelfde structuur: de omgekeerde bewerking draait de bewerking terug, en de symbolen vertellen je dat ze bij elkaar horen. Dat is het hele idee." },
 
-  { type: "heading3", content: "Maar wacht — waarom twee inverses?" },
-  { type: "text", content: "Bij de eerste twee niveaus heb je maar een inverse nodig: − voor +, ÷ voor ×. Dat komt omdat de volgorde daar niet uitmaakt: 3 + 5 = 5 + 3 en 3 × 4 = 4 × 3." },
-  { type: "text", content: "Maar bij machten maakt de volgorde wél uit: 2 ↑ 3 = 8, terwijl 3 ↑ 2 = 9. Er zijn dus twee getallen die kunnen ontbreken — het getal links van ↑ en het getal rechts van ↑ — en je hebt voor elk een andere inverse nodig:" },
+  { type: "heading3", content: "Maar wacht — waarom twee manieren van terugrekenen?" },
+  { type: "text", content: "Bij de eerste twee niveaus heb je maar een omgekeerde bewerking nodig: − voor +, ÷ voor ×. Dat komt omdat de volgorde daar niet uitmaakt: 3 + 5 = 5 + 3 en 3 × 4 = 4 × 3." },
+  { type: "text", content: "Maar bij machten maakt de volgorde wél uit: 2 ↑ 3 = 8, terwijl 3 ↑ 2 = 9. Er zijn dus twee getallen die kunnen ontbreken — het getal links van ↑ en het getal rechts van ↑ — en je hebt voor elk een andere manier van terugrekenen nodig:" },
   { type: "inverseRule" },
   { type: "text", content: "Dat is de enige regel die je nodig hebt. Mis je het linker getal? Gebruik ↓. Mis je het rechter getal? Gebruik ⇓." },
 
-  { type: "heading3", content: "De kracht van inverses: ze heffen elkaar op" },
+  { type: "heading3", content: "De kracht van omgekeerd rekenen: het heft elkaar op" },
   { type: "text", content: "Hier volgt iets prachtigs. Je weet al dat + en − elkaar opheffen:" },
   { type: "formula", lines: ["(5 + 3) − 3 = 5"], label: "Tel 3 erbij op, trek 3 eraf — je bent terug bij het begin." },
   { type: "text", content: "En dat × en ÷ elkaar opheffen:" },
@@ -832,7 +822,7 @@ const nl: Block[] = [
 
   // ── Voorbeelden intro ──
   { type: "heading", content: "Drie problemen, een patroon" },
-  { type: "text", content: "Theorie is één ding. Laten we kijken of het standhoudt in de echte wereld — met drie problemen uit drie totaal verschillende werelden: geld, muziek en geologie. Op school zou elk probleem een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste inverse (↓ of ⇓)." },
+  { type: "text", content: "Theorie is één ding. Laten we kijken of het standhoudt in de echte wereld — met drie problemen uit drie totaal verschillende werelden: geld, muziek en geologie. Op school zou elk probleem een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste manier van terugrekenen (↓ of ⇓)." },
   { type: "examplesIntro" },
 
   // ── Sparen ──
@@ -855,7 +845,7 @@ const nl: Block[] = [
   { type: "heading3", content: "Vraag 1: Hoeveel geld moet ik nu op de bank zetten om over 10 jaar €1000 te hebben, als de rente 3% blijft?" },
   { type: "text", content: "Onze formule zegt: na n jaar is je geld m × r ↑ n. We kennen de rente (r = 1.03), de tijd (n = 10), en we weten dat we op 1000 willen uitkomen. Dus:" },
   { type: "formula", lines: ["m × 1.03 ↑ 10 = 1000"], label: "We zoeken m, maar die zit vast in een vermenigvuldiging." },
-  { type: "text", content: "De m is vermenigvuldigd met 1.03 ↑ 10. Om m alleen te krijgen, passen we de inverse van vermenigvuldigen toe — en dat is delen:" },
+  { type: "text", content: "De m is vermenigvuldigd met 1.03 ↑ 10. Om m alleen te krijgen, passen we de omgekeerde bewerking van vermenigvuldigen toe — en dat is delen:" },
   { type: "formula", lines: ["m = 1000 ÷ 1.03 ↑ 10"], label: "" },
   { type: "try", expr: "1000÷1.03↑10" },
   { type: "text", content: "Ongeveer €744. Als je vandaag €744 op de bank zet tegen 3% rente, is dat over 10 jaar gegroeid tot €1000." },
@@ -874,9 +864,9 @@ const nl: Block[] = [
   { type: "text", content: "Vergelijk met de regelkaart: a ↑ b = c, en y staat op de plek van b — de rechterkant. Rechts onbekend → gebruik ⇓:" },
   { type: "formula", lines: ["y = 2 ⇓ 1.03"], label: "" },
   { type: "try", expr: "2⇓1.03" },
-  { type: "text", content: "Ongeveer 23.4 jaar. Op school schrijf je log(2) / log(1.03) — klopt, maar het laat niet zien waarom. Het ⇓-symbool vertelt je: het is de inverse die de rechterkant van ↑ teruggeeft." },
+  { type: "text", content: "Ongeveer 23.4 jaar. Op school schrijf je log(2) / log(1.03) — klopt, maar het laat niet zien waarom. Het ⇓-symbool vertelt je: het is de omgekeerde bewerking die de rechterkant van ↑ teruggeeft." },
 
-  { type: "text", content: "Drie vragen. In het oude systeem voelt elk antwoord als een ander trucje. In de nieuwe notatie is elk antwoord dezelfde stap: kijk op de regelkaart, kies de juiste inverse (↓ of ⇓), pas toe. Klaar." },
+  { type: "text", content: "Drie vragen. In het oude systeem voelt elk antwoord als een ander trucje. In de nieuwe notatie is elk antwoord dezelfde stap: kijk op de regelkaart, kies de juiste manier van terugrekenen (↓ of ⇓), pas toe. Klaar." },
 
   { type: "text", content: "Probeer het zelf — klik op m, r of n om te kiezen wat je wilt vinden, en verschuif de rest om het antwoord live te zien veranderen:" },
   { type: "savingsExplorer" },
@@ -928,7 +918,7 @@ const nl: Block[] = [
   // ── Jouw beurt ──
   { type: "heading", content: "Jouw beurt" },
   { type: "text", content: "De calculator op deze pagina ondersteunt ↑, ↓ en ⇓. Hier zijn een paar dingen om te ontdekken:" },
-  { type: "challenge", title: "De driehoek van inverses", description: "Deze drie uitdrukkingen beschrijven allemaal dezelfde relatie: 2¹⁰ = 1024. Controleer ze allemaal.", items: [
+  { type: "challenge", title: "De driehoek van omgekeerd rekenen", description: "Deze drie uitdrukkingen beschrijven allemaal dezelfde relatie: 2¹⁰ = 1024. Controleer ze allemaal.", items: [
     { expr: "2↑10", hint: "= 1024 (de macht)" },
     { expr: "1024↓10", hint: "= 2 (de wortel — geeft het grondtal terug)" },
     { expr: "1024⇓2", hint: "= 10 (de logaritme — geeft de exponent terug)" },
@@ -973,7 +963,7 @@ const nl: Block[] = [
 
     { type: "heading3", content: "Het plan" },
     { type: "text", content: "Kijk naar de linkerkant: daar staat (iets) ↓ 2. Dat betekent: \"de wortel van wat erbinnen staat.\" Het \"iets\" erbinnen is 3 + 2 × (2 ↓ 2)." },
-    { type: "text", content: "Als we nu de rechterkant kwadrateren (↑ 2), en we komen precies uit op 3 + 2 × (2 ↓ 2), dan weten we dat de linkerkant gelijk is aan de rechterkant. Waarom? Omdat ↑ 2 en ↓ 2 inverses zijn — ze heffen elkaar op." },
+    { type: "text", content: "Als we nu de rechterkant kwadrateren (↑ 2), en we komen precies uit op 3 + 2 × (2 ↓ 2), dan weten we dat de linkerkant gelijk is aan de rechterkant. Waarom? Omdat ↑ 2 en ↓ 2 omgekeerde bewerkingen zijn — ze heffen elkaar op." },
 
     { type: "heading3", content: "Stap voor stap" },
     { type: "text", content: "Laten we de rechterkant kwadrateren:" },
@@ -982,8 +972,8 @@ const nl: Block[] = [
     { type: "text", content: "Uitwerken met de regel geeft drie stukken:" },
     { type: "formula", lines: ["1 ↑ 2 + 2 × (2 ↓ 2) + (2 ↓ 2) ↑ 2"], label: "a ↑ 2 + 2 × a × b + b ↑ 2, met a = 1 en b = 2 ↓ 2." },
     { type: "try", expr: "1↑2+2×(2↓2)+(2↓2)↑2" },
-    { type: "text", content: "Nu komt de magie. Kijk naar het laatste stuk: (2 ↓ 2) ↑ 2. Dat is ↓ gevolgd door ↑, met hetzelfde getal (2). Het zijn inverses — ze heffen elkaar op! Dus (2 ↓ 2) ↑ 2 = 2. En 1 ↑ 2 is gewoon 1. Dan krijgen we:" },
-    { type: "formula", lines: ["1 + 2 × (2 ↓ 2) + 2"], label: "De inverses hebben elkaar opgeheven: (2 ↓ 2) ↑ 2 werd gewoon 2." },
+    { type: "text", content: "Nu komt de magie. Kijk naar het laatste stuk: (2 ↓ 2) ↑ 2. Dat is ↓ gevolgd door ↑, met hetzelfde getal (2). Het zijn omgekeerde bewerkingen — ze heffen elkaar op! Dus (2 ↓ 2) ↑ 2 = 2. En 1 ↑ 2 is gewoon 1. Dan krijgen we:" },
+    { type: "formula", lines: ["1 + 2 × (2 ↓ 2) + 2"], label: "De omgekeerde bewerkingen hebben elkaar opgeheven: (2 ↓ 2) ↑ 2 werd gewoon 2." },
     { type: "try", expr: "1+2×(2↓2)+2" },
     { type: "text", content: "Herschikken: 1 + 2 = 3:" },
     { type: "formula", lines: ["3 + 2 × (2 ↓ 2)"], label: "Dat is precies wat er bínnen de ↓ 2 aan de linkerkant staat!" },

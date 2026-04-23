@@ -979,6 +979,29 @@ button {
   border-radius: 0.35rem;
 }
 
+.inverseVar {
+  display: inline-block;
+  min-width: 1em;
+  text-align: center;
+  border-radius: 0.28rem;
+  padding: 0 0.2rem;
+  line-height: 1;
+  vertical-align: baseline;
+  font-weight: 700;
+}
+
+.inverseVarA {
+  background: color-mix(in srgb, #60a5fa 28%, transparent);
+}
+
+.inverseVarB {
+  background: color-mix(in srgb, #fbbf24 34%, transparent);
+}
+
+.inverseVarC {
+  background: color-mix(in srgb, #34d399 32%, transparent);
+}
+
 .inverseRuleLabel {
   font-size: 1.15rem;
 }
@@ -1269,12 +1292,33 @@ button {
   align-items: baseline;
 }
 
-.calcRule code {
+.calcRuleCard code {
   font-size: 0.78rem;
   font-family: var(--font-geist-mono), monospace;
   background: none;
   padding: 0;
   white-space: pre;
+}
+
+.calcNum {
+  display: inline-block;
+  min-width: 1.1em;
+  text-align: center;
+  border-radius: 0.28rem;
+  padding: 0.02rem 0.25rem;
+  font-weight: 700;
+}
+
+.calcNumA {
+  background: color-mix(in srgb, #60a5fa 28%, transparent);
+}
+
+.calcNumB {
+  background: color-mix(in srgb, #fbbf24 34%, transparent);
+}
+
+.calcNumC {
+  background: color-mix(in srgb, #34d399 32%, transparent);
 }
 
 .calcRuleHint {
