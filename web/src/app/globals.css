@@ -193,6 +193,31 @@ button {
   display: flex;
   gap: 0.25rem;
 }
+
+.langToggleFlash {
+  position: relative;
+  border-radius: 0.55rem;
+  animation: langFlash 1.7s ease-out 1;
+}
+
+@keyframes langFlash {
+  0% {
+    box-shadow:
+      0 0 0 0.22rem color-mix(in srgb, #fde047 50%, transparent),
+      0 0 1.2rem color-mix(in srgb, #facc15 48%, transparent);
+    background: color-mix(in srgb, #fef08a 16%, transparent);
+  }
+  60% {
+    box-shadow:
+      0 0 0 0.3rem color-mix(in srgb, #fde047 30%, transparent),
+      0 0 1.8rem color-mix(in srgb, #facc15 28%, transparent);
+    background: color-mix(in srgb, #fef08a 9%, transparent);
+  }
+  100% {
+    box-shadow: none;
+    background: transparent;
+  }
+}
 .themeToggle {
   background: var(--surface-muted);
   border: 1px solid var(--border);
@@ -450,9 +475,37 @@ button {
 }
 
 .levelsNote {
-  text-align: right;
+  text-align: left;
   font-size: 0.88rem;
   white-space: nowrap;
+}
+
+.levelsCheck {
+  width: 3rem;
+  text-align: center;
+}
+
+.levelsCheckBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.3rem;
+  border-radius: 0.28rem;
+  padding: 0.02rem 0.25rem;
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.levelsCheckPass {
+  background: color-mix(in srgb, #34d399 32%, transparent);
+  color: #166534;
+}
+
+.levelsCheckFail {
+  background: color-mix(in srgb, #ef4444 28%, transparent);
+  color: #991b1b;
 }
 
 /* Formula figure — stacked vertically */
@@ -1372,8 +1425,9 @@ button {
   }
 
   .levelsTable td:nth-child(1) { width: 22%; }
-  .levelsTable td:nth-child(2) { width: 50%; }
-  .levelsTable td:nth-child(3) { width: 28%; }
+  .levelsTable td:nth-child(2) { width: 42%; }
+  .levelsTable td:nth-child(3) { width: 10%; }
+  .levelsTable td:nth-child(4) { width: 26%; }
 
   .levelsOp {
     width: auto;
@@ -1383,6 +1437,10 @@ button {
   .levelsNote {
     text-align: left;
     line-height: 1.3;
+  }
+
+  .levelsCheck {
+    text-align: left;
   }
 
   .symbolFamily {

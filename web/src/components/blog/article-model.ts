@@ -14,7 +14,10 @@ type HeroContent = {
 };
 
 function slugify(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 function getInitialLanguage(): Language {
@@ -24,8 +27,9 @@ function getInitialLanguage(): Language {
 function getPreferredLanguage(): Language {
   if (typeof window === "undefined") return "en";
   const stored = window.localStorage.getItem(LANGUAGE_KEY);
-  if (stored === "en" || stored === "nl") return stored;
+  if (stored === "en" || stored === "nl" || stored === "zh") return stored;
   const browserLang = navigator.language?.toLowerCase() ?? "";
+  if (browserLang.startsWith("zh")) return "zh";
   return browserLang.startsWith("nl") ? "nl" : "en";
 }
 
@@ -43,13 +47,17 @@ function getPreferredTheme(): Theme {
 export function useInteractiveArticleModel({
   heroEn,
   heroNl,
+  heroZh,
   enBlocks,
   nlBlocks,
+  zhBlocks,
 }: {
   heroEn: HeroContent;
   heroNl: HeroContent;
+  heroZh: HeroContent;
   enBlocks: Block[];
   nlBlocks: Block[];
+  zhBlocks: Block[];
 }) {
   const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -86,8 +94,16 @@ export function useInteractiveArticleModel({
     window.localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
-  const hero = useMemo(() => (language === "en" ? heroEn : heroNl), [heroEn, heroNl, language]);
-  const blocks = useMemo(() => (language === "en" ? enBlocks : nlBlocks), [enBlocks, nlBlocks, language]);
+  const hero = useMemo(() => {
+    if (language === "nl") return heroNl;
+    if (language === "zh") return heroZh;
+    return heroEn;
+  }, [heroEn, heroNl, heroZh, language]);
+  const blocks = useMemo(() => {
+    if (language === "nl") return nlBlocks;
+    if (language === "zh") return zhBlocks;
+    return enBlocks;
+  }, [enBlocks, nlBlocks, zhBlocks, language]);
   const toc = useMemo(
     () =>
       blocks
