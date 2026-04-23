@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Block, Language } from "./types";
 
-const LANGUAGE_KEY = "interactive-language-v1";
 const THEME_KEY = "interactive-theme-v1";
 
 type Theme = "light" | "dark";
@@ -20,19 +19,6 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-function getInitialLanguage(): Language {
-  return "en";
-}
-
-function getPreferredLanguage(): Language {
-  if (typeof window === "undefined") return "en";
-  const stored = window.localStorage.getItem(LANGUAGE_KEY);
-  if (stored === "en" || stored === "nl" || stored === "zh") return stored;
-  const browserLang = navigator.language?.toLowerCase() ?? "";
-  if (browserLang.startsWith("zh")) return "zh";
-  return browserLang.startsWith("nl") ? "nl" : "en";
-}
-
 function getInitialTheme(): Theme {
   return "light";
 }
@@ -45,6 +31,7 @@ function getPreferredTheme(): Theme {
 }
 
 export function useInteractiveArticleModel({
+  initialLanguage,
   heroEn,
   heroNl,
   heroZh,
@@ -52,6 +39,7 @@ export function useInteractiveArticleModel({
   nlBlocks,
   zhBlocks,
 }: {
+  initialLanguage: Language;
   heroEn: HeroContent;
   heroNl: HeroContent;
   heroZh: HeroContent;
@@ -59,16 +47,14 @@ export function useInteractiveArticleModel({
   nlBlocks: Block[];
   zhBlocks: Block[];
 }) {
-  const [language, setLanguage] = useState<Language>(getInitialLanguage);
+  const language = initialLanguage;
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [mobileCalc, setMobileCalc] = useState(false);
   const [fabPulsed, setFabPulsed] = useState(false);
 
   useEffect(() => {
-    const preferredLanguage = getPreferredLanguage();
     const preferredTheme = getPreferredTheme();
     const syncPreferred = () => {
-      setLanguage((current) => (current === preferredLanguage ? current : preferredLanguage));
       setTheme((current) => (current === preferredTheme ? current : preferredTheme));
     };
     const taskId = window.setTimeout(syncPreferred, 0);
@@ -85,9 +71,8 @@ export function useInteractiveArticleModel({
   }, []);
 
   useEffect(() => {
-    document.documentElement.lang = language;
-    window.localStorage.setItem(LANGUAGE_KEY, language);
-  }, [language]);
+    document.documentElement.lang = initialLanguage;
+  }, [initialLanguage]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -114,7 +99,6 @@ export function useInteractiveArticleModel({
 
   return {
     language,
-    setLanguage,
     theme,
     setTheme,
     mobileCalc,

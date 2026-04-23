@@ -24,23 +24,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "↑ ↓ ⇓ — The hidden pattern behind powers, roots, and logarithms",
-  description:
-    "An interactive article about an alternative notation for powers, roots, and logarithms using ↑, ↓ and ⇓.",
-  openGraph: {
-    title: "↑ ↓ ⇓ — The hidden pattern behind powers, roots, and logarithms",
-    description:
-      "Powers, roots, and logarithms are the same relationship. School notation hides it. Three arrows make it visible.",
-    type: "article",
-    locale: "en_GB",
-    alternateLocale: "nl_NL",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "↑ ↓ ⇓ — The hidden pattern behind powers, roots, and logarithms",
-    description:
-      "Powers, roots, and logarithms are the same relationship. School notation hides it. Three arrows make it visible.",
-  },
+  title: "↑ ↓ ⇓",
+  description: "Interactive article about powers, roots, and logarithms.",
 };
 
 export default function RootLayout({

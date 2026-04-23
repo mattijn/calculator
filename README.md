@@ -10,7 +10,7 @@ In school, powers (`2³`), roots (`³√8`), and logarithms (`log₂8`) look lik
 - Three real-world examples worked out in detail: compound interest, piano tuning, and earthquakes
 - An interactive calculator with the new operators
 - A collapsible proof appendix showing how the notation simplifies algebra
-- Full bilingual support (English / Nederlands)
+- Full multilingual support (Nederlands / English / 中文)
 
 ## Run locally
 

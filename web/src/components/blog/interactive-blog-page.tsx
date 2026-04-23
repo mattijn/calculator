@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { InterestChart, RepeatedMultViz, PianoChainViz, PianoFreqViz, EarthquakeViz, SavingsExplorer } from "./visualizations";
 import { useInteractiveArticleModel } from "./article-model";
 import { evaluateTryExpression, useCalculatorModel } from "./calculator-model";
@@ -1145,16 +1146,17 @@ const heroNl = {
   time: "15 min lezen",
 };
 const heroZh = {
-  title: "为什么幂、根和对数其实是同一个模式",
+  title: "为什么幂、根和对数里藏着同一个模式",
   byline: "一篇关于幂、根和对数的互动文章：它们其实在讲同一件事",
   audience: "给学生、老师和好奇的人。你不需要先学过对数——会算 3 + 5 就可以读到最后。",
   time: "15 分钟阅读",
 };
 
-export function InteractiveBlogPage() {
+export function InteractiveBlogPage({ initialLanguage }: { initialLanguage: Language }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const {
     language,
-    setLanguage,
     theme,
     setTheme,
     mobileCalc,
@@ -1164,6 +1166,7 @@ export function InteractiveBlogPage() {
     blocks,
     toc,
   } = useInteractiveArticleModel({
+    initialLanguage,
     heroEn,
     heroNl,
     heroZh,
@@ -1189,7 +1192,13 @@ export function InteractiveBlogPage() {
   }, []);
 
   const selectLanguage = (next: Language) => {
-    setLanguage(next);
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length > 0) {
+      segments[0] = next;
+      router.push(`/${segments.join("/")}`);
+    } else {
+      router.push(`/${next}`);
+    }
     if (typeof window !== "undefined") {
       window.localStorage.setItem(LANGUAGE_CHOICE_KEY, "1");
       window.localStorage.setItem(LANGUAGE_CUE_KEY, "1");
