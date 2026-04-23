@@ -9,18 +9,22 @@ import type { CalculatorViewModel } from "./calculator-model";
 
 export type { Language, Block };
 
+const LANGUAGE_CUE_KEY = "interactive-language-cue-seen-v1";
+const LANGUAGE_CHOICE_KEY = "interactive-language-choice-made-v1";
+
 /* ── Try-it widget ── */
 
 function pronounce(expr: string, lang: Language): string {
   const en = lang === "en";
+  const zh = lang === "zh";
   let out = expr;
-  out = out.split("⇓").join(en ? " double\u2011down " : " dubbel\u2011omlaag ");
-  out = out.split("↑").join(en ? " up " : " omhoog ");
-  out = out.split("↓").join(en ? " down " : " omlaag ");
-  out = out.split("×").join(en ? " times " : " keer ");
-  out = out.split("÷").join(en ? " divided by " : " gedeeld door ");
-  out = out.split("+").join(" plus ");
-  out = out.split("-").join(en ? " minus " : " min ");
+  out = out.split("⇓").join(en ? " double\u2011down " : zh ? " 双下 " : " dubbel\u2011omlaag ");
+  out = out.split("↑").join(en ? " up " : zh ? " 上 " : " omhoog ");
+  out = out.split("↓").join(en ? " down " : zh ? " 下 " : " omlaag ");
+  out = out.split("×").join(en ? " times " : zh ? " 乘以 " : " keer ");
+  out = out.split("÷").join(en ? " divided by " : zh ? " 除以 " : " gedeeld door ");
+  out = out.split("+").join(zh ? " 加 " : " plus ");
+  out = out.split("-").join(en ? " minus " : zh ? " 减 " : " min ");
   return out.replace(/\s+/g, " ").trim();
 }
 
@@ -40,7 +44,7 @@ function Try({ expression, lang }: { expression: string; lang: Language }) {
       <code>{mathFormat(display)}</code>
       <span className="tryPronounce">({pron})</span>
       <button className="tryBtn" onClick={run}>
-        {lang === "en" ? "try it" : "probeer"}
+        {lang === "en" ? "try it" : lang === "zh" ? "试试看" : "probeer"}
       </button>
       {result !== null && <strong className="tryResult">= {result}</strong>}
     </span>
@@ -53,14 +57,14 @@ function FullCalc({ lang, model }: { lang: Language; model: CalculatorViewModel 
   return (
     <div className="fullCalc card">
       <h3>{lang === "en" ? "Calculator" : "Calculator"}</h3>
-      <p className="calcSubtitle muted">{lang === "en" ? "Scrolls along with you as you read" : "Scrolt mee terwijl je leest"}</p>
+      <p className="calcSubtitle muted">{lang === "en" ? "Scrolls along with you as you read" : lang === "zh" ? "阅读时会跟着滚动" : "Scrolt mee terwijl je leest"}</p>
       <div className="calcDisplayWrap">
         <input
           className="calcDisplay"
           value={expr}
           onChange={(e) => setExpr(e.target.value)}
           placeholder={
-            lang === "en" ? "Type or tap buttons..." : "Typ of tik knoppen..."
+            lang === "en" ? "Type or tap buttons..." : lang === "zh" ? "输入或点击按钮..." : "Typ of tik knoppen..."
           }
           onKeyDown={(e) => {
             if (e.key === "Enter") evaluate();
@@ -86,7 +90,7 @@ function FullCalc({ lang, model }: { lang: Language; model: CalculatorViewModel 
           className="calcKey calcKeyAction"
           onClick={backspace}
         >
-          {lang === "en" ? "Delete" : "Wis"}
+          {lang === "en" ? "Delete" : lang === "zh" ? "删除" : "Wis"}
         </button>
         <button
           className="calcKey calcKeyAction"
@@ -109,8 +113,8 @@ function FullCalc({ lang, model }: { lang: Language; model: CalculatorViewModel 
       </div>
       <div className="calcRuleCard">
         <code><span className="calcNum calcNumA">2</span> ↑ <span className="calcNum calcNumB">3</span> = <span className="calcNum calcNumC">8</span></code><span></span>
-        <code><span className="calcNum calcNumA">2</span> = <span className="calcNum calcNumC">8</span> ↓ <span className="calcNum calcNumB">3</span></code><span className="calcRuleHint">{lang === "en" ? "left unknown? use down" : "links onbekend? gebruik omlaag"}</span>
-        <code><span className="calcNum calcNumB">3</span> = <span className="calcNum calcNumC">8</span> ⇓ <span className="calcNum calcNumA">2</span></code><span className="calcRuleHint">{lang === "en" ? "right unknown? use double-down" : "rechts onbekend? gebruik dubbel-omlaag"}</span>
+        <code><span className="calcNum calcNumA">2</span> = <span className="calcNum calcNumC">8</span> ↓ <span className="calcNum calcNumB">3</span></code><span className="calcRuleHint">{lang === "en" ? "left unknown? use down" : lang === "zh" ? "左边未知？用 ↓" : "links onbekend? gebruik omlaag"}</span>
+        <code><span className="calcNum calcNumB">3</span> = <span className="calcNum calcNumC">8</span> ⇓ <span className="calcNum calcNumA">2</span></code><span className="calcRuleHint">{lang === "en" ? "right unknown? use double-down" : lang === "zh" ? "右边未知？用 ⇓" : "rechts onbekend? gebruik dubbel-omlaag"}</span>
       </div>
     </div>
   );
@@ -162,7 +166,10 @@ function linkify(text: string): React.ReactNode[] {
 }
 
 function slugify(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 const ARROW_RE = /([↑↓⇓])/g;
@@ -250,8 +257,8 @@ function NotationTransform({ lang }: { lang: Language }) {
       </div>
       <button className="transformBtn" onClick={() => setShowNew((s) => !s)}>
         {showNew
-          ? (lang === "en" ? "← School notation" : "← Schoolnotatie")
-          : (lang === "en" ? "Transform →" : "Transformeer →")}
+          ? (lang === "en" ? "← School notation" : lang === "zh" ? "← 学校写法" : "← Schoolnotatie")
+          : (lang === "en" ? "Transform →" : lang === "zh" ? "转换 →" : "Transformeer →")}
       </button>
     </div>
   );
@@ -301,15 +308,27 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
       return (
         <table className="levelsTable">
           <tbody>
-            {block.rows.map((r) => (
-              <tr key={r.op}>
+            {block.rows.map((r, i) => {
+              const hasPass = r.note.includes("✓");
+              const hasFail = r.note.includes("✗");
+              const noteText = r.note.replace(/[✓✗]/g, "").trim();
+              const status = hasPass ? "✓" : hasFail ? "✗" : "";
+              return (
+              <tr key={`${r.op}-${i}`}>
                 <td className="levelsOp">
                   <code>{mathFormat(r.op)}</code>
                 </td>
                 <td>{r.desc}</td>
-                <td className="levelsNote">{r.note}</td>
+                <td className="levelsCheck">
+                  {status && (
+                    <span className={`levelsCheckBadge ${hasPass ? "levelsCheckPass" : "levelsCheckFail"}`}>
+                      {status}
+                    </span>
+                  )}
+                </td>
+                <td className="levelsNote">{noteText}</td>
               </tr>
-            ))}
+            )})}
           </tbody>
         </table>
       );
@@ -318,17 +337,17 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
         <div className="symbolFamily">
           <div className="symbolCard">
             <span className="symbolGlyph"><span className="mathArrow">↑</span></span>
-            <span className="symbolName">{lang === "en" ? "power (up)" : "macht (omhoog)"}</span>
+            <span className="symbolName">{lang === "en" ? "power (up)" : lang === "zh" ? "幂（上）" : "macht (omhoog)"}</span>
             <span className="symbolEx muted">{mathFormat("2 ↑ 3 = 8")}</span>
           </div>
           <div className="symbolCard">
             <span className="symbolGlyph"><span className="mathArrow">↓</span></span>
-            <span className="symbolName">{lang === "en" ? "root (down)" : "wortel (omlaag)"}</span>
+            <span className="symbolName">{lang === "en" ? "root (down)" : lang === "zh" ? "根（下）" : "wortel (omlaag)"}</span>
             <span className="symbolEx muted">{mathFormat("8 ↓ 3 = 2")}</span>
           </div>
           <div className="symbolCard">
             <span className="symbolGlyph"><span className="mathArrow">⇓</span></span>
-            <span className="symbolName">{lang === "en" ? "log (double down)" : "log (dubbel omlaag)"}</span>
+            <span className="symbolName">{lang === "en" ? "log (double down)" : lang === "zh" ? "对数（双下）" : "log (dubbel omlaag)"}</span>
             <span className="symbolEx muted">{mathFormat("8 ⇓ 2 = 3")}</span>
           </div>
         </div>
@@ -381,13 +400,13 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
               </tr>
               <tr className="inverseRuleRow">
                 <td className="inverseRuleFormula"><code><strong className="inverseVar inverseVarA">?</strong> <span className="symbolHighlight">↑</span> <span className="inverseVar inverseVarB">b</span> = <span className="inverseVar inverseVarC">c</span></code></td>
-                <td className="inverseRuleHint">{lang === "en" ? <><em>Left missing?</em><br/>Use ↓ (down)</> : <><em>Links kwijt?</em><br/>Gebruik ↓ (omlaag)</>}</td>
+                <td className="inverseRuleHint">{lang === "en" ? <><em>Left missing?</em><br/>Use ↓ (down)</> : lang === "zh" ? <><em>左边缺少？</em><br/>用 ↓（下）</> : <><em>Links kwijt?</em><br/>Gebruik ↓ (omlaag)</>}</td>
                 <td className="inverseRuleArrow">→</td>
                 <td className="inverseRuleFormula"><code><strong className="inverseVar inverseVarA">?</strong> = <span className="inverseVar inverseVarC">c</span> <span className="symbolHighlight">↓</span> <span className="inverseVar inverseVarB">b</span></code></td>
               </tr>
               <tr className="inverseRuleRow">
                 <td className="inverseRuleFormula"><code><span className="inverseVar inverseVarA">a</span> <span className="symbolHighlight">↑</span> <strong className="inverseVar inverseVarB">?</strong> = <span className="inverseVar inverseVarC">c</span></code></td>
-                <td className="inverseRuleHint">{lang === "en" ? <><em>Right missing?</em><br/>Use ⇓ (double-down)</> : <><em>Rechts kwijt?</em><br/>Gebruik ⇓ (dubbel-omlaag)</>}</td>
+                <td className="inverseRuleHint">{lang === "en" ? <><em>Right missing?</em><br/>Use ⇓ (double-down)</> : lang === "zh" ? <><em>右边缺少？</em><br/>用 ⇓（双下）</> : <><em>Rechts kwijt?</em><br/>Gebruik ⇓ (dubbel-omlaag)</>}</td>
                 <td className="inverseRuleArrow">→</td>
                 <td className="inverseRuleFormula"><code><strong className="inverseVar inverseVarB">?</strong> = <span className="inverseVar inverseVarC">c</span> <span className="symbolHighlight">⇓</span> <span className="inverseVar inverseVarA">a</span></code></td>
               </tr>
@@ -402,10 +421,11 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
       );
     case "examplesIntro": {
       const en = lang === "en";
+      const zh = lang === "zh";
       const examples = [
         {
-          href: `#${slugify(en ? "Saving money" : "Sparen")}`,
-          label: en ? "Saving money" : "Sparen",
+          href: `#${slugify(en ? "Saving money" : zh ? "存钱" : "Sparen")}`,
+          label: en ? "Saving money" : zh ? "存钱" : "Sparen",
           ops: "÷  ↓  ⇓",
           icon: (
             <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -416,8 +436,8 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
           ),
         },
         {
-          href: `#${slugify(en ? "What does a piano sound like?" : "Hoe klinkt een piano?")}`,
-          label: en ? "Piano tuning" : "Pianostemming",
+          href: `#${slugify(en ? "What does a piano sound like?" : zh ? "钢琴怎么调音？" : "Hoe klinkt een piano?")}`,
+          label: en ? "Piano tuning" : zh ? "钢琴调音" : "Pianostemming",
           ops: "↓",
           icon: (
             <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round">
@@ -432,8 +452,8 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
           ),
         },
         {
-          href: `#${slugify(en ? "Earthquakes and the Richter scale" : "Aardbevingen en de Richterschaal")}`,
-          label: en ? "Earthquakes" : "Aardbevingen",
+          href: `#${slugify(en ? "Earthquakes and the Richter scale" : zh ? "地震与里氏震级" : "Aardbevingen en de Richterschaal")}`,
+          label: en ? "Earthquakes" : zh ? "地震" : "Aardbevingen",
           ops: "↑  ⇓",
           icon: (
             <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" strokeLinecap="round">
@@ -474,7 +494,7 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
                 details?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
             >
-              {lang === "en" ? "▲ Close appendix" : "▲ Bijlage sluiten"}
+              {lang === "en" ? "▲ Close appendix" : lang === "zh" ? "▲ 关闭附录" : "▲ Bijlage sluiten"}
             </button>
           </div>
         </details>
@@ -582,13 +602,13 @@ const en: Block[] = [
 
   // ── Interest ──
   { type: "heading", content: "Saving money" },
-  { type: "text", content: "Imagine you put €100 in a savings account. The bank pays 3% interest per year. What happens?" },
+  { type: "text", content: "Imagine you put $100 in a savings account. The bank pays 3% interest per year. What happens?" },
 
   { type: "heading3", content: "Building the formula step by step" },
   { type: "text", content: "After one year, the bank adds 3% to your money. That means you keep what you had (100%) and get 3% extra, so you now have 103% of your money:" },
   { type: "formula", lines: ["100 + 3% of 100 = 103"], label: "But there is a shortcut: adding 3% is the same as multiplying by 1.03." },
   { type: "formula", lines: ["100 × 1.03 = 103"], label: "Where does the 1.03 come from? It is 1 + 3/100 = 1 + 0.03 = 1.03." },
-  { type: "text", content: "After the second year, you get 3% interest again — but this time on €103, the amount that already includes last year's interest:" },
+  { type: "text", content: "After the second year, you get 3% interest again — but this time on $103, the amount that already includes last year's interest:" },
   { type: "formula", lines: ["103 × 1.03 = 106.09"], label: "" },
   { type: "text", content: "But 103 was itself 100 × 1.03. So we can write the whole chain:" },
   { type: "formula", lines: ["100 × 1.03 × 1.03 = 100 × 1.03 ↑ 2 = 106.09"], label: "Repeated multiplication is a power. Two years means ↑ 2." },
@@ -597,13 +617,13 @@ const en: Block[] = [
   { type: "text", content: "One formula. Three letters. Let's see what we can do with it." },
   { type: "interestViz" },
 
-  { type: "heading3", content: "Question 1: How much money do I need to put in the bank now, to have €1000 after 10 years at 3% interest?" },
+  { type: "heading3", content: "Question 1: How much money do I need to put in the bank now, to have $1000 after 10 years at 3% interest?" },
   { type: "text", content: "Our formula says: after n years, your money is m × r ↑ n. We know the interest rate (r = 1.03), the time (n = 10), and we know we want to end up with 1000. So:" },
   { type: "formula", lines: ["m × 1.03 ↑ 10 = 1000"], label: "We want m, but it's trapped in a multiplication." },
   { type: "text", content: "The m is multiplied by 1.03 ↑ 10. To get m alone, we apply the inverse of multiplication — which is division:" },
   { type: "formula", lines: ["m = 1000 ÷ 1.03 ↑ 10"], label: "" },
   { type: "try", expr: "1000÷1.03↑10" },
-  { type: "text", content: "About €744. If you put €744 in the bank today at 3% interest, in 10 years it will have grown to €1000." },
+  { type: "text", content: "About $744. If you put $744 in the bank today at 3% interest, in 10 years it will have grown to $1000." },
 
   { type: "heading3", content: "Question 2: What interest rate do I need to double my money in 10 years?" },
   { type: "text", content: "Doubling means going from m to 2 × m. Our formula says m × r ↑ 10 = 2 × m. The m appears on both sides, so it cancels out. We are left with:" },
@@ -989,6 +1009,127 @@ const nl: Block[] = [
   ] },
 ];
 
+const zh: Block[] = [
+  { type: "text", content: "阿姆斯特丹的一位研究者在看他儿子的数学作业。题目是幂、根和对数。他看完后想：" },
+  { type: "quote", content: "\"为什么这么简单的东西要写得这么难？\"" },
+  { type: "text", content: "这个问题后来写成了一本[书](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。这篇互动文章就基于那本书。我们会用很直观的方式，带你看到同一个数学模式。" },
+
+  { type: "heading", content: "你已经知道的模式" },
+  { type: "text", content: "先看最简单的：加法和减法是一对。" },
+  { type: "pair", left: "3 + 5 = 8", right: "8 − 5 = 3", arrow: "减法可以把加法退回去" },
+  { type: "text", content: "你知道 8 和 5，就能用 8 − 5 找回 3。" },
+  { type: "text", content: "糖果例子：你有 3 颗糖，又拿到 5 颗，所以是 8 颗。再送出 5 颗，就回到 3 颗。" },
+  { type: "text", content: "同样，乘法和除法也是一对：" },
+  { type: "pair", left: "3 × 4 = 12", right: "12 ÷ 4 = 3", arrow: "除法是乘法的逆运算" },
+  { type: "text", content: "你知道 12 和 4，就能用除法找回 3。" },
+  { type: "levels", rows: [
+    { op: "+  −", desc: "加法 ↔ 减法", note: "符号看起来像一组 ✓" },
+    { op: "×  ÷", desc: "乘法 ↔ 除法", note: "符号看起来像一组 ✓" },
+  ] },
+
+  { type: "heading", content: "学校写法把模式藏起来了" },
+  { type: "text", content: "还有第三层：重复乘法，也就是幂。" },
+  { type: "pair", left: "2 × 2 × 2 = 8", right: "写作 2³ = 8", arrow: "小 3 表示“2 连乘 3 次”" },
+  { type: "text", content: "如果你知道 8 和 3，想找回 2，学校写法是：" },
+  { type: "formula", lines: ["³√8 = 2"], label: "读作：8 的立方根是 2" },
+  { type: "text", content: "如果你知道 8 和 2，想找回 3，学校写法是：" },
+  { type: "formula", lines: ["log₂(8) = 3"], label: "读作：以 2 为底，8 的对数是 3" },
+  { type: "formula", lines: ["2³ = 8", "³√8 = 2", "log₂(8) = 3"], label: "同一个关系，却是三套很不一样的写法" },
+  { type: "text", content: "问题不在数学本身，而在写法：模式还在，但你更难一眼看出来。" },
+
+  { type: "heading", content: "如果我们把写法修一下？" },
+  { type: "text", content: "思路很简单：用一组“像一家人”的符号。" },
+  { type: "symbols" },
+  { type: "text", content: "同一个关系可以写成：2 ↑ 3 = 8、8 ↓ 3 = 2、8 ⇓ 2 = 3。" },
+  { type: "notationTransform" },
+  { type: "text", content: "现在三个层次都能看到同一个模式：" },
+  { type: "levels", rows: [
+    { op: "+  −", desc: "加法 ↔ 减法", note: "符号看起来像一组 ✓" },
+    { op: "×  ÷", desc: "乘法 ↔ 除法", note: "符号看起来像一组 ✓" },
+    { op: "↑  ↓  ⇓", desc: "幂 ↔ 根 ↔ 对数", note: "符号看起来像一组 ✓" },
+  ] },
+
+  { type: "heading3", content: "为什么会有两种逆运算？" },
+  { type: "text", content: "因为幂的顺序不能交换：2 ↑ 3 = 8，但 3 ↑ 2 = 9。左边和右边都可能未知。" },
+  { type: "inverseRule" },
+  { type: "text", content: "只要记住这一条：左边未知用 ↓，右边未知用 ⇓。" },
+
+  { type: "heading3", content: "逆运算会互相抵消" },
+  { type: "formula", lines: ["(5 + 3) − 3 = 5"], label: "加上去，再减回来" },
+  { type: "formula", lines: ["(5 × 3) ÷ 3 = 5"], label: "乘上去，再除回来" },
+  { type: "formula", lines: ["(5 ↑ 3) ↓ 3 = 5"], label: "幂和根也一样" },
+  { type: "try", expr: "(5↑3)↓3" },
+  { type: "formula", lines: ["(5 ↑ 3) ⇓ 5 = 3"], label: "幂和对数也一样" },
+  { type: "try", expr: "(5↑3)⇓5" },
+
+  { type: "heading", content: "三个问题，一个模式" },
+  { type: "text", content: "现实里也一样。无论是存钱、钢琴还是地震，步骤都相同：写成 a ↑ b = c，找未知数位置，再选 ↓ 或 ⇓。" },
+  { type: "examplesIntro" },
+
+  { type: "heading", content: "存钱" },
+  { type: "text", content: "你存 1000 元，年利率 3%。每年都乘 1.03。" },
+  { type: "formula", lines: ["1000 × 1.03 × 1.03 = 1000 × 1.03 ↑ 2"], label: "重复乘法就是幂" },
+  { type: "formula", lines: ["n 年后: m × r ↑ n"], label: "m 起始金额，r 每年倍率，n 年数" },
+  { type: "interestViz" },
+  { type: "heading3", content: "问题 1：10 年后要到 10000，现在要存多少？" },
+  { type: "formula", lines: ["m × 1.03 ↑ 10 = 10000", "m = 10000 ÷ 1.03 ↑ 10"], label: "用除法把 m 单独留下来" },
+  { type: "try", expr: "10000÷1.03↑10" },
+  { type: "heading3", content: "问题 2：10 年翻倍需要多少利率？" },
+  { type: "formula", lines: ["r ↑ 10 = 2", "r = 2 ↓ 10"], label: "左边未知，用 ↓" },
+  { type: "try", expr: "2↓10" },
+  { type: "heading3", content: "问题 3：3% 利率要多少年翻倍？" },
+  { type: "formula", lines: ["1.03 ↑ y = 2", "y = 2 ⇓ 1.03"], label: "右边未知，用 ⇓" },
+  { type: "try", expr: "2⇓1.03" },
+  { type: "savingsExplorer" },
+
+  { type: "heading", content: "钢琴怎么调音？" },
+  { type: "text", content: "一个八度有 12 个键，频率翻 2 倍。设每一步都乘 r：" },
+  { type: "pianoChainViz" },
+  { type: "formula", lines: ["r ↑ 12 = 2", "r = 2 ↓ 12"], label: "左边未知，用 ↓" },
+  { type: "try", expr: "2↓12" },
+  { type: "pianoFreqViz" },
+
+  { type: "heading", content: "地震与里氏震级" },
+  { type: "text", content: "里氏震级每 +1，能量约乘 10 ↑ 1.5。" },
+  { type: "formula", lines: ["10 ↑ 1.5 = 31.623"], label: "每 +1 级约 31.6 倍能量" },
+  { type: "try", expr: "10↑1.5" },
+  { type: "text", content: "若要能量翻倍，设震级差为 Δ：" },
+  { type: "formula", lines: ["10 ↑ (1.5 × Δ) = 2", "1.5 × Δ = 2 ⇓ 10", "Δ = 2 ⇓ 10 ÷ 1.5"], label: "右边未知先用 ⇓，再除以 1.5" },
+  { type: "try", expr: "2⇓10÷1.5" },
+  { type: "earthquakeViz" },
+
+  { type: "heading", content: "轮到你了" },
+  { type: "challenge", title: "逆运算三角形", description: "下面三个式子描述同一个关系：2¹⁰ = 1024。请都验证一下。", items: [
+    { expr: "2↑10", hint: "= 1024（幂）" },
+    { expr: "1024↓10", hint: "= 2（根，找回底数）" },
+    { expr: "1024⇓2", hint: "= 10（对数，找回指数）" },
+  ] },
+  { type: "challenge", title: "半次幂 = 平方根", description: "下面两个式子结果应该一样：", items: [
+    { expr: "2↑0.5", hint: "指数 1/2 的幂" },
+    { expr: "2↓2", hint: "2 的平方根" },
+  ] },
+  { type: "challenge", title: "放射性衰变", description: "碳-14 每 5730 年减半。解 0.5 ↑ n = 0.01，右边未知所以用 ⇓。", items: [
+    { expr: "0.01⇓0.5", hint: "≈ 6.6 次减半，约 3.8 万年" },
+  ] },
+  { type: "collapsible", title: "附录：一个更容易看懂的证明", blocks: [
+    { type: "text", content: "这部分给想看证明的同学和老师。我们只看一个小例子，用最简单的方法。" },
+    { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "目标：证明左右相等" },
+    { type: "text", content: "把根号改写成 ↓2：" },
+    { type: "formula", lines: ["左边: (3 + 2 × (2 ↓ 2)) ↓ 2", "右边: 1 + 2 ↓ 2"], label: "接下来只要比较两边" },
+    { type: "text", content: "做法：把右边平方（↑2），看能不能变成左边根号里面的内容。" },
+    { type: "formula", lines: ["(1 + 2 ↓ 2) ↑ 2"], label: "用 (a + b) ↑ 2 公式展开" },
+    { type: "formula", lines: ["1 ↑ 2 + 2 × (2 ↓ 2) + (2 ↓ 2) ↑ 2"], label: "关键在最后一项" },
+    { type: "text", content: "因为 ↓2 和 ↑2 是逆运算，所以 (2 ↓ 2) ↑ 2 = 2。" },
+    { type: "formula", lines: ["1 + 2 × (2 ↓ 2) + 2", "3 + 2 × (2 ↓ 2)"], label: "这正好就是左边根号里的内容" },
+    { type: "formula", lines: ["(3 + 2 × (2 ↓ 2)) ↓ 2 = 1 + 2 ↓ 2  ✓"], label: "证明完成" },
+    { type: "text", content: "这就是本文的重点：好的写法让关系更容易看见。" },
+  ] },
+
+  { type: "heading", content: "这种写法来自哪里" },
+  { type: "text", content: "这套写法由 CWI Amsterdam 的 Steven Pemberton 提出。目的很清楚：让同一个数学模式更容易看见。" },
+  { type: "text", content: "完整书籍 PDF：[Numbers](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)" },
+];
+
 /* ── Page ── */
 
 const heroEn = {
@@ -1002,6 +1143,12 @@ const heroNl = {
   byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
   audience: "Voor leerlingen, docenten en iedereen die gewoon nieuwsgierig is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
   time: "15 min lezen",
+};
+const heroZh = {
+  title: "为什么幂、根和对数其实是同一个模式",
+  byline: "一篇关于幂、根和对数的互动文章：它们其实在讲同一件事",
+  audience: "给学生、老师和好奇的人。你不需要先学过对数——会算 3 + 5 就可以读到最后。",
+  time: "15 分钟阅读",
 };
 
 export function InteractiveBlogPage() {
@@ -1019,10 +1166,38 @@ export function InteractiveBlogPage() {
   } = useInteractiveArticleModel({
     heroEn,
     heroNl,
+    heroZh,
     enBlocks: en,
     nlBlocks: nl,
+    zhBlocks: zh,
   });
   const calcModel = useCalculatorModel();
+  const [showLanguageCue, setShowLanguageCue] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const languageChosen = window.localStorage.getItem(LANGUAGE_CHOICE_KEY) === "1";
+    if (languageChosen) return;
+    const showId = window.setTimeout(() => setShowLanguageCue(true), 300);
+    const timeoutId = window.setTimeout(() => {
+      setShowLanguageCue(false);
+    }, 2600);
+    return () => {
+      window.clearTimeout(showId);
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  const selectLanguage = (next: Language) => {
+    setLanguage(next);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(LANGUAGE_CHOICE_KEY, "1");
+      window.localStorage.setItem(LANGUAGE_CUE_KEY, "1");
+    }
+    if (showLanguageCue) {
+      setShowLanguageCue(false);
+    }
+  };
 
   return (
     <article className="storyPage">
@@ -1031,9 +1206,10 @@ export function InteractiveBlogPage() {
         <div className="heroMeta">
           <span className="readMeta">{hero.time}</span>
           <div className="heroControls">
-            <div className="langToggle">
-              <button className={language === "en" ? "primaryBtn" : "secondaryBtn"} onClick={() => setLanguage("en")}>EN</button>
-              <button className={language === "nl" ? "primaryBtn" : "secondaryBtn"} onClick={() => setLanguage("nl")}>NL</button>
+            <div className={`langToggle${showLanguageCue ? " langToggleFlash" : ""}`}>
+              <button className={language === "nl" ? "primaryBtn" : "secondaryBtn"} onClick={() => selectLanguage("nl")}>NL</button>
+              <button className={language === "en" ? "primaryBtn" : "secondaryBtn"} onClick={() => selectLanguage("en")}>EN</button>
+              <button className={language === "zh" ? "primaryBtn" : "secondaryBtn"} onClick={() => selectLanguage("zh")}>中文</button>
             </div>
             <button
               className="themeToggle"

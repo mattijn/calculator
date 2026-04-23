@@ -1,4 +1,4 @@
-export type Language = "en" | "nl";
+export type Language = "en" | "nl" | "zh";
 
 export type Block =
   | { type: "text"; content: string }
