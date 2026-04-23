@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { Language } from "./types";
 
 const R = (v: number) => Math.round(v * 100) / 100;
@@ -383,16 +383,6 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
     (value: number) => new Intl.NumberFormat(locale, { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(value),
     [locale],
   );
-
-  useEffect(() => {
-    if (zh) {
-      setStartAmount(1000);
-      setGoal(10000);
-    } else {
-      setStartAmount(100);
-      setGoal(1000);
-    }
-  }, [zh]);
 
   const triggerPulse = useCallback(() => {
     setFormulaPulse(true);

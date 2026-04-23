@@ -377,7 +377,7 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
     case "interestViz":
       return <InterestChart lang={lang} />;
     case "savingsExplorer":
-      return <SavingsExplorer lang={lang} />;
+      return <SavingsExplorer key={`savings-${lang}`} lang={lang} />;
     case "repeatedMultViz":
       return <RepeatedMultViz lang={lang} />;
     case "pianoChainViz":
