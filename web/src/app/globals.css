@@ -884,6 +884,47 @@ button {
   font-size: 0.88rem;
 }
 
+@media (max-width: 600px) {
+  .vizWrap {
+    padding: 0.85rem 0.55rem;
+  }
+  .vizCaption {
+    font-size: 1rem;
+    line-height: 1.45;
+    padding: 0 0.15rem;
+  }
+  .savingsExplorer {
+    padding: 1rem 0.75rem;
+    gap: 0.65rem;
+  }
+  .savingsLabel {
+    font-size: 0.95rem;
+    min-width: 4.75rem;
+  }
+  .savingsToggle {
+    font-size: 1.05rem;
+    width: 2.55rem;
+    height: 2.1rem;
+  }
+  .savingsValue {
+    font-size: 1rem;
+    min-width: 3.5rem;
+  }
+  .savingsAnswer {
+    font-size: 1.2rem;
+  }
+  .savingsFormula {
+    padding: 0.55rem 0.5rem;
+  }
+  .savingsFormula code {
+    font-size: clamp(0.88rem, 3.8vw, 1.05rem);
+  }
+  .savingsOperatorHint {
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+}
+
 /* Collapsible (details/summary) */
 
 .collapsibleBlock {
@@ -1104,7 +1145,7 @@ button {
   justify-content: center;
 }
 .transformFormula {
-  font-size: 1.3rem;
+  font-size: clamp(1.05rem, 4vw, 1.3rem);
   letter-spacing: 0.03em;
   background: var(--surface-muted);
   padding: 0.25rem 0.7rem;
@@ -1140,7 +1181,7 @@ button {
   border: none;
   border-radius: 0.4rem;
   padding: 0.5rem 1.2rem;
-  font-size: 0.92rem;
+  font-size: clamp(0.9rem, 3.5vw, 0.92rem);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -1198,7 +1239,7 @@ button {
 
 .examplePreviewLabel {
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: clamp(0.88rem, 3.2vw, 0.92rem);
 }
 
 .examplePreviewOps {

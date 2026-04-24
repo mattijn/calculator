@@ -12,11 +12,11 @@ export function InterestChart({ lang }: { lang: Language }) {
   const years = Array.from({ length: 26 }, (_, i) => i);
   const amounts = years.map((y) => principal * 1.03 ** y);
   const w = 520,
-    h = 240,
-    pL = 50,
+    h = 252,
+    pL = 58,
     pR = 15,
     pT = 20,
-    pB = 35;
+    pB = 44;
   const plotW = w - pL - pR;
   const plotH = h - pT - pB;
   const minA = principal * 0.8;
@@ -33,27 +33,27 @@ export function InterestChart({ lang }: { lang: Language }) {
 
   return (
     <div className="vizWrap">
-      <svg viewBox={`0 0 ${w} ${h}`} className="vizSvg" role="img" aria-label={en ? "Growth of 100 euros at 3% interest over 25 years" : zh ? "100 欧元在 3% 利率下 25 年的增长" : "Groei van 100 euro bij 3% rente over 25 jaar"}>
+      <svg viewBox={`0 0 ${w} ${h}`} className="vizSvg" role="img" aria-label={en ? "Growth of 100 dollars at 3% interest over 25 years" : zh ? "1000 元人民币在 3% 年利率下 25 年的增长" : "Groei van 100 euro bij 3% rente over 25 jaar"}>
         <path d={area} fill="var(--accent-light)" />
         <path d={line} fill="none" stroke="var(--accent)" strokeWidth="2.5" />
         <line x1={pL} y1={y(minA)} x2={pL + plotW} y2={y(minA)} stroke="var(--border)" />
         <line x1={pL} y1={pT} x2={pL} y2={y(minA)} stroke="var(--border)" />
         {[0, 5, 10, 15, 20, 25].map((yr) => (
-          <text key={yr} x={x(yr)} y={h - 10} textAnchor="middle" fontSize="12" fill="#78716c">{yr}</text>
+          <text key={yr} x={x(yr)} y={h - 12} textAnchor="middle" fontSize="15" fill="#78716c">{yr}</text>
         ))}
         {[principal, principal * 1.5, principal * 2].map((a) => (
           <g key={a}>
             <line x1={pL} y1={y(a)} x2={pL + plotW} y2={y(a)} stroke="var(--border)" strokeDasharray={a === principal * 2 ? "none" : "3,3"} strokeWidth={a === principal * 2 ? 1.5 : 0.5} />
-            <text x={pL - 6} y={y(a) + 4} textAnchor="end" fontSize="12" fill="#78716c">{currencySymbol}{a}</text>
+            <text x={pL - 8} y={y(a) + 5} textAnchor="end" fontSize="15" fill="#78716c">{currencySymbol}{a}</text>
           </g>
         ))}
         <line x1={pL} y1={y(principal * 2)} x2={pL + plotW} y2={y(principal * 2)} stroke="#e11d48" strokeDasharray="5,4" strokeWidth="1.5" />
         <circle cx={x(doubleYr)} cy={y(principal * 2)} r="5" fill="#e11d48" />
-        <text x={x(doubleYr)} y={y(principal * 2) - 10} textAnchor="middle" fontSize="11" fontWeight="600" fill="#e11d48">
+        <text x={x(doubleYr)} y={y(principal * 2) - 12} textAnchor="middle" fontSize="14" fontWeight="600" fill="#e11d48">
           ≈ {Math.round(doubleYr)} {en ? "years" : zh ? "年" : "jaar"}
         </text>
         <circle cx={x(0)} cy={y(principal)} r="4" fill="var(--accent)" />
-        <text x={pL + plotW / 2} y={h - 0} textAnchor="middle" fontSize="12" fill="#78716c">
+        <text x={pL + plotW / 2} y={h - 4} textAnchor="middle" fontSize="15" fill="#78716c">
           {en ? "years →" : zh ? "年 →" : "jaren →"}
         </text>
       </svg>
@@ -70,8 +70,8 @@ export function InterestChart({ lang }: { lang: Language }) {
 
 export function RepeatedMultViz({ lang }: { lang: Language }) {
   const n = 13;
-  const w = 520, h = 80, padX = 35;
-  const dotY = 25;
+  const w = 520, h = 96, padX = 35;
+  const dotY = 28;
   const sp = (w - 2 * padX) / 12;
   const en = lang === "en";
   const zh = lang === "zh";
@@ -89,18 +89,18 @@ export function RepeatedMultViz({ lang }: { lang: Language }) {
           );
         })}
         {[0, 1, 2].map((i) => (
-          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 10} textAnchor="middle" fontSize="10" fill="var(--accent)" fontWeight="600">×r</text>
+          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 11} textAnchor="middle" fontSize="13" fill="var(--accent)" fontWeight="600">×r</text>
         ))}
-        <text x={padX + 5 * sp + sp / 2} y={dotY - 10} textAnchor="middle" fontSize="13" fill="#a8a29e">···</text>
+        <text x={padX + 5 * sp + sp / 2} y={dotY - 11} textAnchor="middle" fontSize="16" fill="#a8a29e">···</text>
         {[10, 11].map((i) => (
-          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 10} textAnchor="middle" fontSize="10" fill="var(--accent)" fontWeight="600">×r</text>
+          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 11} textAnchor="middle" fontSize="13" fill="var(--accent)" fontWeight="600">×r</text>
         ))}
-        <text x={padX} y={dotY + 20} textAnchor="middle" fontSize="12" fontWeight="700" fill="var(--foreground)">1</text>
-        <text x={w - padX} y={dotY + 20} textAnchor="middle" fontSize="12" fontWeight="700" fill="var(--foreground)">2</text>
-        <line x1={padX + 12} y1={dotY + 35} x2={w - padX - 12} y2={dotY + 35} stroke="var(--accent)" strokeWidth="1.5" />
-        <line x1={padX + 12} y1={dotY + 31} x2={padX + 12} y2={dotY + 35} stroke="var(--accent)" strokeWidth="1.5" />
-        <line x1={w - padX - 12} y1={dotY + 31} x2={w - padX - 12} y2={dotY + 35} stroke="var(--accent)" strokeWidth="1.5" />
-        <text x={w / 2} y={dotY + 50} textAnchor="middle" fontSize="11" fill="var(--accent)" fontWeight="600">
+        <text x={padX} y={dotY + 22} textAnchor="middle" fontSize="15" fontWeight="700" fill="var(--foreground)">1</text>
+        <text x={w - padX} y={dotY + 22} textAnchor="middle" fontSize="15" fontWeight="700" fill="var(--foreground)">2</text>
+        <line x1={padX + 12} y1={dotY + 38} x2={w - padX - 12} y2={dotY + 38} stroke="var(--accent)" strokeWidth="1.5" />
+        <line x1={padX + 12} y1={dotY + 34} x2={padX + 12} y2={dotY + 38} stroke="var(--accent)" strokeWidth="1.5" />
+        <line x1={w - padX - 12} y1={dotY + 34} x2={w - padX - 12} y2={dotY + 38} stroke="var(--accent)" strokeWidth="1.5" />
+        <text x={w / 2} y={dotY + 58} textAnchor="middle" fontSize="14" fill="var(--accent)" fontWeight="600">
           {en ? "12 × multiply by r  =  ×2" : zh ? "12 次 ×r  =  ×2" : "12 × vermenigvuldigen met r  =  ×2"}
         </text>
       </svg>
@@ -112,8 +112,8 @@ export function PianoChainViz({ lang }: { lang: Language }) {
   const en = lang === "en";
   const zh = lang === "zh";
   const n = 13;
-  const w = 520, h = 105, padX = 35;
-  const dotY = 30;
+  const w = 520, h = 118, padX = 35;
+  const dotY = 32;
   const sp = (w - 2 * padX) / 12;
 
   return (
@@ -129,20 +129,20 @@ export function PianoChainViz({ lang }: { lang: Language }) {
           );
         })}
         {[0, 1, 2].map((i) => (
-          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 12} textAnchor="middle" fontSize="10" fill="var(--accent)" fontWeight="600">×r</text>
+          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 13} textAnchor="middle" fontSize="13" fill="var(--accent)" fontWeight="600">×r</text>
         ))}
-        <text x={padX + 5 * sp + sp / 2} y={dotY - 12} textAnchor="middle" fontSize="13" fill="#a8a29e">···</text>
+        <text x={padX + 5 * sp + sp / 2} y={dotY - 13} textAnchor="middle" fontSize="16" fill="#a8a29e">···</text>
         {[10, 11].map((i) => (
-          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 12} textAnchor="middle" fontSize="10" fill="var(--accent)" fontWeight="600">×r</text>
+          <text key={i} x={padX + i * sp + sp / 2} y={dotY - 13} textAnchor="middle" fontSize="13" fill="var(--accent)" fontWeight="600">×r</text>
         ))}
-        <text x={padX} y={dotY + 20} textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--foreground)">C₄</text>
-        <text x={padX} y={dotY + 33} textAnchor="middle" fontSize="10" fill="#78716c">262 Hz</text>
-        <text x={w - padX} y={dotY + 20} textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--foreground)">C₅</text>
-        <text x={w - padX} y={dotY + 33} textAnchor="middle" fontSize="10" fill="#78716c">524 Hz</text>
-        <line x1={padX + 12} y1={dotY + 48} x2={w - padX - 12} y2={dotY + 48} stroke="var(--accent)" strokeWidth="1.5" />
-        <line x1={padX + 12} y1={dotY + 44} x2={padX + 12} y2={dotY + 48} stroke="var(--accent)" strokeWidth="1.5" />
-        <line x1={w - padX - 12} y1={dotY + 44} x2={w - padX - 12} y2={dotY + 48} stroke="var(--accent)" strokeWidth="1.5" />
-        <text x={w / 2} y={dotY + 62} textAnchor="middle" fontSize="11" fill="var(--accent)" fontWeight="600">
+        <text x={padX} y={dotY + 22} textAnchor="middle" fontSize="14" fontWeight="700" fill="var(--foreground)">C₄</text>
+        <text x={padX} y={dotY + 36} textAnchor="middle" fontSize="13" fill="#78716c">262 Hz</text>
+        <text x={w - padX} y={dotY + 22} textAnchor="middle" fontSize="14" fontWeight="700" fill="var(--foreground)">C₅</text>
+        <text x={w - padX} y={dotY + 36} textAnchor="middle" fontSize="13" fill="#78716c">524 Hz</text>
+        <line x1={padX + 12} y1={dotY + 52} x2={w - padX - 12} y2={dotY + 52} stroke="var(--accent)" strokeWidth="1.5" />
+        <line x1={padX + 12} y1={dotY + 48} x2={padX + 12} y2={dotY + 52} stroke="var(--accent)" strokeWidth="1.5" />
+        <line x1={w - padX - 12} y1={dotY + 48} x2={w - padX - 12} y2={dotY + 52} stroke="var(--accent)" strokeWidth="1.5" />
+        <text x={w / 2} y={dotY + 70} textAnchor="middle" fontSize="14" fill="var(--accent)" fontWeight="600">
           {en ? "12 steps of ×r  =  ×2 (one octave)" : zh ? "12 步 ×r  =  ×2（一个八度）" : "12 stappen van ×r  =  ×2 (één octaaf)"}
         </text>
       </svg>
@@ -157,7 +157,7 @@ export function PianoFreqViz({ lang }: { lang: Language }) {
   const baseFreq = 261.63;
   const names = ["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B","C"];
   const freqs = names.map((_, i) => baseFreq * factor ** i);
-  const w = 520, h = 200, pL = 15, pR = 15, pT = 10, pB = 45;
+  const w = 520, h = 228, pL = 15, pR = 15, pT = 10, pB = 62;
   const barW = (w - pL - pR - 12 * 4) / 13;
   const maxH = h - pT - pB;
 
@@ -198,12 +198,12 @@ export function PianoFreqViz({ lang }: { lang: Language }) {
               <rect x={R(xPos)} y={R(pT + maxH - barH)} width={R(barW)} height={R(barH)}
                 fill={isSharp ? "#1e293b" : "var(--accent)"} opacity={R(isSharp ? 0.8 : 0.15 + 0.06 * i)}
                 stroke="var(--accent)" strokeWidth="1" rx="3" />
-              <text x={xPos + barW / 2} y={pT + maxH + 16} textAnchor="middle" fontSize="11" fontWeight="600" fill="var(--foreground)">{names[i]}</text>
-              <text x={xPos + barW / 2} y={pT + maxH + 30} textAnchor="middle" fontSize="9" fill="#78716c">{Math.round(freq)}</text>
+              <text x={xPos + barW / 2} y={pT + maxH + 18} textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--foreground)">{names[i]}</text>
+              <text x={xPos + barW / 2} y={pT + maxH + 34} textAnchor="middle" fontSize="12" fill="#78716c">{Math.round(freq)}</text>
             </g>
           );
         })}
-        <text x={w / 2} y={h - 2} textAnchor="middle" fontSize="11" fill="#78716c">
+        <text x={w / 2} y={h - 4} textAnchor="middle" fontSize="14" fill="#78716c">
           {en
             ? "Click a bar to hear the note — each is ×1.0595 higher in pitch"
             : zh
@@ -226,7 +226,7 @@ export function EarthquakeViz({ lang }: { lang: Language }) {
     { m: "5.8", e: 16 },
     { m: "6.0", e: 32 },
   ];
-  const w = 520, h = 230, pL = 40, pR = 20, pT = 15, pB = 45;
+  const w = 520, h = 244, pL = 40, pR = 20, pT = 24, pB = 50;
   const plotH = h - pT - pB;
   const barW = (w - pL - pR - 5 * 16) / 6;
   const maxE = 32;
@@ -319,14 +319,14 @@ export function EarthquakeViz({ lang }: { lang: Language }) {
                 x={xPos} y={pT + plotH - barH} width={barW} height={barH}
                 fill="var(--accent)" opacity={0.3 + 0.14 * i} rx="3"
               />
-              <text x={xPos + barW / 2} y={pT + plotH - barH - 6} textAnchor="middle" fontSize="11" fontWeight="600" fill="var(--accent)">
+              <text x={xPos + barW / 2} y={pT + plotH - barH - 5} textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--accent)">
                 {e}×
               </text>
-              <text x={xPos + barW / 2} y={pT + plotH + 16} textAnchor="middle" fontSize="12" fontWeight="600" fill="var(--foreground)">
+              <text x={xPos + barW / 2} y={pT + plotH + 18} textAnchor="middle" fontSize="15" fontWeight="600" fill="var(--foreground)">
                 M {m}
               </text>
               {i < mags.length - 1 && (
-                <text x={xPos + barW + 8} y={pT + plotH - barH / 2} textAnchor="middle" fontSize="10" fill="#e11d48" fontWeight="600">
+                <text x={xPos + barW + 8} y={pT + plotH - barH / 2} textAnchor="middle" fontSize="13" fill="#e11d48" fontWeight="600">
                   ×2
                 </text>
               )}
@@ -334,7 +334,7 @@ export function EarthquakeViz({ lang }: { lang: Language }) {
           );
         })}
         <line x1={pL} y1={pT + plotH} x2={w - pR} y2={pT + plotH} stroke="var(--border)" />
-        <text x={w / 2} y={h - 5} textAnchor="middle" fontSize="11" fill="#78716c">
+        <text x={w / 2} y={h - 8} textAnchor="middle" fontSize="14" fill="#78716c">
           {en
             ? "Click a bar to feel the quake — each +0.2 = double the energy"
             : zh
@@ -483,8 +483,9 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
         </span>
       </div>
 
-      <svg viewBox="0 0 480 130" className="vizSvg savingsChart">
+      <svg viewBox="0 0 480 148" className="vizSvg savingsChart">
         {yearData.map((val, i) => {
+          const floorY = 118;
           const barH = R(Math.max(2, (val / maxVal) * 95));
           const barW = R(Math.max(2, Math.min(16, 400 / (maxYear + 1) - 2)));
           const xPos = R(40 + i * (400 / (maxYear + 1)));
@@ -493,27 +494,27 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
           const opacity = R(atGoal ? 0.9 : 0.3 + 0.5 * (val / maxVal));
           return (
             <g key={i}>
-              <rect x={xPos} y={R(105 - barH)} width={barW} height={barH}
+              <rect x={xPos} y={R(floorY - barH)} width={barW} height={barH}
                 fill={atGoal ? "#22c55e" : "var(--accent)"}
                 opacity={opacity} rx="2"
                 style={{ transition: "height 0.3s ease, y 0.3s ease" }} />
               {isLast && (
-                <text x={R(xPos + barW / 2)} y={R(105 - barH - 4)} textAnchor="middle" fontSize="8" fontWeight="700"
+                <text x={R(xPos + barW / 2)} y={R(floorY - barH - 6)} textAnchor="middle" fontSize="12" fontWeight="700"
                   fill={atGoal ? "#22c55e" : "var(--accent)"}>
                   {currencySymbol}{fmtInt(val)}
                 </text>
               )}
               {(i === 0 || i === maxYear || (maxYear <= 25 && i % 5 === 0) || (maxYear > 25 && i % 10 === 0)) && (
-                <text x={R(xPos + barW / 2)} y={120} textAnchor="middle" fontSize="8" fill="var(--muted-text)">{i}</text>
+                <text x={R(xPos + barW / 2)} y={136} textAnchor="middle" fontSize="12" fill="var(--muted-text)">{i}</text>
               )}
             </g>
           );
         })}
-        <line x1={40} y1={R(105 - (goal / maxVal) * 95)} x2={440} y2={R(105 - (goal / maxVal) * 95)}
+        <line x1={40} y1={R(118 - (goal / maxVal) * 95)} x2={440} y2={R(118 - (goal / maxVal) * 95)}
           stroke="#22c55e" strokeDasharray="4,3" strokeWidth="1.2"
           style={{ transition: "y1 0.3s ease, y2 0.3s ease" }} />
-        <text x={36} y={R(105 - (goal / maxVal) * 95 + 3)} textAnchor="end" fontSize="8" fill="#22c55e" fontWeight="600">{currencySymbol}{fmtInt(goal)}</text>
-        <text x={240} y={10} textAnchor="middle" fontSize="9" fill="var(--muted-text)">
+        <text x={36} y={R(118 - (goal / maxVal) * 95 + 4)} textAnchor="end" fontSize="12" fill="#22c55e" fontWeight="600">{currencySymbol}{fmtInt(goal)}</text>
+        <text x={240} y={16} textAnchor="middle" fontSize="12" fill="var(--muted-text)">
           {en ? "Click m, r, or n to change what you're solving for" : zh ? "点击 m、r 或 n，选择你要解哪个量" : "Klik m, r of n om te kiezen wat je zoekt"}
         </text>
       </svg>
