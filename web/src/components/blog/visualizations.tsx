@@ -513,7 +513,6 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
         <line x1={40} y1={R(118 - (goal / maxVal) * 95)} x2={440} y2={R(118 - (goal / maxVal) * 95)}
           stroke="#22c55e" strokeDasharray="4,3" strokeWidth="1.2"
           style={{ transition: "y1 0.3s ease, y2 0.3s ease" }} />
-        <text x={36} y={R(118 - (goal / maxVal) * 95 + 4)} textAnchor="end" fontSize="12" fill="#22c55e" fontWeight="600">{currencySymbol}{fmtInt(goal)}</text>
         <text x={240} y={16} textAnchor="middle" fontSize="12" fill="var(--muted-text)">
           {en ? "Click m, r, or n to change what you're solving for" : zh ? "点击 m、r 或 n，选择你要解哪个量" : "Klik m, r of n om te kiezen wat je zoekt"}
         </text>
