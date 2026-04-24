@@ -888,6 +888,12 @@ button {
   .vizWrap {
     padding: 0.85rem 0.55rem;
   }
+  .vizSvg text {
+    font-size: 16px !important;
+  }
+  .pianoChainHzLabel {
+    transform: translateY(6px);
+  }
   .vizCaption {
     font-size: 1rem;
     line-height: 1.45;
@@ -925,12 +931,12 @@ button {
   }
 }
 
-@media (max-width: 425px) {
+@media (max-width: 480px) {
   .vizWrap {
     padding: 0.75rem 0.35rem;
   }
   .vizSvg text {
-    font-size: 16px !important;
+    font-size: 18px !important;
   }
   .savingsFormula code {
     font-size: 0.95rem;

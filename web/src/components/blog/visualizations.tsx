@@ -136,9 +136,9 @@ export function PianoChainViz({ lang }: { lang: Language }) {
           <text key={i} x={padX + i * sp + sp / 2} y={dotY - 13} textAnchor="middle" fontSize="13" fill="var(--accent)" fontWeight="600">×r</text>
         ))}
         <text x={padX} y={dotY + 22} textAnchor="middle" fontSize="14" fontWeight="700" fill="var(--foreground)">C₄</text>
-        <text x={padX} y={dotY + 36} textAnchor="middle" fontSize="13" fill="#78716c">262 Hz</text>
+        <text className="pianoChainHzLabel" x={padX} y={dotY + 36} textAnchor="middle" fontSize="13" fill="#78716c">262 Hz</text>
         <text x={w - padX} y={dotY + 22} textAnchor="middle" fontSize="14" fontWeight="700" fill="var(--foreground)">C₅</text>
-        <text x={w - padX} y={dotY + 36} textAnchor="middle" fontSize="13" fill="#78716c">524 Hz</text>
+        <text className="pianoChainHzLabel" x={w - padX} y={dotY + 36} textAnchor="middle" fontSize="13" fill="#78716c">524 Hz</text>
         <line x1={padX + 12} y1={dotY + 52} x2={w - padX - 12} y2={dotY + 52} stroke="var(--accent)" strokeWidth="1.5" />
         <line x1={padX + 12} y1={dotY + 48} x2={padX + 12} y2={dotY + 52} stroke="var(--accent)" strokeWidth="1.5" />
         <line x1={w - padX - 12} y1={dotY + 48} x2={w - padX - 12} y2={dotY + 52} stroke="var(--accent)" strokeWidth="1.5" />
@@ -157,7 +157,7 @@ export function PianoFreqViz({ lang }: { lang: Language }) {
   const baseFreq = 261.63;
   const names = ["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B","C"];
   const freqs = names.map((_, i) => baseFreq * factor ** i);
-  const w = 520, h = 228, pL = 15, pR = 15, pT = 10, pB = 62;
+  const w = 520, h = 240, pL = 15, pR = 15, pT = 10, pB = 74;
   const barW = (w - pL - pR - 12 * 4) / 13;
   const maxH = h - pT - pB;
 
@@ -199,7 +199,7 @@ export function PianoFreqViz({ lang }: { lang: Language }) {
                 fill={isSharp ? "#1e293b" : "var(--accent)"} opacity={R(isSharp ? 0.8 : 0.15 + 0.06 * i)}
                 stroke="var(--accent)" strokeWidth="1" rx="3" />
               <text x={xPos + barW / 2} y={pT + maxH + 18} textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--foreground)">{names[i]}</text>
-              <text x={xPos + barW / 2} y={pT + maxH + 34} textAnchor="middle" fontSize="12" fill="#78716c">{Math.round(freq)}</text>
+              <text x={xPos + barW / 2} y={pT + maxH + 46} textAnchor="middle" fontSize="12" fill="#78716c">{Math.round(freq)}</text>
             </g>
           );
         })}
@@ -499,8 +499,14 @@ export function SavingsExplorer({ lang }: { lang: Language }) {
                 opacity={opacity} rx="2"
                 style={{ transition: "height 0.3s ease, y 0.3s ease" }} />
               {isLast && (
-                <text x={R(xPos + barW / 2)} y={R(floorY - barH - 6)} textAnchor="middle" fontSize="12" fontWeight="700"
-                  fill={atGoal ? "#22c55e" : "var(--accent)"}>
+                <text
+                  x={R(xPos + barW / 2 - 6)}
+                  y={R(floorY - barH - 6)}
+                  textAnchor="start"
+                  fontSize="12"
+                  fontWeight="700"
+                  fill={atGoal ? "#22c55e" : "var(--accent)"}
+                >
                   {currencySymbol}{fmtInt(val)}
                 </text>
               )}

@@ -653,6 +653,7 @@ const en: Block[] = [
   { type: "heading", content: "What does a piano sound like?" },
   { type: "text", content: "Play a C on the piano. That note vibrates 262 times per second (262 Hz)." },
   { type: "text", content: "Now play the C one octave higher. That note vibrates exactly twice as fast: 524 Hz." },
+  { type: "pianoFreqViz" },
   { type: "text", content: "Between those two C's there are 12 keys. Here's the clever part: the piano is tuned so that each key is the same percentage higher in pitch than the one before. Not the same amount higher — the same factor." },
   { type: "text", content: "Let's call that unknown factor r. You start at 262 Hz and multiply by r for each key:" },
   { type: "pianoChainViz" },
@@ -663,8 +664,7 @@ const en: Block[] = [
   { type: "text", content: "Look at this formula: it has the shape a ↑ b = c, where r is in the position of a — the left side of ↑. From the rule card: left side unknown → use ↓." },
   { type: "formula", lines: ["r = 2 ↓ 12"], label: "" },
   { type: "try", expr: "2↓12" },
-  { type: "text", content: "About 1.0595. Each piano key is roughly 6% higher in pitch than the previous one. Here's what that looks like in practice:" },
-  { type: "pianoFreqViz" },
+  { type: "text", content: "About 1.0595. So each piano key is roughly 6% higher in pitch than the previous one." },
   { type: "text", content: "In school, this answer would be written as ¹²√2. Same number — but good luck seeing where it came from. With the notation, the equation r ↑ 12 = 2 directly mirrors what the piano does, and ↓ gets you the answer in one step." },
 
   // ── Earthquakes ──
@@ -898,6 +898,7 @@ const nl: Block[] = [
   { type: "heading", content: "Hoe klinkt een piano?" },
   { type: "text", content: "Sla een C aan op de piano. Die noot trilt 262 keer per seconde (262 Hz)." },
   { type: "text", content: "Sla nu de C een octaaf hoger aan. Die trilt precies twee keer zo snel: 524 Hz." },
+  { type: "pianoFreqViz" },
   { type: "text", content: "Tussen die twee C's zitten 12 toetsen. En hier wordt het slim: de piano is zo gestemd dat elke toets hetzelfde percentage hoger klinkt dan de vorige. Niet hetzelfde bedrag hoger — dezelfde factor." },
   { type: "text", content: "Noem die onbekende factor r. Je begint bij 262 Hz en vermenigvuldigt met r voor elke toets:" },
   { type: "pianoChainViz" },
@@ -908,8 +909,7 @@ const nl: Block[] = [
   { type: "text", content: "Kijk naar deze formule: hij heeft de vorm a ↑ b = c, waarbij r op de plek van a staat — de linkerkant van ↑. Uit de regelkaart: links onbekend → gebruik ↓." },
   { type: "formula", lines: ["r = 2 ↓ 12"], label: "" },
   { type: "try", expr: "2↓12" },
-  { type: "text", content: "Ongeveer 1.0595. Elke pianotoets is ruwweg 6% hoger in toonhoogte. Zo ziet dat er in de praktijk uit:" },
-  { type: "pianoFreqViz" },
+  { type: "text", content: "Ongeveer 1.0595. Elke pianotoets is dus ruwweg 6% hoger in toonhoogte." },
   { type: "text", content: "Op school zou het antwoord ¹²√2 zijn. Hetzelfde getal — maar probeer daar maar eens uit af te lezen waar het vandaan komt. Met de notatie spiegelt de vergelijking r ↑ 12 = 2 direct wat de piano doet, en ↓ geeft je het antwoord in één stap." },
 
   // ── Aardbevingen ──
@@ -1125,6 +1125,7 @@ const zh: Block[] = [
   { type: "heading", content: "钢琴怎么调音？" },
   { type: "text", content: "在钢琴上弹一个 C，它的频率大约是每秒振动 262 次（262 Hz）。" },
   { type: "text", content: "再弹高一个八度的 C，频率正好快一倍：524 Hz。" },
+  { type: "pianoFreqViz" },
   { type: "text", content: "这两个 C 之间隔着 12 个键。巧妙之处在于：钢琴被调成“每一键相对前一键，音高都乘同一个比例”。不是“每次都加同样多的赫兹”，而是“每次都乘同一个因子”。" },
   { type: "text", content: "把这个未知因子叫作 r。你从 262 Hz 出发，每经过一个键就乘一次 r：" },
   { type: "pianoChainViz" },
@@ -1135,8 +1136,7 @@ const zh: Block[] = [
   { type: "text", content: "看这个式子：形状是 a ↑ b = c，而 r 在 a 的位置——在 ↑ 左边。规则卡说：左边未知 → 用 ↓。" },
   { type: "formula", lines: ["r = 2 ↓ 12"], label: "" },
   { type: "try", expr: "2↓12" },
-  { type: "text", content: "大约 1.0595，也就是相邻两键音高大约差 6%。直观上看频率怎么爬升：" },
-  { type: "pianoFreqViz" },
+  { type: "text", content: "大约 1.0595。所以每个琴键的音高大约比前一个高 6%。" },
   { type: "text", content: "在学校会写成 ¹²√2。数字一样，却很难看出它从钢琴的“12 步翻倍”里长出来。用新记号，r ↑ 12 = 2 直接照抄钢琴在做什么，而 ↓ 一步就把 r 求出来。" },
 
   { type: "heading", content: "地震与里氏震级" },
