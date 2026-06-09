@@ -471,14 +471,6 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
       return <EarthquakeViz lang={lang} />;
     case "notationTransform":
       return <NotationTransform lang={lang} />;
-    case "skipToCore":
-      return (
-        <p className="skipToCoreWrap">
-          <a href={`#${CORE_SECTION_ID}`} className="skipToCoreBtn">
-            {lang === "en" ? "Jump to the gist →" : lang === "zh" ? "跳到核心部分 →" : "Direct naar de kern →"}
-          </a>
-        </p>
-      );
     case "coreHighlight":
       return (
         <div id={CORE_SECTION_ID} className="notationCoreHighlight">
@@ -583,8 +575,6 @@ const enIntro: Block[] = [
   { type: "text", content: "A researcher in Amsterdam was checking his son's maths homework. The assignment covered powers, roots, and logarithms. He looked at the formulas and thought:" },
   { type: "quote", content: "\"Why do they make something so simple so difficult?\"" },
   { type: "text", content: "That question turned into a [book](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf). This interactive article is based on it. We are going to show you a pattern that is already in your head — you just haven't noticed it yet — and then show how a small change in notation makes that pattern visible." },
-  { type: "skipToCore" },
-
   // ── Pattern ──
   { type: "heading", content: "A pattern you already know" },
   { type: "text", content: "Let's start with something simple. Addition and subtraction belong together:" },
@@ -836,7 +826,6 @@ const nlIntro: Block[] = [
   { type: "text", content: "Een onderzoeker in Amsterdam keek het wiskundehuiswerk van zijn zoon na. De opdracht ging over machten, wortels en logaritmen. Hij bekeek de formules en dacht:" },
   { type: "quote", content: "\"Waarom maken ze iets simpels zo moeilijk?\"" },
   { type: "text", content: "Die vraag werd een [boek](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf), en dit interactieve artikel is daarop gebaseerd. We laten je een patroon zien dat al in je hoofd zit — je hebt het alleen nog niet opgemerkt — en dan laten we zien hoe een kleine verandering in notatie dat patroon zichtbaar maakt." },
-  { type: "skipToCore" },
 
   // ── Patroon ──
   { type: "heading", content: "Een patroon dat je al kent" },
@@ -1084,8 +1073,6 @@ const zhIntro: Block[] = [
   { type: "text", content: "阿姆斯特丹的一位研究者在看他儿子的数学作业。题目是幂、根和对数。他看完后想：" },
   { type: "quote", content: "\"为什么这么简单的东西要写得这么难？\"" },
   { type: "text", content: "这个问题后来写成了一本[书](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。这篇互动文章就基于那本书。我们会先指出你心里其实已经有的一种模式——只是还没留意到——再说明：只要稍微改一下写法，这个模式就会变得一眼可见。" },
-  { type: "skipToCore" },
-
   { type: "heading", content: "你已经知道的模式" },
   { type: "text", content: "先看最简单的：加法和减法是一对。" },
   { type: "pair", left: "3 + 5 = 8", right: "8 − 5 = 3", arrow: "减法可以把加法退回去" },
@@ -1543,14 +1530,44 @@ export function InteractiveBlogPage({
         <p className="heroDek">{hero.byline}</p>
         <p className="heroAudience">{hero.audience}</p>
         <nav className="tocNav" aria-label="Table of contents">
-          {toc.map((item, i) => (
-            <a key={item.id} href={`#${item.id}`} className="tocChip"
-              style={{ animationDelay: `${0.3 + i * 0.06}s` }}>
-              <span className="tocChipNum">{i + 1}</span>
-              {item.label}
-            </a>
-          ))}
+          {page === "main" && (
+            <div className="tocNavJump">
+              <a
+                href={`#${CORE_SECTION_ID}`}
+                className="storyNavChip storyNavChipJump"
+                style={{ animationDelay: "0.28s" }}
+              >
+                {language === "en"
+                  ? "Jump to the gist"
+                  : language === "zh"
+                    ? "跳到核心"
+                    : "Direct naar de kern"}
+              </a>
+            </div>
+          )}
+          <div className="tocNavSections">
+            {toc.map((item, i) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className="storyNavChip"
+                style={{ animationDelay: `${0.34 + i * 0.06}s` }}
+              >
+                <span className="storyNavChipNum">{i + 1}</span>
+                {item.label}
+              </a>
+            ))}
+          </div>
         </nav>
+        {page === "main" && (
+          <p className="tocNavHint">
+            {language === "en"
+              ? "No time? Use the first chip — or read calmly from the beginning."
+              : language === "zh"
+                ? "赶时间？点第一个标签——或从头慢慢读。"
+                : "Geen tijd? Gebruik de eerste chip — of lees rustig door van het begin."}
+          </p>
+        )}
       </header>
       <div className="storyBody">
         <div className="storyArticle">

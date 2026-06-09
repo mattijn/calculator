@@ -41,7 +41,7 @@ export function StickySectionNav({ items }: { items: { label: string; id: string
         <a
           key={item.id}
           href={`#${item.id}`}
-          className={`stickySectionChip${activeId === item.id ? " stickySectionChipActive" : ""}`}
+          className={`storyNavChip${activeId === item.id ? " storyNavChipActive" : ""}`}
         >
           {item.label}
         </a>

@@ -29,7 +29,6 @@ export type Block =
   | { type: "collapsible"; title: string; blocks: Block[] }
   | { type: "challenge"; title: string; description: string; items: { expr: string; hint?: string }[] }
   | { type: "notationTransform" }
-  | { type: "skipToCore" }
   | { type: "coreHighlight"; blocks: Block[] }
   | { type: "savingsExplorer" }
   | { type: "repeatedMultViz" }
