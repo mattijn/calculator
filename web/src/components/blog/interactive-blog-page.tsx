@@ -318,29 +318,7 @@ function RevealBlock({ children }: { children: React.ReactNode }) {
   );
 }
 
-function NotationTldr({ lang }: { lang: Language }) {
-  const en = lang === "en";
-  const zh = lang === "zh";
-  const title = en ? "TL;DR" : zh ? "要点" : "Kort";
-  const intro = en
-    ? "In a hurry? Here's the gist — powers, roots, and logarithms, from the notation you know to arrow notation:"
-    : zh
-      ? "赶时间？核心就在这里——幂、根和对数，从熟悉的写法到箭头记号："
-      : "Geen tijd voor het hele verhaal? Dit is de kern — machten, wortels en logaritmen, van de schrijfwijze die je kent naar pijlnotatie:";
-  const spoken = en
-    ? "Read them out loud: \"2 up 3 is 8\", \"8 down 3 is 2\", \"8 double-down 2 is 3.\" The symbols go up, down, double-down — a family you can see."
-    : zh
-      ? "试着读出来：“2 上 3 等于 8”“8 下 3 等于 2”“8 双下 2 等于 3”。符号往上、往下、双往下——一眼能看出是一家人。"
-      : "Zeg het hardop: \"2 omhoog 3 is 8\", \"8 omlaag 3 is 2\", \"8 dubbel-omlaag 2 is 3.\" De symbolen gaan omhoog, omlaag, dubbel-omlaag — een familie die je kunt zien.";
-  return (
-    <aside className="notationTldr card" aria-label={title}>
-      <p className="notationTldrLabel">{title}</p>
-      <p className="storyP notationTldrIntro">{intro}</p>
-      <NotationTransform lang={lang} />
-      <p className="storyP notationTldrSpoken">{spoken}</p>
-    </aside>
-  );
-}
+const CORE_SECTION_ID = "kern";
 
 function NotationTransform({ lang }: { lang: Language }) {
   const rows = [
@@ -493,8 +471,22 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
       return <EarthquakeViz lang={lang} />;
     case "notationTransform":
       return <NotationTransform lang={lang} />;
-    case "notationTldr":
-      return <NotationTldr lang={lang} />;
+    case "skipToCore":
+      return (
+        <p className="skipToCoreWrap">
+          <a href={`#${CORE_SECTION_ID}`} className="skipToCoreBtn">
+            {lang === "en" ? "Jump to the gist →" : lang === "zh" ? "跳到核心部分 →" : "Direct naar de kern →"}
+          </a>
+        </p>
+      );
+    case "coreHighlight":
+      return (
+        <div id={CORE_SECTION_ID} className="notationCoreHighlight">
+          {block.blocks.map((b, i) => (
+            <RenderBlock key={i} block={b} lang={lang} />
+          ))}
+        </div>
+      );
     case "inverseRule":
       return (
         <div className="inverseRuleCard card">
@@ -591,7 +583,7 @@ const enIntro: Block[] = [
   { type: "text", content: "A researcher in Amsterdam was checking his son's maths homework. The assignment covered powers, roots, and logarithms. He looked at the formulas and thought:" },
   { type: "quote", content: "\"Why do they make something so simple so difficult?\"" },
   { type: "text", content: "That question turned into a [book](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf). This interactive article is based on it. We are going to show you a pattern that is already in your head — you just haven't noticed it yet — and then show how a small change in notation makes that pattern visible." },
-  { type: "notationTldr" },
+  { type: "skipToCore" },
 
   // ── Pattern ──
   { type: "heading", content: "A pattern you already know" },
@@ -627,10 +619,12 @@ const enIntro: Block[] = [
   // ── Fix ──
   { type: "heading", content: "What if we fix it?" },
   { type: "text", content: "The fix is surprisingly simple. Instead of three different visual systems, use three symbols that look like variations of each other:" },
-  { type: "symbols" },
-  { type: "text", content: "This is how you rewrite the three power, root, and log relationships into the arrow proposal:" },
-  { type: "notationTransform" },
-  { type: "text", content: "Read them out loud: \"2 up 3 is 8\", \"8 down 3 is 2\", \"8 double-down 2 is 3.\" The symbols go up, down, double-down — a family you can see." },
+  { type: "coreHighlight", blocks: [
+    { type: "symbols" },
+    { type: "text", content: "This is how you rewrite the three power, root, and log relationships into the arrow proposal:" },
+    { type: "notationTransform" },
+    { type: "text", content: "Read them out loud: \"2 up 3 is 8\", \"8 down 3 is 2\", \"8 double-down 2 is 3.\" The symbols go up, down, double-down — a family you can see." },
+  ] },
   { type: "text", content: "And the table now has a pattern on every level:" },
   { type: "levels", rows: [
     { op: "+  −", desc: "Addition ↔ Subtraction", note: "Symbols look related ✓" },
@@ -842,7 +836,7 @@ const nlIntro: Block[] = [
   { type: "text", content: "Een onderzoeker in Amsterdam keek het wiskundehuiswerk van zijn zoon na. De opdracht ging over machten, wortels en logaritmen. Hij bekeek de formules en dacht:" },
   { type: "quote", content: "\"Waarom maken ze iets simpels zo moeilijk?\"" },
   { type: "text", content: "Die vraag werd een [boek](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf), en dit interactieve artikel is daarop gebaseerd. We laten je een patroon zien dat al in je hoofd zit — je hebt het alleen nog niet opgemerkt — en dan laten we zien hoe een kleine verandering in notatie dat patroon zichtbaar maakt." },
-  { type: "notationTldr" },
+  { type: "skipToCore" },
 
   // ── Patroon ──
   { type: "heading", content: "Een patroon dat je al kent" },
@@ -878,10 +872,12 @@ const nlIntro: Block[] = [
   // ── Oplossing ──
   { type: "heading", content: "Wat als we het repareren?" },
   { type: "text", content: "De oplossing is verrassend simpel. In plaats van drie verschillende systemen, gebruik drie symbolen die op variaties van elkaar lijken:" },
-  { type: "symbols" },
-  { type: "text", content: "Zo herschrijf je de drie relaties van macht, wortel en log naar het voorstel met pijlen:" },
-  { type: "notationTransform" },
-  { type: "text", content: "Zeg het hardop: \"2 omhoog 3 is 8\", \"8 omlaag 3 is 2\", \"8 dubbel-omlaag 2 is 3.\" De symbolen gaan omhoog, omlaag, dubbel-omlaag — een familie die je kunt zien." },
+  { type: "coreHighlight", blocks: [
+    { type: "symbols" },
+    { type: "text", content: "Zo herschrijf je de drie relaties van macht, wortel en log naar het voorstel met pijlen:" },
+    { type: "notationTransform" },
+    { type: "text", content: "Zeg het hardop: \"2 omhoog 3 is 8\", \"8 omlaag 3 is 2\", \"8 dubbel-omlaag 2 is 3.\" De symbolen gaan omhoog, omlaag, dubbel-omlaag — een familie die je kunt zien." },
+  ] },
   { type: "text", content: "En het patroon klopt nu op alle drie de niveaus:" },
   { type: "levels", rows: [
     { op: "+  −", desc: "Optellen ↔ Aftrekken", note: "Symbolen lijken op elkaar ✓" },
@@ -1088,7 +1084,7 @@ const zhIntro: Block[] = [
   { type: "text", content: "阿姆斯特丹的一位研究者在看他儿子的数学作业。题目是幂、根和对数。他看完后想：" },
   { type: "quote", content: "\"为什么这么简单的东西要写得这么难？\"" },
   { type: "text", content: "这个问题后来写成了一本[书](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。这篇互动文章就基于那本书。我们会先指出你心里其实已经有的一种模式——只是还没留意到——再说明：只要稍微改一下写法，这个模式就会变得一眼可见。" },
-  { type: "notationTldr" },
+  { type: "skipToCore" },
 
   { type: "heading", content: "你已经知道的模式" },
   { type: "text", content: "先看最简单的：加法和减法是一对。" },
@@ -1119,10 +1115,12 @@ const zhIntro: Block[] = [
 
   { type: "heading", content: "如果我们把写法修一下？" },
   { type: "text", content: "办法出奇地简单：别用三套完全不同的样子，改用三个“彼此像变体”的符号：" },
-  { type: "symbols" },
-  { type: "text", content: "幂、根和对数的三种关系，这样改写成箭头方案：" },
-  { type: "notationTransform" },
-  { type: "text", content: "试着读出来：“2 上 3 等于 8”“8 下 3 等于 2”“8 双下 2 等于 3”。符号往上、往下、双往下——一眼能看出是一家人。" },
+  { type: "coreHighlight", blocks: [
+    { type: "symbols" },
+    { type: "text", content: "幂、根和对数的三种关系，这样改写成箭头方案：" },
+    { type: "notationTransform" },
+    { type: "text", content: "试着读出来：“2 上 3 等于 8”“8 下 3 等于 2”“8 双下 2 等于 3”。符号往上、往下、双往下——一眼能看出是一家人。" },
+  ] },
   { type: "text", content: "表格里每一层也都对齐同一种结构：" },
   { type: "levels", rows: [
     { op: "+  −", desc: "加法 ↔ 减法", note: "符号看起来像一组 ✓" },

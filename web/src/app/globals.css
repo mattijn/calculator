@@ -342,7 +342,7 @@ button {
   display: grid;
   gap: 0;
   max-width: 680px;
-  overflow-x: clip;
+  min-width: 0;
   word-break: break-word;
 }
 
@@ -1142,36 +1142,64 @@ button {
   font-weight: 700;
 }
 
-/* Notation TL;DR */
+/* Skip to core + in-article highlight */
 
-.notationTldr {
-  margin: 1.25rem 0 1.75rem;
-  padding: 1rem 1.1rem 1.05rem;
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: color-mix(in srgb, var(--accent-light) 55%, var(--surface));
+.skipToCoreWrap {
+  margin: 0.35rem 0 1.35rem;
 }
 
-.notationTldrLabel {
-  margin: 0 0 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.skipToCoreBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
   color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border));
+  background: color-mix(in srgb, var(--accent-light) 80%, var(--surface));
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
 }
 
-.notationTldrIntro {
-  margin-top: 0;
-  font-weight: 500;
+.skipToCoreBtn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-1px);
 }
 
-.notationTldrSpoken {
-  margin-bottom: 0;
+.notationCoreHighlight {
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.85rem 0.75rem 1rem;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  scroll-margin-top: 5.5rem;
+  transition:
+    background 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
 }
 
-.notationTldr .transformCard {
-  margin: 0.65rem 0 0.75rem;
-  background: var(--surface);
+.notationCoreHighlight:target {
+  background: color-mix(in srgb, var(--accent-light) 72%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 62%, transparent);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 24%, transparent);
+  animation: coreHighlightPulse 1.2s ease;
+}
+
+@keyframes coreHighlightPulse {
+  0% {
+    border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+    box-shadow: 0 0 0 color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  40% {
+    border-color: color-mix(in srgb, var(--accent) 78%, transparent);
+    box-shadow: 0 16px 36px color-mix(in srgb, var(--accent) 32%, transparent);
+  }
+  100% {
+    border-color: color-mix(in srgb, var(--accent) 62%, transparent);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 24%, transparent);
+  }
 }
 
 /* Notation transform */
