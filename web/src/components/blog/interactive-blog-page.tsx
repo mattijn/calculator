@@ -642,10 +642,21 @@ const enIntro: Block[] = [
   { type: "try", expr: "(5↑3)⇓5" },
   { type: "text", content: "In school notation, that first cancellation would be written as ³√(5³) = 5, and the second as log₅(5³) = 3. But look at them: can you see that ³√ and ³ cancel? Or that log₅ and 5³ cancel? Not really — they look completely different. With ↓ and ↑, the cancellation is visible: they're the same symbol pointing in opposite directions. And ⇓ and ↑ work the same way. That's the whole point of the notation: it doesn't just label the operations — it shows you how they relate." },
 
-  // ── Examples intro ──
-  { type: "heading", content: "Four examples, one pattern" },
-  { type: "text", content: "Theory is one thing. Let's see if it holds up in the real world — with examples from finance, music, geology, and public health. In school, each would require a different technique. With our notation, they all follow the same pattern: set up an equation with ↑, figure out which number is missing, and pick the matching inverse (↓ or ⇓)." },
-  { type: "examplesIntro" },
+  { type: "heading", content: "Your turn" },
+  { type: "text", content: "The calculator on this page supports ↑, ↓, and ⇓. Here are some things to explore:" },
+  { type: "challenge", title: "The triangle of inverses", description: "These three expressions all describe the same relationship: 2¹⁰ = 1024. Verify each one.", items: [
+    { expr: "2↑10", hint: "= 1024 (the power)" },
+    { expr: "1024↓10", hint: "= 2 (the root — gets the base back)" },
+    { expr: "1024⇓2", hint: "= 10 (the log — gets the exponent back)" },
+  ] },
+  { type: "challenge", title: "Half power = square root", description: "A power of 0.5 is the same as a square root. These two should give the same answer:", items: [
+    { expr: "2↑0.5", hint: "power with exponent ½" },
+    { expr: "2↓2", hint: "square root of 2" },
+  ] },
+  { type: "challenge", title: "↓ or ⇓?", description: "2 ↑ 3 = 8. ↓ and ⇓ both work backwards from 8 — but each gives back something different. Try both:", items: [
+    { expr: "8↓3", hint: "= 2 (the base)" },
+    { expr: "8⇓2", hint: "= 3 (the exponent)" },
+  ] },
 
 ];
 
@@ -743,20 +754,9 @@ const enEarthquakes: Block[] = [
 ];
 
 const enMainClosing: Block[] = [
-  { type: "heading", content: "Your turn" },
-  { type: "text", content: "The calculator on this page supports ↑, ↓, and ⇓. Here are some things to explore:" },
-  { type: "challenge", title: "The triangle of inverses", description: "These three expressions all describe the same relationship: 2¹⁰ = 1024. Verify each one.", items: [
-    { expr: "2↑10", hint: "= 1024 (the power)" },
-    { expr: "1024↓10", hint: "= 2 (the root — gets the base back)" },
-    { expr: "1024⇓2", hint: "= 10 (the log — gets the exponent back)" },
-  ] },
-  { type: "challenge", title: "Half power = square root", description: "A power of 0.5 is the same as a square root. These two should give the same answer:", items: [
-    { expr: "2↑0.5", hint: "power with exponent ½" },
-    { expr: "2↓2", hint: "square root of 2" },
-  ] },
-  { type: "challenge", title: "Radioactive decay", description: "Some materials slowly fall apart. Carbon-14 is one of them: every 5730 years, half of it is gone. You start with 100%. After halving once, you have 0.5 (= 50%) left. After halving twice: 0.5 × 0.5 = 0.5 ↑ 2 = 0.25 (= 25%). After n halvings you have 0.5 ↑ n left. The question: after how many halvings is only 1% (= 0.01) left? You're looking for n in 0.5 ↑ n = 0.01. The number right of ↑ is missing — so use ⇓:", items: [
-    { expr: "0.01⇓0.5", hint: "≈ 6.6 halvings, or about 38,000 years" },
-  ] },
+  { type: "heading", content: "Four examples, one pattern" },
+  { type: "text", content: "Theory is one thing. Let's see if it holds up in the real world — with examples from finance, music, geology, and public health. In school, each would require a different technique. With our notation, they all follow the same pattern: set up an equation with ↑, figure out which number is missing, and pick the matching inverse (↓ or ⇓)." },
+  { type: "examplesIntro" },
 
   { type: "heading", content: "Where this comes from" },
   { type: "text", content: "This notation was developed by Steven Pemberton, a computer scientist at CWI Amsterdam. In his book \"Numbers,\" he starts from the very beginning — counting with sticks — and builds up through addition, multiplication, and powers, showing that each level follows the same pattern. The notation isn't arbitrary: it was designed to make that pattern visible." },
@@ -894,10 +894,21 @@ const nlIntro: Block[] = [
   { type: "try", expr: "(5↑3)⇓5" },
   { type: "text", content: "In schoolnotatie zou die eerste opheffing geschreven worden als ³√(5³) = 5, en de tweede als log₅(5³) = 3. Maar kijk ernaar: kun je zien dat ³√ en ³ elkaar opheffen? Of dat log₅ en 5³ elkaar opheffen? Niet echt — ze zien er compleet anders uit. Met ↓ en ↑ is de opheffing zichtbaar: het zijn hetzelfde symbool dat de andere kant op wijst. En ⇓ en ↑ werken op dezelfde manier. Dat is het hele punt van de notatie: ze labelt niet alleen de bewerkingen — ze laat zien hoe ze zich tot elkaar verhouden." },
 
-  // ── Voorbeelden intro ──
-  { type: "heading", content: "Vier voorbeelden, een patroon" },
-  { type: "text", content: "Theorie is één ding. Laten we kijken of het standhoudt in de echte wereld — met voorbeelden uit geld, muziek, geologie en volksgezondheid. Op school zou elk een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste manier van terugrekenen (↓ of ⇓)." },
-  { type: "examplesIntro" },
+  { type: "heading", content: "Jouw beurt" },
+  { type: "text", content: "De calculator op deze pagina ondersteunt ↑, ↓ en ⇓. Hier zijn een paar dingen om te ontdekken:" },
+  { type: "challenge", title: "De driehoek van omgekeerd rekenen", description: "Deze drie uitdrukkingen beschrijven allemaal dezelfde relatie: 2¹⁰ = 1024. Controleer ze allemaal.", items: [
+    { expr: "2↑10", hint: "= 1024 (de macht)" },
+    { expr: "1024↓10", hint: "= 2 (de wortel — geeft het grondtal terug)" },
+    { expr: "1024⇓2", hint: "= 10 (de logaritme — geeft de exponent terug)" },
+  ] },
+  { type: "challenge", title: "Halve macht = wortel", description: "Een macht van 0.5 is hetzelfde als een wortel. Deze twee moeten hetzelfde antwoord geven:", items: [
+    { expr: "2↑0.5", hint: "macht met exponent ½" },
+    { expr: "2↓2", hint: "wortel van 2" },
+  ] },
+  { type: "challenge", title: "↓ of ⇓?", description: "2 ↑ 3 = 8. ↓ en ⇓ werken allebei terug vanaf 8 — maar elk geeft iets anders terug. Probeer beide:", items: [
+    { expr: "8↓3", hint: "= 2 (het grondtal)" },
+    { expr: "8⇓2", hint: "= 3 (de exponent)" },
+  ] },
 ];
 
 const nlSavings: Block[] = [
@@ -994,20 +1005,9 @@ const nlEarthquakes: Block[] = [
 ];
 
 const nlMainClosing: Block[] = [
-  { type: "heading", content: "Jouw beurt" },
-  { type: "text", content: "De calculator op deze pagina ondersteunt ↑, ↓ en ⇓. Hier zijn een paar dingen om te ontdekken:" },
-  { type: "challenge", title: "De driehoek van omgekeerd rekenen", description: "Deze drie uitdrukkingen beschrijven allemaal dezelfde relatie: 2¹⁰ = 1024. Controleer ze allemaal.", items: [
-    { expr: "2↑10", hint: "= 1024 (de macht)" },
-    { expr: "1024↓10", hint: "= 2 (de wortel — geeft het grondtal terug)" },
-    { expr: "1024⇓2", hint: "= 10 (de logaritme — geeft de exponent terug)" },
-  ] },
-  { type: "challenge", title: "Halve macht = wortel", description: "Een macht van 0.5 is hetzelfde als een wortel. Deze twee moeten hetzelfde antwoord geven:", items: [
-    { expr: "2↑0.5", hint: "macht met exponent ½" },
-    { expr: "2↓2", hint: "wortel van 2" },
-  ] },
-  { type: "challenge", title: "Radioactief verval", description: "Sommige stoffen vallen langzaam uit elkaar. Koolstof-14 is er daar één van: elke 5730 jaar is de helft weg. Je begint met 100%. Na één keer halveren heb je 0.5 (= 50%) over. Na twee keer halveren: 0.5 × 0.5 = 0.5 ↑ 2 = 0.25 (= 25%). Na n keer halveren heb je dus 0.5 ↑ n over. De vraag is: na hoeveel keer halveren is nog maar 1% (= 0.01) over? Je zoekt n in 0.5 ↑ n = 0.01. Het getal rechts van ↑ ontbreekt — dus gebruik ⇓:", items: [
-    { expr: "0.01⇓0.5", hint: "≈ 6.6 halveringen, oftewel zo'n 38.000 jaar" },
-  ] },
+  { type: "heading", content: "Vier voorbeelden, een patroon" },
+  { type: "text", content: "Theorie is één ding. Laten we kijken of het standhoudt in de echte wereld — met voorbeelden uit geld, muziek, geologie en volksgezondheid. Op school zou elk een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste manier van terugrekenen (↓ of ⇓)." },
+  { type: "examplesIntro" },
 
   { type: "heading", content: "Waar dit vandaan komt" },
   { type: "text", content: "Deze notatie is ontwikkeld door Steven Pemberton, een informaticus bij CWI Amsterdam. Zijn boek begint helemaal bij het begin — tellen met streepjes — en bouwt op via optellen, vermenigvuldigen en machten, en laat zien dat elk niveau hetzelfde patroon volgt. De notatie is niet willekeurig: die is ontworpen om dat patroon zichtbaar te maken." },
@@ -1135,9 +1135,21 @@ const zhIntro: Block[] = [
   { type: "try", expr: "(5↑3)⇓5" },
   { type: "text", content: "在学校写法里，前一种抵消会写成 ³√(5³) = 5，后一种写成 log₅(5³) = 3。你一眼能看出 ³√ 和 ³ 在互消吗？能看出 log₅ 和 5³ 在互消吗？其实很难——它们长得太不像。用 ↓ 和 ↑，互消是看得见的：同一支箭头，方向相反。⇓ 和 ↑ 也是同一思路。记号的用处不只是“起名”，而是让你看见关系。" },
 
-  { type: "heading", content: "四个例题，一个模式" },
-  { type: "text", content: "理论是一回事，现实里也要站得住脚。下面用来自金融、音乐、地质和公共卫生的例题。在学校，它们常常像不同技巧：“把指数挪下来”“写根号”“取对数再相除”。用本文的记号，它们都走同一条路：先写成 a ↑ b = c，看缺的是左边还是右边，再选 ↓ 或 ⇓。" },
-  { type: "examplesIntro" },
+  { type: "heading", content: "轮到你了" },
+  { type: "text", content: "本页的计算器支持 ↑、↓、⇓。可以试试下面几题：" },
+  { type: "challenge", title: "逆运算三角形", description: "下面三个式子描述同一个关系：2¹⁰ = 1024。请都验证一下。", items: [
+    { expr: "2↑10", hint: "= 1024（幂）" },
+    { expr: "1024↓10", hint: "= 2（根，找回底数）" },
+    { expr: "1024⇓2", hint: "= 10（对数，找回指数）" },
+  ] },
+  { type: "challenge", title: "半次幂 = 平方根", description: "指数取 0.5 的幂，和开平方根是一回事。下面两个式子结果应该一样：", items: [
+    { expr: "2↑0.5", hint: "指数 1/2 的幂" },
+    { expr: "2↓2", hint: "2 的平方根" },
+  ] },
+  { type: "challenge", title: "↓ 还是 ⇓？", description: "2 ↑ 3 = 8。↓ 和 ⇓ 都从 8 往回算——但各自找回不同的量。两个都试试：", items: [
+    { expr: "8↓3", hint: "= 2（底数）" },
+    { expr: "8⇓2", hint: "= 3（指数）" },
+  ] },
 ];
 
 const zhSavings: Block[] = [
@@ -1227,20 +1239,9 @@ const zhEarthquakes: Block[] = [
 ];
 
 const zhMainClosing: Block[] = [
-  { type: "heading", content: "轮到你了" },
-  { type: "text", content: "本页的计算器支持 ↑、↓、⇓。可以试试下面几题：" },
-  { type: "challenge", title: "逆运算三角形", description: "下面三个式子描述同一个关系：2¹⁰ = 1024。请都验证一下。", items: [
-    { expr: "2↑10", hint: "= 1024（幂）" },
-    { expr: "1024↓10", hint: "= 2（根，找回底数）" },
-    { expr: "1024⇓2", hint: "= 10（对数，找回指数）" },
-  ] },
-  { type: "challenge", title: "半次幂 = 平方根", description: "指数取 0.5 的幂，和开平方根是一回事。下面两个式子结果应该一样：", items: [
-    { expr: "2↑0.5", hint: "指数 1/2 的幂" },
-    { expr: "2↓2", hint: "2 的平方根" },
-  ] },
-  { type: "challenge", title: "放射性衰变", description: "有些物质会慢慢衰变。碳-14 是其中之一：每过 5730 年，大约剩一半。一开始是 100%。减半一次后，剩 0.5（= 50%）。减半两次：0.5 × 0.5 = 0.5 ↑ 2 = 0.25（= 25%）。减半 n 次后，剩下 0.5 ↑ n。问题：减半多少次后，只剩 1%（= 0.01）？也就是求 n，使 0.5 ↑ n = 0.01。↑ 右边的 n 未知，所以用 ⇓：", items: [
-    { expr: "0.01⇓0.5", hint: "≈ 6.6 次减半，约 3.8 万年" },
-  ] },
+  { type: "heading", content: "四个例题，一个模式" },
+  { type: "text", content: "理论是一回事，现实里也要站得住脚。下面用来自金融、音乐、地质和公共卫生的例题。在学校，它们常常像不同技巧：“把指数挪下来”“写根号”“取对数再相除”。用本文的记号，它们都走同一条路：先写成 a ↑ b = c，看缺的是左边还是右边，再选 ↓ 或 ⇓。" },
+  { type: "examplesIntro" },
 
   { type: "heading", content: "这种写法来自哪里" },
   { type: "text", content: "这套记号由阿姆斯特丹 CWI 的计算机科学家 Steven Pemberton 发展出来。他的《Numbers》从最基础开始——用木棍数数——一路搭到加法、乘法、幂，并说明每一层都重复同一种结构。记号不是随意画的，而是为了让这个结构显形。" },
