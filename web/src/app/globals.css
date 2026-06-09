@@ -1142,6 +1142,38 @@ button {
   font-weight: 700;
 }
 
+/* Notation TL;DR */
+
+.notationTldr {
+  margin: 1.25rem 0 1.75rem;
+  padding: 1rem 1.1rem 1.05rem;
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent-light) 55%, var(--surface));
+}
+
+.notationTldrLabel {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.notationTldrIntro {
+  margin-top: 0;
+  font-weight: 500;
+}
+
+.notationTldrSpoken {
+  margin-bottom: 0;
+}
+
+.notationTldr .transformCard {
+  margin: 0.65rem 0 0.75rem;
+  background: var(--surface);
+}
+
 /* Notation transform */
 
 .transformCard {
@@ -1299,6 +1331,10 @@ button {
   border-style: dashed;
 }
 
+.examplePreviewCardCurrent {
+  border-color: var(--accent);
+}
+
 .examplePreviewCardComingSoon .examplePreviewVizSoon {
   filter: grayscale(0.45);
 }
@@ -1319,9 +1355,15 @@ button {
   border: 1px solid var(--border);
 }
 
-.examplePreviewFooterDisabled {
+.examplePreviewFooterDisabled,
+.examplePreviewFooterCurrent {
   padding: 0.65rem 0.75rem 0.75rem;
   text-align: center;
+}
+
+.examplePreviewFooterCurrent {
+  border-top: 1px solid var(--border);
+  background: var(--accent-light);
 }
 
 .examplePreviewVizInner {
@@ -1495,6 +1537,28 @@ button {
 
 .examplePreviewFooter:hover .examplePreviewCta {
   color: var(--accent);
+}
+
+/* Example sub-page footer */
+
+.examplePageFooter {
+  margin: 2rem 0 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.examplePageFooterTitle {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.examplePageFooter .examplesIntroGrid {
+  margin: 0 0 1rem;
+}
+
+.examplePageFooterBack {
+  margin: 0;
 }
 
 /* Full calculator */

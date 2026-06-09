@@ -11,7 +11,15 @@ import {
   SavingsExamplePreview,
 } from "./example-previews";
 import { InterestChart, RepeatedMultViz, PianoChainViz, PianoFreqViz, EarthquakeViz, SavingsExplorer } from "./visualizations";
-import { getArticleBlocks, getArticleHero, getBackLink, registerArticleContent } from "./article-content";
+import {
+  getArticleBlocks,
+  getArticleHero,
+  getBackLink,
+  getExamplesHubLink,
+  isExamplePage,
+  registerArticleContent,
+  type ExampleSlug,
+} from "./article-content";
 import { useInteractiveArticleModel } from "./article-model";
 import { evaluateTryExpression, useCalculatorModel } from "./calculator-model";
 import { headingItemsFromBlocks, StickySectionNav } from "./sticky-section-nav";
@@ -186,6 +194,101 @@ function mathFormat(text: string): React.ReactNode[] {
   );
 }
 
+function ExamplesHubGrid({
+  lang,
+  currentSlug,
+}: {
+  lang: Language;
+  currentSlug?: ExampleSlug;
+}) {
+  const en = lang === "en";
+  const zh = lang === "zh";
+  const examples: {
+    slug?: ExampleSlug;
+    href?: string;
+    label: string;
+    ops: string;
+    preview: React.ReactNode;
+    comingSoon?: boolean;
+  }[] = [
+    {
+      slug: "savings",
+      href: `/${lang}/examples/savings`,
+      label: en ? "Saving money" : zh ? "存钱" : "Sparen",
+      ops: "÷  ↓  ⇓",
+      preview: <SavingsExamplePreview lang={lang} />,
+    },
+    {
+      slug: "piano",
+      href: `/${lang}/examples/piano`,
+      label: en ? "Piano tuning" : zh ? "钢琴调音" : "Pianostemming",
+      ops: "↓",
+      preview: <PianoExamplePreview lang={lang} />,
+    },
+    {
+      slug: "earthquakes",
+      href: `/${lang}/examples/earthquakes`,
+      label: en ? "Earthquakes" : zh ? "地震" : "Aardbevingen",
+      ops: "↑  ⇓",
+      preview: <EarthquakeExamplePreview lang={lang} />,
+    },
+    {
+      label: en ? "Disease spread" : zh ? "疾病传播" : "Ziekteverspreiding",
+      ops: "↑  ⇓",
+      preview: <DiseaseSpreadExamplePreview lang={lang} />,
+      comingSoon: true,
+    },
+  ];
+
+  return (
+    <div className="examplesIntroGrid">
+      {examples.map((ex) => {
+        const current = ex.slug !== undefined && ex.slug === currentSlug;
+        return (
+          <div
+            key={ex.href ?? ex.label}
+            className={`examplePreviewCard card${
+              ex.comingSoon ? " examplePreviewCardComingSoon" : ""
+            }${current ? " examplePreviewCardCurrent" : ""}`}
+          >
+            {ex.comingSoon && (
+              <span className="examplePreviewSoonBadge">
+                {en ? "Coming soon" : zh ? "即将推出" : "Binnenkort"}
+              </span>
+            )}
+            {ex.preview}
+            {current ? (
+              <div className="examplePreviewFooter examplePreviewFooterCurrent" aria-current="page">
+                <span className="examplePreviewLabel">{ex.label}</span>
+                <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
+                <span className="examplePreviewCta muted">
+                  {en ? "You are reading this" : zh ? "你正在阅读" : "Je leest dit nu"}
+                </span>
+              </div>
+            ) : ex.comingSoon ? (
+              <div className="examplePreviewFooter examplePreviewFooterDisabled">
+                <span className="examplePreviewLabel">{ex.label}</span>
+                <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
+                <span className="examplePreviewCta muted">
+                  {en ? "Full example in preparation" : zh ? "完整例题筹备中" : "Volledig voorbeeld in voorbereiding"}
+                </span>
+              </div>
+            ) : (
+              <Link href={ex.href!} className="examplePreviewFooter">
+                <span className="examplePreviewLabel">{ex.label}</span>
+                <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
+                <span className="examplePreviewCta">
+                  {en ? "Full example →" : zh ? "完整例题 →" : "Volledig voorbeeld →"}
+                </span>
+              </Link>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function RevealBlock({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -215,14 +318,38 @@ function RevealBlock({ children }: { children: React.ReactNode }) {
   );
 }
 
+function NotationTldr({ lang }: { lang: Language }) {
+  const en = lang === "en";
+  const zh = lang === "zh";
+  const title = en ? "TL;DR" : zh ? "要点" : "Kort";
+  const intro = en
+    ? "In a hurry? Here's the gist — powers, roots, and logarithms, from the notation you know to arrow notation:"
+    : zh
+      ? "赶时间？核心就在这里——幂、根和对数，从熟悉的写法到箭头记号："
+      : "Geen tijd voor het hele verhaal? Dit is de kern — machten, wortels en logaritmen, van de schrijfwijze die je kent naar pijlnotatie:";
+  const spoken = en
+    ? "Read them out loud: \"2 up 3 is 8\", \"8 down 3 is 2\", \"8 double-down 2 is 3.\" The symbols go up, down, double-down — a family you can see."
+    : zh
+      ? "试着读出来：“2 上 3 等于 8”“8 下 3 等于 2”“8 双下 2 等于 3”。符号往上、往下、双往下——一眼能看出是一家人。"
+      : "Zeg het hardop: \"2 omhoog 3 is 8\", \"8 omlaag 3 is 2\", \"8 dubbel-omlaag 2 is 3.\" De symbolen gaan omhoog, omlaag, dubbel-omlaag — een familie die je kunt zien.";
+  return (
+    <aside className="notationTldr card" aria-label={title}>
+      <p className="notationTldrLabel">{title}</p>
+      <p className="storyP notationTldrIntro">{intro}</p>
+      <NotationTransform lang={lang} />
+      <p className="storyP notationTldrSpoken">{spoken}</p>
+    </aside>
+  );
+}
+
 function NotationTransform({ lang }: { lang: Language }) {
   const rows = [
     { school: "2³ = 8", arrow: "2 ↑ 3 = 8" },
     { school: "³√8 = 2", arrow: "8 ↓ 3 = 2" },
     { school: "log₂(8) = 3", arrow: "8 ⇓ 2 = 3" },
   ];
-  const schoolLabel = lang === "en" ? "School" : lang === "zh" ? "学校写法" : "School";
-  const newLabel = lang === "en" ? "New notation" : lang === "zh" ? "新符号" : "Nieuwe notatie";
+  const schoolLabel = lang === "en" ? "From" : lang === "zh" ? "从" : "Van";
+  const newLabel = lang === "en" ? "To" : lang === "zh" ? "到" : "Naar";
   return (
     <div className="transformCard card">
       <div className="transformHeader">
@@ -366,6 +493,8 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
       return <EarthquakeViz lang={lang} />;
     case "notationTransform":
       return <NotationTransform lang={lang} />;
+    case "notationTldr":
+      return <NotationTldr lang={lang} />;
     case "inverseRule":
       return (
         <div className="inverseRuleCard card">
@@ -400,70 +529,8 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
           </p>
         </div>
       );
-    case "examplesIntro": {
-      const en = lang === "en";
-      const zh = lang === "zh";
-      const examples = [
-        {
-          href: `/${lang}/examples/savings`,
-          label: en ? "Saving money" : zh ? "存钱" : "Sparen",
-          ops: "÷  ↓  ⇓",
-          preview: <SavingsExamplePreview lang={lang} />,
-        },
-        {
-          href: `/${lang}/examples/piano`,
-          label: en ? "Piano tuning" : zh ? "钢琴调音" : "Pianostemming",
-          ops: "↓",
-          preview: <PianoExamplePreview lang={lang} />,
-        },
-        {
-          href: `/${lang}/examples/earthquakes`,
-          label: en ? "Earthquakes" : zh ? "地震" : "Aardbevingen",
-          ops: "↑  ⇓",
-          preview: <EarthquakeExamplePreview lang={lang} />,
-        },
-        {
-          label: en ? "Disease spread" : zh ? "疾病传播" : "Ziekteverspreiding",
-          ops: "↑  ⇓",
-          preview: <DiseaseSpreadExamplePreview lang={lang} />,
-          comingSoon: true,
-        },
-      ];
-      return (
-        <div className="examplesIntroGrid">
-          {examples.map((ex) => (
-            <div
-              key={ex.href ?? ex.label}
-              className={`examplePreviewCard card${ex.comingSoon ? " examplePreviewCardComingSoon" : ""}`}
-            >
-              {ex.comingSoon && (
-                <span className="examplePreviewSoonBadge">
-                  {en ? "Coming soon" : zh ? "即将推出" : "Binnenkort"}
-                </span>
-              )}
-              {ex.preview}
-              {ex.comingSoon ? (
-                <div className="examplePreviewFooter examplePreviewFooterDisabled">
-                  <span className="examplePreviewLabel">{ex.label}</span>
-                  <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
-                  <span className="examplePreviewCta muted">
-                    {en ? "Full example in preparation" : zh ? "完整例题筹备中" : "Volledig voorbeeld in voorbereiding"}
-                  </span>
-                </div>
-              ) : (
-                <Link href={ex.href!} className="examplePreviewFooter">
-                  <span className="examplePreviewLabel">{ex.label}</span>
-                  <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
-                  <span className="examplePreviewCta">
-                    {en ? "Full example →" : zh ? "完整例题 →" : "Volledig voorbeeld →"}
-                  </span>
-                </Link>
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    }
+    case "examplesIntro":
+      return <ExamplesHubGrid lang={lang} />;
     case "pageLink": {
       const href =
         block.page === "appendix" ? `/${lang}/appendix`
@@ -524,6 +591,7 @@ const enIntro: Block[] = [
   { type: "text", content: "A researcher in Amsterdam was checking his son's maths homework. The assignment covered powers, roots, and logarithms. He looked at the formulas and thought:" },
   { type: "quote", content: "\"Why do they make something so simple so difficult?\"" },
   { type: "text", content: "That question turned into a [book](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf). This interactive article is based on it. We are going to show you a pattern that is already in your head — you just haven't noticed it yet — and then show how a small change in notation makes that pattern visible." },
+  { type: "notationTldr" },
 
   // ── Pattern ──
   { type: "heading", content: "A pattern you already know" },
@@ -560,7 +628,7 @@ const enIntro: Block[] = [
   { type: "heading", content: "What if we fix it?" },
   { type: "text", content: "The fix is surprisingly simple. Instead of three different visual systems, use three symbols that look like variations of each other:" },
   { type: "symbols" },
-  { type: "text", content: "Now let's rewrite that same relationship:" },
+  { type: "text", content: "This is how you rewrite the three power, root, and log relationships into the arrow proposal:" },
   { type: "notationTransform" },
   { type: "text", content: "Read them out loud: \"2 up 3 is 8\", \"8 down 3 is 2\", \"8 double-down 2 is 3.\" The symbols go up, down, double-down — a family you can see." },
   { type: "text", content: "And the table now has a pattern on every level:" },
@@ -706,21 +774,10 @@ const enMainClosing: Block[] = [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 halvings, or about 38,000 years" },
   ] },
 
-  { type: "heading", content: "How do we know it works?" },
-  { type: "text", content: "The notation is not a trick — each symbol is defined to match ordinary school maths. A power ↑ is exponentiation, ↓ is a root, and ⇓ is a logarithm. The calculator on this site uses those definitions exactly." },
-  { type: "formula", lines: ["2 ↑ 3 = 8  ↔  2³ = 8", "8 ↓ 3 = 2  ↔  ³√8 = 2", "8 ⇓ 2 = 3  ↔  log₂(8) = 3"], label: "Same relationships, two notations. Try the left-hand side — the answer should match what you already know." },
-  { type: "try", expr: "2↑3" },
-  { type: "try", expr: "8↓3" },
-  { type: "try", expr: "8⇓2" },
-  { type: "text", content: "Every \"try it\" button on this site runs through the same parser and evaluator. Automated tests check that mixed expressions (like 2↑3+1) still give the expected results, and that inverses undo each other: (5↑3)↓3 = 5 and (5↑3)⇓5 = 3." },
-  { type: "try", expr: "(5↑3)↓3" },
-  { type: "try", expr: "(5↑3)⇓5" },
-  { type: "text", content: "The semantics are documented in the project's language spec (grammar, operator precedence, and compatibility notes). If a result ever looks wrong, that's a bug — not a feature of the notation." },
-  { type: "pageLink", page: "validation", label: "Reader testing: feedback from three perspectives →" },
-
   { type: "heading", content: "Where this comes from" },
   { type: "text", content: "This notation was developed by Steven Pemberton, a computer scientist at CWI Amsterdam. In his book \"Numbers,\" he starts from the very beginning — counting with sticks — and builds up through addition, multiplication, and powers, showing that each level follows the same pattern. The notation isn't arbitrary: it was designed to make that pattern visible." },
   { type: "text", content: "If this notation made something click for you — or if you want to share it with a student or teacher — the full book by Steven Pemberton is [available as a PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
+  { type: "pageLink", page: "validation", label: "Reader testing: feedback from three perspectives →" },
   { type: "pageLink", page: "appendix", label: "Appendix: A proof that becomes simple →" },
 ];
 
@@ -785,6 +842,7 @@ const nlIntro: Block[] = [
   { type: "text", content: "Een onderzoeker in Amsterdam keek het wiskundehuiswerk van zijn zoon na. De opdracht ging over machten, wortels en logaritmen. Hij bekeek de formules en dacht:" },
   { type: "quote", content: "\"Waarom maken ze iets simpels zo moeilijk?\"" },
   { type: "text", content: "Die vraag werd een [boek](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf), en dit interactieve artikel is daarop gebaseerd. We laten je een patroon zien dat al in je hoofd zit — je hebt het alleen nog niet opgemerkt — en dan laten we zien hoe een kleine verandering in notatie dat patroon zichtbaar maakt." },
+  { type: "notationTldr" },
 
   // ── Patroon ──
   { type: "heading", content: "Een patroon dat je al kent" },
@@ -821,7 +879,7 @@ const nlIntro: Block[] = [
   { type: "heading", content: "Wat als we het repareren?" },
   { type: "text", content: "De oplossing is verrassend simpel. In plaats van drie verschillende systemen, gebruik drie symbolen die op variaties van elkaar lijken:" },
   { type: "symbols" },
-  { type: "text", content: "Laten we diezelfde relatie herschrijven:" },
+  { type: "text", content: "Zo herschrijf je de drie relaties van macht, wortel en log naar het voorstel met pijlen:" },
   { type: "notationTransform" },
   { type: "text", content: "Zeg het hardop: \"2 omhoog 3 is 8\", \"8 omlaag 3 is 2\", \"8 dubbel-omlaag 2 is 3.\" De symbolen gaan omhoog, omlaag, dubbel-omlaag — een familie die je kunt zien." },
   { type: "text", content: "En het patroon klopt nu op alle drie de niveaus:" },
@@ -966,21 +1024,10 @@ const nlMainClosing: Block[] = [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 halveringen, oftewel zo'n 38.000 jaar" },
   ] },
 
-  { type: "heading", content: "Hoe weten we dat het klopt?" },
-  { type: "text", content: "De notatie is geen truc — elk symbool is gedefinieerd om overeen te komen met gewone schoolwiskunde. Een macht ↑ is machtsverheffen, ↓ is een wortel, en ⇓ is een logaritme. De calculator op deze site gebruikt precies die definities." },
-  { type: "formula", lines: ["2 ↑ 3 = 8  ↔  2³ = 8", "8 ↓ 3 = 2  ↔  ³√8 = 2", "8 ⇓ 2 = 3  ↔  log₂(8) = 3"], label: "Dezelfde relaties, twee notaties. Probeer de linkerkant — het antwoord hoort overeen te komen met wat je al kent." },
-  { type: "try", expr: "2↑3" },
-  { type: "try", expr: "8↓3" },
-  { type: "try", expr: "8⇓2" },
-  { type: "text", content: "Elke \"probeer\"-knop op deze site loopt door dezelfde parser en evaluator. Geautomatiseerde tests controleren dat gemengde uitdrukkingen (zoals 2↑3+1) de verwachte uitkomst geven, en dat omgekeerde bewerkingen elkaar opheffen: (5↑3)↓3 = 5 en (5↑3)⇓5 = 3." },
-  { type: "try", expr: "(5↑3)↓3" },
-  { type: "try", expr: "(5↑3)⇓5" },
-  { type: "text", content: "De semantiek staat beschreven in de language spec van het project (grammatica, operatorvolgorde en compatibiliteitsnotities). Als een resultaat ooit verkeerd lijkt, is dat een bug — geen eigenschap van de notatie." },
-  { type: "pageLink", page: "validation", label: "Lezersessies: feedback vanuit drie perspectieven →" },
-
   { type: "heading", content: "Waar dit vandaan komt" },
   { type: "text", content: "Deze notatie is ontwikkeld door Steven Pemberton, een informaticus bij CWI Amsterdam. Zijn boek begint helemaal bij het begin — tellen met streepjes — en bouwt op via optellen, vermenigvuldigen en machten, en laat zien dat elk niveau hetzelfde patroon volgt. De notatie is niet willekeurig: die is ontworpen om dat patroon zichtbaar te maken." },
   { type: "text", content: "Als deze notatie iets voor je heeft opgehelderd — of als je het wilt delen met een leerling of docent — het volledige boek van Steven Pemberton is [beschikbaar als PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
+  { type: "pageLink", page: "validation", label: "Lezersessies: feedback vanuit drie perspectieven →" },
   { type: "pageLink", page: "appendix", label: "Bijlage: Een bewijs dat simpel wordt →" },
 ];
 
@@ -1041,6 +1088,7 @@ const zhIntro: Block[] = [
   { type: "text", content: "阿姆斯特丹的一位研究者在看他儿子的数学作业。题目是幂、根和对数。他看完后想：" },
   { type: "quote", content: "\"为什么这么简单的东西要写得这么难？\"" },
   { type: "text", content: "这个问题后来写成了一本[书](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。这篇互动文章就基于那本书。我们会先指出你心里其实已经有的一种模式——只是还没留意到——再说明：只要稍微改一下写法，这个模式就会变得一眼可见。" },
+  { type: "notationTldr" },
 
   { type: "heading", content: "你已经知道的模式" },
   { type: "text", content: "先看最简单的：加法和减法是一对。" },
@@ -1072,7 +1120,7 @@ const zhIntro: Block[] = [
   { type: "heading", content: "如果我们把写法修一下？" },
   { type: "text", content: "办法出奇地简单：别用三套完全不同的样子，改用三个“彼此像变体”的符号：" },
   { type: "symbols" },
-  { type: "text", content: "下面把同一个关系改写：" },
+  { type: "text", content: "幂、根和对数的三种关系，这样改写成箭头方案：" },
   { type: "notationTransform" },
   { type: "text", content: "试着读出来：“2 上 3 等于 8”“8 下 3 等于 2”“8 双下 2 等于 3”。符号往上、往下、双往下——一眼能看出是一家人。" },
   { type: "text", content: "表格里每一层也都对齐同一种结构：" },
@@ -1209,21 +1257,10 @@ const zhMainClosing: Block[] = [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 次减半，约 3.8 万年" },
   ] },
 
-  { type: "heading", content: "我们怎么知道它是对的？" },
-  { type: "text", content: "这套记号不是文字游戏——每个符号都按普通数学来定义。↑ 是乘方，↓ 是开根，⇓ 是对数。本站的计算器就按这些定义计算。" },
-  { type: "formula", lines: ["2 ↑ 3 = 8  ↔  2³ = 8", "8 ↓ 3 = 2  ↔  ³√8 = 2", "8 ⇓ 2 = 3  ↔  log₂(8) = 3"], label: "同一关系，两种写法。试左边——结果应和你已知的学校写法一致。" },
-  { type: "try", expr: "2↑3" },
-  { type: "try", expr: "8↓3" },
-  { type: "try", expr: "8⇓2" },
-  { type: "text", content: "页面上每个“试试看”按钮都走同一套解析器和求值器。自动化测试会检查混合表达式（如 2↑3+1）是否给出预期结果，并检查逆运算是否互消：(5↑3)↓3 = 5，(5↑3)⇓5 = 3。" },
-  { type: "try", expr: "(5↑3)↓3" },
-  { type: "try", expr: "(5↑3)⇓5" },
-  { type: "text", content: "语义写在项目的 language spec 里（语法、运算符优先级和兼容性说明）。如果某次结果看起来不对，那是程序 bug，不是记号本身的问题。" },
-  { type: "pageLink", page: "validation", label: "读者试读：三个视角的反馈 →" },
-
   { type: "heading", content: "这种写法来自哪里" },
   { type: "text", content: "这套记号由阿姆斯特丹 CWI 的计算机科学家 Steven Pemberton 发展出来。他的《Numbers》从最基础开始——用木棍数数——一路搭到加法、乘法、幂，并说明每一层都重复同一种结构。记号不是随意画的，而是为了让这个结构显形。" },
   { type: "text", content: "如果这套写法让你豁然开朗，或者你想把它分享给同学、老师，Steven Pemberton 的完整著作可以在这里下载：[Numbers（PDF）](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。" },
+  { type: "pageLink", page: "validation", label: "读者试读：三个视角的反馈 →" },
   { type: "pageLink", page: "appendix", label: "附录：一个更容易看懂的证明 →" },
 ];
 
@@ -1339,6 +1376,20 @@ const zhValidation: Block[] = [
 const audienceEn = "For students, teachers, and the simply curious. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.";
 const audienceNl = "Voor leerlingen, docenten en iedereen die gewoon nieuwsgierig is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.";
 const audienceZh = "给学生、老师和好奇的人。你不需要先学过对数——会算 3 + 5 就可以读到最后。";
+
+function ExamplePageFooter({ lang, page }: { lang: Language; page: ExampleSlug }) {
+  const back = getExamplesHubLink(lang);
+  const title = lang === "en" ? "More examples" : lang === "zh" ? "更多例题" : "Meer voorbeelden";
+  return (
+    <nav className="examplePageFooter" aria-label={title}>
+      <h3 className="examplePageFooterTitle">{title}</h3>
+      <ExamplesHubGrid lang={lang} currentSlug={page} />
+      <Link href={back.href} className="articleBackLink examplePageFooterBack">
+        {back.label}
+      </Link>
+    </nav>
+  );
+}
 
 registerArticleContent({
   en: {
@@ -1516,6 +1567,11 @@ export function InteractiveBlogPage({
               <RenderBlock block={block} lang={language} />
             </RevealBlock>
           ))}
+          {isExamplePage(page) && (
+            <RevealBlock>
+              <ExamplePageFooter lang={language} page={page} />
+            </RevealBlock>
+          )}
         </div>
         <aside className="storySidebar">
           <div className="stickyCalc">

@@ -1,3 +1,4 @@
+import { slugify } from "@/lib/slugify";
 import type { ArticlePage, Block, HeroContent, Language } from "./types";
 
 export const EXAMPLE_SLUGS = ["savings", "piano", "earthquakes"] as const;
@@ -5,6 +6,26 @@ export type ExampleSlug = (typeof EXAMPLE_SLUGS)[number];
 
 export function isExampleSlug(value: string): value is ExampleSlug {
   return (EXAMPLE_SLUGS as readonly string[]).includes(value);
+}
+
+export function isExamplePage(page: ArticlePage): page is ExampleSlug {
+  return isExampleSlug(page);
+}
+
+export function getExamplesHubHeading(lang: Language): string {
+  return lang === "en" ? "Four examples, one pattern" : lang === "zh" ? "四个例题，一个模式" : "Vier voorbeelden, een patroon";
+}
+
+export function getExamplesHubLink(lang: Language): { href: string; label: string } {
+  return {
+    href: `/${lang}#${slugify(getExamplesHubHeading(lang))}`,
+    label:
+      lang === "en"
+        ? "← Back to where you left off in the article"
+        : lang === "zh"
+          ? "← 返回文章中刚才阅读的位置"
+          : "← Terug naar waar je gebleven was in het artikel",
+  };
 }
 
 type ContentBundle = {
@@ -58,16 +79,5 @@ export function getBackLink(lang: Language, page: ArticlePage): { href: string; 
       label: lang === "en" ? "← Back to article" : lang === "zh" ? "← 返回文章" : "← Terug naar artikel",
     };
   }
-  const hub = lang === "en" ? "Four examples, one pattern" : lang === "zh" ? "四个例题，一个模式" : "Vier voorbeelden, een patroon";
-  return {
-    href: `${home}#${slugifyHeading(hub)}`,
-    label: lang === "en" ? "← Back to examples hub" : lang === "zh" ? "← 返回例题总览" : "← Terug naar overzicht",
-  };
-}
-
-function slugifyHeading(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/(^-|-$)/g, "");
+  return getExamplesHubLink(lang);
 }
