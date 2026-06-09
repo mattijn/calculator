@@ -1,8 +1,90 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type MutableRefObject } from "react";
 import type { Language } from "./types";
 
 const R = (v: number) => Math.round(v * 100) / 100;
+
+export function playEarthquakeRumble(
+  intensity: number,
+  audioCtxRef: MutableRefObject<AudioContext | null>,
+) {
+  if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+  const ctx = audioCtxRef.current;
+  if (ctx.state === "suspended") void ctx.resume();
+  const dur = 0.3 + (intensity / 32) * 1.5;
+  const noiseVol = Math.min(0.95, 0.35 + (intensity / 16) * 0.3);
+  const toneVol = Math.min(0.32, 0.1 + (intensity / 32) * 0.2);
+
+  const bufSize = Math.ceil(ctx.sampleRate * dur);
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) {
+    const t = i / bufSize;
+    const decay = 1 - t * t;
+    data[i] = (Math.random() * 2 - 1) * decay;
+  }
+
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 260 + (intensity / 32) * 900;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(noiseVol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+
+  const tone = ctx.createOscillator();
+  tone.type = "triangle";
+  tone.frequency.value = 140 + (intensity / 32) * 90;
+  const toneGain = ctx.createGain();
+  toneGain.gain.setValueAtTime(toneVol, ctx.currentTime);
+  toneGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur * 0.85);
+  src.connect(lp);
+  lp.connect(gain);
+  gain.connect(ctx.destination);
+  tone.connect(toneGain);
+  toneGain.connect(ctx.destination);
+  src.start();
+  src.stop(ctx.currentTime + dur);
+  tone.start();
+  tone.stop(ctx.currentTime + dur * 0.85);
+}
+
+export function shakeStoryArticle(fromEl: HTMLElement, intensity: number) {
+  const article = fromEl.closest(".storyArticle") || fromEl.parentElement;
+  if (!article) return;
+  const px = 2 + intensity * 1.5;
+  const dur = 300 + intensity * 60;
+  const steps = Math.ceil(dur / 25);
+  let step = 0;
+  const target = article as HTMLElement;
+  const original = target.style.transform;
+  const shake = () => {
+    if (step >= steps) {
+      target.style.transform = original;
+      return;
+    }
+    const progress = step / steps;
+    const decay = 1 - progress * progress;
+    const dx = (Math.random() - 0.5) * 2 * px * decay;
+    const dy = (Math.random() - 0.5) * 2 * px * decay;
+    const rot = (Math.random() - 0.5) * 0.4 * (intensity / 32) * decay;
+    target.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+    step++;
+    requestAnimationFrame(shake);
+  };
+  requestAnimationFrame(shake);
+}
+
+export function triggerEarthquakeFeedback(
+  fromEl: HTMLElement | null,
+  intensity: number,
+  audioCtxRef: MutableRefObject<AudioContext | null>,
+) {
+  if (!fromEl) return;
+  playEarthquakeRumble(intensity, audioCtxRef);
+  shakeStoryArticle(fromEl, intensity);
+}
 
 export function InterestChart({ lang }: { lang: Language }) {
   const en = lang === "en";
@@ -233,79 +315,9 @@ export function EarthquakeViz({ lang }: { lang: Language }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
-  const playRumble = useCallback((intensity: number) => {
-    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
-    const ctx = audioCtxRef.current;
-    if (ctx.state === "suspended") void ctx.resume();
-    const dur = 0.3 + (intensity / 32) * 1.5;
-    const noiseVol = Math.min(0.95, 0.35 + (intensity / 16) * 0.3);
-    const toneVol = Math.min(0.32, 0.1 + (intensity / 32) * 0.2);
-
-    const bufSize = Math.ceil(ctx.sampleRate * dur);
-    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) {
-      const t = i / bufSize;
-      const decay = 1 - t * t;
-      data[i] = (Math.random() * 2 - 1) * decay;
-    }
-
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const lp = ctx.createBiquadFilter();
-    lp.type = "lowpass";
-    // Keep more mid/upper rumble so laptop speakers still reproduce it.
-    lp.frequency.value = 260 + (intensity / 32) * 900;
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(noiseVol, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-
-    // Extra low-mid tone to make quakes clearly audible.
-    const tone = ctx.createOscillator();
-    tone.type = "triangle";
-    tone.frequency.value = 140 + (intensity / 32) * 90;
-    const toneGain = ctx.createGain();
-    toneGain.gain.setValueAtTime(toneVol, ctx.currentTime);
-    toneGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur * 0.85);
-    src.connect(lp);
-    lp.connect(gain);
-    gain.connect(ctx.destination);
-    tone.connect(toneGain);
-    toneGain.connect(ctx.destination);
-    src.start();
-    src.stop(ctx.currentTime + dur);
-    tone.start();
-    tone.stop(ctx.currentTime + dur * 0.85);
-  }, []);
-
   const triggerShake = useCallback((intensity: number) => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const article = el.closest(".storyArticle") || el.parentElement;
-    if (!article) return;
-    playRumble(intensity);
-    const px = 2 + intensity * 1.5;
-    const dur = 300 + intensity * 60;
-    const steps = Math.ceil(dur / 25);
-    let step = 0;
-    const target = article as HTMLElement;
-    const original = target.style.transform;
-    const shake = () => {
-      if (step >= steps) {
-        target.style.transform = original;
-        return;
-      }
-      const progress = step / steps;
-      const decay = 1 - progress * progress;
-      const dx = (Math.random() - 0.5) * 2 * px * decay;
-      const dy = (Math.random() - 0.5) * 2 * px * decay;
-      const rot = (Math.random() - 0.5) * 0.4 * (intensity / 32) * decay;
-      target.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
-      step++;
-      requestAnimationFrame(shake);
-    };
-    requestAnimationFrame(shake);
-  }, [playRumble]);
+    triggerEarthquakeFeedback(wrapRef.current, intensity, audioCtxRef);
+  }, []);
 
   return (
     <div className="vizWrap" ref={wrapRef}>

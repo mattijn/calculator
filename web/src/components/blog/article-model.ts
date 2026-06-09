@@ -1,16 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Block, Language } from "./types";
+import type { Block, HeroContent, Language } from "./types";
 
 const THEME_KEY = "interactive-theme-v1";
 
 type Theme = "light" | "dark";
-
-type HeroContent = {
-  title: string;
-  byline: string;
-  audience: string;
-  time: string;
-};
 
 function slugify(text: string): string {
   return text
@@ -32,20 +25,12 @@ function getPreferredTheme(): Theme {
 
 export function useInteractiveArticleModel({
   initialLanguage,
-  heroEn,
-  heroNl,
-  heroZh,
-  enBlocks,
-  nlBlocks,
-  zhBlocks,
+  hero,
+  blocks,
 }: {
   initialLanguage: Language;
-  heroEn: HeroContent;
-  heroNl: HeroContent;
-  heroZh: HeroContent;
-  enBlocks: Block[];
-  nlBlocks: Block[];
-  zhBlocks: Block[];
+  hero: HeroContent;
+  blocks: Block[];
 }) {
   const language = initialLanguage;
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -79,16 +64,6 @@ export function useInteractiveArticleModel({
     window.localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
-  const hero = useMemo(() => {
-    if (language === "nl") return heroNl;
-    if (language === "zh") return heroZh;
-    return heroEn;
-  }, [heroEn, heroNl, heroZh, language]);
-  const blocks = useMemo(() => {
-    if (language === "nl") return nlBlocks;
-    if (language === "zh") return zhBlocks;
-    return enBlocks;
-  }, [enBlocks, nlBlocks, zhBlocks, language]);
   const toc = useMemo(
     () =>
       blocks

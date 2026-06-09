@@ -4,14 +4,18 @@ import type { Language } from "@/components/blog/types";
 
 const SUPPORTED_LANGUAGES: Language[] = ["en", "nl", "zh"];
 
-type LangPageProps = {
+type AppendixPageProps = {
   params: Promise<{ lang: string }>;
 };
 
-export default async function LangPage({ params }: LangPageProps) {
+export function generateStaticParams() {
+  return SUPPORTED_LANGUAGES.map((lang) => ({ lang }));
+}
+
+export default async function AppendixPage({ params }: AppendixPageProps) {
   const { lang } = await params;
   if (!SUPPORTED_LANGUAGES.includes(lang as Language)) {
     notFound();
   }
-  return <InteractiveBlogPage initialLanguage={lang as Language} page="main" />;
+  return <InteractiveBlogPage initialLanguage={lang as Language} page="appendix" />;
 }

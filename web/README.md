@@ -20,7 +20,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Content and structure
 
-- `src/app/` - routes (`/`, `/learn`, `/reference`, `/examples`)
+- `src/app/` - routes (`/[lang]`, `/[lang]/examples/*`, `/[lang]/appendix`)
 - `src/lib/grammar/` - PEG grammar
 - `src/lib/generated/` - generated parser
 - `src/lib/evaluator.ts` - evaluator semantics

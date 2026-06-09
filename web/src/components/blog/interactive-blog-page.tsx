@@ -1,14 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { slugify } from "@/lib/slugify";
+import {
+  DiseaseSpreadExamplePreview,
+  EarthquakeExamplePreview,
+  PianoExamplePreview,
+  SavingsExamplePreview,
+} from "./example-previews";
 import { InterestChart, RepeatedMultViz, PianoChainViz, PianoFreqViz, EarthquakeViz, SavingsExplorer } from "./visualizations";
+import { getArticleBlocks, getArticleHero, getBackLink, registerArticleContent } from "./article-content";
 import { useInteractiveArticleModel } from "./article-model";
 import { evaluateTryExpression, useCalculatorModel } from "./calculator-model";
-import type { Language, Block } from "./types";
+import { headingItemsFromBlocks, StickySectionNav } from "./sticky-section-nav";
+import type { ArticlePage, Language, Block } from "./types";
 import type { CalculatorViewModel } from "./calculator-model";
 
-export type { Language, Block };
+export type { Language, Block, ArticlePage };
 
 const LANGUAGE_CUE_KEY = "interactive-language-cue-seen-v1";
 const LANGUAGE_CHOICE_KEY = "interactive-language-choice-made-v1";
@@ -166,13 +176,6 @@ function linkify(text: string): React.ReactNode[] {
   return result.length ? result : [text];
 }
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 const ARROW_RE = /([↑↓⇓])/g;
 function mathFormat(text: string): React.ReactNode[] {
   const parts = text.split(ARROW_RE);
@@ -213,54 +216,29 @@ function RevealBlock({ children }: { children: React.ReactNode }) {
 }
 
 function NotationTransform({ lang }: { lang: Language }) {
-  const [showNew, setShowNew] = useState(false);
-  const [autoTriggered, setAutoTriggered] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6 && !autoTriggered) {
-          setAutoTriggered(true);
-          setTimeout(() => setShowNew(true), 600);
-        }
-      },
-      { threshold: 0.6 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [autoTriggered]);
-
   const rows = [
     { school: "2³ = 8", arrow: "2 ↑ 3 = 8" },
     { school: "³√8 = 2", arrow: "8 ↓ 3 = 2" },
     { school: "log₂(8) = 3", arrow: "8 ⇓ 2 = 3" },
   ];
+  const schoolLabel = lang === "en" ? "School" : lang === "zh" ? "学校写法" : "School";
+  const newLabel = lang === "en" ? "New notation" : lang === "zh" ? "新符号" : "Nieuwe notatie";
   return (
-    <div className="transformCard card" ref={ref}>
+    <div className="transformCard card">
+      <div className="transformHeader">
+        <span className="transformColLabel">{schoolLabel}</span>
+        <span className="transformColSpacer" aria-hidden="true" />
+        <span className="transformColLabel">{newLabel}</span>
+      </div>
       <div className="transformRows">
         {rows.map((r, i) => (
-          <div key={i} className="transformRow" style={{ transitionDelay: `${i * 120}ms` }}>
-            <div className="transformFlip">
-              <code className={`transformFormula transformFront${showNew ? " transformHidden" : ""}`}
-                style={{ transitionDelay: `${i * 120}ms` }}>
-                {r.school}
-              </code>
-              <code className={`transformFormula transformBack${showNew ? "" : " transformHidden"}`}
-                style={{ transitionDelay: `${i * 120 + 150}ms` }}>
-                {mathFormat(r.arrow)}
-              </code>
-            </div>
+          <div key={i} className="transformRow">
+            <code className="transformFormula">{r.school}</code>
+            <span className="transformArrow" aria-hidden="true">→</span>
+            <code className="transformFormula">{mathFormat(r.arrow)}</code>
           </div>
         ))}
       </div>
-      <button className="transformBtn" onClick={() => setShowNew((s) => !s)}>
-        {showNew
-          ? (lang === "en" ? "← School notation" : lang === "zh" ? "← 学校写法" : "← Schoolnotatie")
-          : (lang === "en" ? "Transform →" : lang === "zh" ? "转换 →" : "Transformeer →")}
-      </button>
     </div>
   );
 }
@@ -427,58 +405,74 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
       const zh = lang === "zh";
       const examples = [
         {
-          href: `#${slugify(en ? "Saving money" : zh ? "存钱" : "Sparen")}`,
+          href: `/${lang}/examples/savings`,
           label: en ? "Saving money" : zh ? "存钱" : "Sparen",
           ops: "÷  ↓  ⇓",
-          icon: (
-            <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 6v28M12 14l8-8 8 8" />
-              <rect x="8" y="24" width="24" height="10" rx="2" fill="var(--accent-light)" />
-              <line x1="14" y1="27" x2="14" y2="31" /><line x1="20" y1="27" x2="20" y2="31" /><line x1="26" y1="27" x2="26" y2="31" />
-            </svg>
-          ),
+          preview: <SavingsExamplePreview lang={lang} />,
         },
         {
-          href: `#${slugify(en ? "What does a piano sound like?" : zh ? "钢琴怎么调音？" : "Hoe klinkt een piano?")}`,
+          href: `/${lang}/examples/piano`,
           label: en ? "Piano tuning" : zh ? "钢琴调音" : "Pianostemming",
           ops: "↓",
-          icon: (
-            <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round">
-              <rect x="4" y="12" width="5" height="22" rx="1" fill="var(--accent)" opacity="0.15" />
-              <rect x="10" y="16" width="4" height="18" rx="1" fill="var(--foreground)" opacity="0.7" />
-              <rect x="15" y="14" width="5" height="20" rx="1" fill="var(--accent)" opacity="0.25" />
-              <rect x="21" y="10" width="4" height="24" rx="1" fill="var(--foreground)" opacity="0.7" />
-              <rect x="26" y="12" width="5" height="22" rx="1" fill="var(--accent)" opacity="0.4" />
-              <rect x="32" y="8" width="4" height="26" rx="1" fill="var(--foreground)" opacity="0.7" />
-              <path d="M6 8c6 0 10 2 14 2s8-3 14-3" stroke="var(--accent)" strokeWidth="1.5" fill="none" />
-            </svg>
-          ),
+          preview: <PianoExamplePreview lang={lang} />,
         },
         {
-          href: `#${slugify(en ? "Earthquakes and the Richter scale" : zh ? "地震与里氏震级" : "Aardbevingen en de Richterschaal")}`,
+          href: `/${lang}/examples/earthquakes`,
           label: en ? "Earthquakes" : zh ? "地震" : "Aardbevingen",
           ops: "↑  ⇓",
-          icon: (
-            <svg className="examplePreviewIcon" viewBox="0 0 40 40" fill="none" strokeLinecap="round">
-              <path d="M4 30 Q10 28 14 30 Q18 32 22 30 Q26 28 30 30 Q34 32 38 30" stroke="var(--accent)" strokeWidth="2" />
-              <path d="M8 26 Q12 24 16 26 Q20 28 24 26 Q28 24 32 26" stroke="var(--accent)" strokeWidth="1.5" opacity="0.5" />
-              <path d="M12 22 Q16 20 20 22 Q24 24 28 22" stroke="var(--accent)" strokeWidth="1" opacity="0.3" />
-              <circle cx="20" cy="18" r="3" fill="var(--accent)" opacity="0.2" />
-              <circle cx="20" cy="18" r="1" fill="var(--accent)" />
-            </svg>
-          ),
+          preview: <EarthquakeExamplePreview lang={lang} />,
+        },
+        {
+          label: en ? "Disease spread" : zh ? "疾病传播" : "Ziekteverspreiding",
+          ops: "↑  ⇓",
+          preview: <DiseaseSpreadExamplePreview lang={lang} />,
+          comingSoon: true,
         },
       ];
       return (
         <div className="examplesIntroGrid">
           {examples.map((ex) => (
-            <a key={ex.href} href={ex.href} className="examplePreviewCard card">
-              {ex.icon}
-              <span className="examplePreviewLabel">{ex.label}</span>
-              <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
-            </a>
+            <div
+              key={ex.href ?? ex.label}
+              className={`examplePreviewCard card${ex.comingSoon ? " examplePreviewCardComingSoon" : ""}`}
+            >
+              {ex.comingSoon && (
+                <span className="examplePreviewSoonBadge">
+                  {en ? "Coming soon" : zh ? "即将推出" : "Binnenkort"}
+                </span>
+              )}
+              {ex.preview}
+              {ex.comingSoon ? (
+                <div className="examplePreviewFooter examplePreviewFooterDisabled">
+                  <span className="examplePreviewLabel">{ex.label}</span>
+                  <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
+                  <span className="examplePreviewCta muted">
+                    {en ? "Full example in preparation" : zh ? "完整例题筹备中" : "Volledig voorbeeld in voorbereiding"}
+                  </span>
+                </div>
+              ) : (
+                <Link href={ex.href!} className="examplePreviewFooter">
+                  <span className="examplePreviewLabel">{ex.label}</span>
+                  <span className="examplePreviewOps">{mathFormat(ex.ops)}</span>
+                  <span className="examplePreviewCta">
+                    {en ? "Full example →" : zh ? "完整例题 →" : "Volledig voorbeeld →"}
+                  </span>
+                </Link>
+              )}
+            </div>
           ))}
         </div>
+      );
+    }
+    case "pageLink": {
+      const href =
+        block.page === "appendix" ? `/${lang}/appendix`
+        : block.page === "validation" ? `/${lang}/validation`
+        : `/${lang}`;
+      return (
+        <Link href={href} className="pageLinkCard card">
+          {block.label}
+        </Link>
       );
     }
     case "collapsible":
@@ -526,7 +520,7 @@ function RenderBlock({ block, lang }: { block: Block; lang: Language }) {
 /* ── English content                                 ── */
 /* ══════════════════════════════════════════════════════ */
 
-const en: Block[] = [
+const enIntro: Block[] = [
   { type: "text", content: "A researcher in Amsterdam was checking his son's maths homework. The assignment covered powers, roots, and logarithms. He looked at the formulas and thought:" },
   { type: "quote", content: "\"Why do they make something so simple so difficult?\"" },
   { type: "text", content: "That question turned into a [book](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf). This interactive article is based on it. We are going to show you a pattern that is already in your head — you just haven't noticed it yet — and then show how a small change in notation makes that pattern visible." },
@@ -558,8 +552,6 @@ const en: Block[] = [
   { type: "formula", lines: ["³√8 = 2"], label: "Read: \"the cube root of 8 is 2.\"" },
   { type: "text", content: "And what if you know the answer is 8 and the base is 2, and you want to find the exponent (3)? That is called a logarithm:" },
   { type: "formula", lines: ["log₂(8) = 3"], label: "Read: \"the base-2 logarithm of 8 is 3.\"" },
-  { type: "text", content: "Now put all three notations below each other:" },
-  { type: "formula", lines: ["2³ = 8", "³√8 = 2", "log₂(8) = 3"], label: "Three ways to write the same relationship: the power, the root, and the log." },
   { type: "text", content: "Do these three look related to you? Do they look like they belong to the same family?" },
   { type: "text", content: "They don't. The first uses a tiny superscript. The second uses a √ sign with a little number in the crook. The third spells out the word \"log\" and puts the base as a subscript. Three completely different visual systems for three operations that are supposed to be inverses of each other." },
   { type: "text", content: "This is the problem: the maths still follows the same pattern, but these three very different symbols make that pattern much harder to see." },
@@ -568,7 +560,7 @@ const en: Block[] = [
   { type: "heading", content: "What if we fix it?" },
   { type: "text", content: "The fix is surprisingly simple. Instead of three different visual systems, use three symbols that look like variations of each other:" },
   { type: "symbols" },
-  { type: "text", content: "Now let's rewrite that same relationship. Click the button to see the transformation:" },
+  { type: "text", content: "Now let's rewrite that same relationship:" },
   { type: "notationTransform" },
   { type: "text", content: "Read them out loud: \"2 up 3 is 8\", \"8 down 3 is 2\", \"8 double-down 2 is 3.\" The symbols go up, down, double-down — a family you can see." },
   { type: "text", content: "And the table now has a pattern on every level:" },
@@ -599,11 +591,13 @@ const en: Block[] = [
   { type: "text", content: "In school notation, that first cancellation would be written as ³√(5³) = 5, and the second as log₅(5³) = 3. But look at them: can you see that ³√ and ³ cancel? Or that log₅ and 5³ cancel? Not really — they look completely different. With ↓ and ↑, the cancellation is visible: they're the same symbol pointing in opposite directions. And ⇓ and ↑ work the same way. That's the whole point of the notation: it doesn't just label the operations — it shows you how they relate." },
 
   // ── Examples intro ──
-  { type: "heading", content: "Three problems, one pattern" },
-  { type: "text", content: "Theory is one thing. Let's see if it holds up in the real world — with three problems from three completely different worlds: finance, music, and geology. In school, each of these would require a different technique. With our notation, they all follow the same pattern: set up an equation with ↑, figure out which number is missing, and pick the matching inverse (↓ or ⇓)." },
+  { type: "heading", content: "Four examples, one pattern" },
+  { type: "text", content: "Theory is one thing. Let's see if it holds up in the real world — with examples from finance, music, geology, and public health. In school, each would require a different technique. With our notation, they all follow the same pattern: set up an equation with ↑, figure out which number is missing, and pick the matching inverse (↓ or ⇓)." },
   { type: "examplesIntro" },
 
-  // ── Interest ──
+];
+
+const enSavings: Block[] = [
   { type: "heading", content: "Saving money" },
   { type: "text", content: "Imagine you put $100 in a savings account. The bank pays 3% interest per year. What happens?" },
 
@@ -648,8 +642,9 @@ const en: Block[] = [
 
   { type: "text", content: "Try it yourself — click m, r, or n to choose what you want to find, and slide the others to see the answer change live:" },
   { type: "savingsExplorer" },
+];
 
-  // ── Piano ──
+const enPiano: Block[] = [
   { type: "heading", content: "What does a piano sound like?" },
   { type: "text", content: "Play a C on the piano. That note vibrates 262 times per second (262 Hz)." },
   { type: "text", content: "Now play the C one octave higher. That note vibrates exactly twice as fast: 524 Hz." },
@@ -666,8 +661,9 @@ const en: Block[] = [
   { type: "try", expr: "2↓12" },
   { type: "text", content: "About 1.0595. So each piano key is roughly 6% higher in pitch than the previous one." },
   { type: "text", content: "In school, this answer would be written as ¹²√2. Same number — but good luck seeing where it came from. With the notation, the equation r ↑ 12 = 2 directly mirrors what the piano does, and ↓ gets you the answer in one step." },
+];
 
-  // ── Earthquakes ──
+const enEarthquakes: Block[] = [
   { type: "heading", content: "Earthquakes and the Richter scale" },
   { type: "text", content: "You've probably heard of the Richter scale on the news. A magnitude 3 earthquake you barely feel, a magnitude 7 can destroy a city. But the difference between 3 and 7 isn't \"a bit more\" — it's enormous." },
   { type: "text", content: "Scientists designed the Richter scale so that each step of 1 magnitude means exactly 10 ↑ 1.5 times more energy:" },
@@ -692,8 +688,9 @@ const en: Block[] = [
   { type: "text", content: "About 0.2. That means a magnitude 7.2 earthquake releases roughly twice the energy of a 7.0. Let's see what that looks like:" },
   { type: "earthquakeViz" },
   { type: "text", content: "Each tiny 0.2 step doubles the energy. From 5.0 to 6.0 is just one number on the scale, but it means 32 times more energy. The Richter scale is hiding a power relationship — and the ⇓ symbol is what lets you see into it." },
+];
 
-  // ── Your turn ──
+const enMainClosing: Block[] = [
   { type: "heading", content: "Your turn" },
   { type: "text", content: "The calculator on this page supports ↑, ↓, and ⇓. Here are some things to explore:" },
   { type: "challenge", title: "The triangle of inverses", description: "These three expressions all describe the same relationship: 2¹⁰ = 1024. Verify each one.", items: [
@@ -709,15 +706,28 @@ const en: Block[] = [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 halvings, or about 38,000 years" },
   ] },
 
-  // ── Origin ──
+  { type: "heading", content: "How do we know it works?" },
+  { type: "text", content: "The notation is not a trick — each symbol is defined to match ordinary school maths. A power ↑ is exponentiation, ↓ is a root, and ⇓ is a logarithm. The calculator on this site uses those definitions exactly." },
+  { type: "formula", lines: ["2 ↑ 3 = 8  ↔  2³ = 8", "8 ↓ 3 = 2  ↔  ³√8 = 2", "8 ⇓ 2 = 3  ↔  log₂(8) = 3"], label: "Same relationships, two notations. Try the left-hand side — the answer should match what you already know." },
+  { type: "try", expr: "2↑3" },
+  { type: "try", expr: "8↓3" },
+  { type: "try", expr: "8⇓2" },
+  { type: "text", content: "Every \"try it\" button on this site runs through the same parser and evaluator. Automated tests check that mixed expressions (like 2↑3+1) still give the expected results, and that inverses undo each other: (5↑3)↓3 = 5 and (5↑3)⇓5 = 3." },
+  { type: "try", expr: "(5↑3)↓3" },
+  { type: "try", expr: "(5↑3)⇓5" },
+  { type: "text", content: "The semantics are documented in the project's language spec (grammar, operator precedence, and compatibility notes). If a result ever looks wrong, that's a bug — not a feature of the notation." },
+  { type: "pageLink", page: "validation", label: "Reader testing: feedback from three perspectives →" },
+
   { type: "heading", content: "Where this comes from" },
   { type: "text", content: "This notation was developed by Steven Pemberton, a computer scientist at CWI Amsterdam. In his book \"Numbers,\" he starts from the very beginning — counting with sticks — and builds up through addition, multiplication, and powers, showing that each level follows the same pattern. The notation isn't arbitrary: it was designed to make that pattern visible." },
   { type: "text", content: "If this notation made something click for you — or if you want to share it with a student or teacher — the full book by Steven Pemberton is [available as a PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
+  { type: "pageLink", page: "appendix", label: "Appendix: A proof that becomes simple →" },
+];
 
-  // ── Proof (appendix) ──
-  { type: "collapsible", title: "Appendix: A proof that becomes simple", blocks: [
-    { type: "text", content: "Note — This section is for maths teachers and maths enthusiasts. Share it with them — this notation often surprises even experienced maths teachers, and the proof tends to spark a good discussion." },
-    { type: "text", content: "Wikipedia has a page about [nested radicals](https://en.wikipedia.org/wiki/Nested_radical) — expressions where a square root contains another square root. That page is full of advanced maths — but we're only looking at one small corner of it, and we'll keep it simple." },
+const enAppendix: Block[] = [
+  { type: "heading", content: "Appendix: A proof that becomes simple" },
+  { type: "text", content: "Note — This section is for maths teachers and maths enthusiasts. Share it with them — this notation often surprises even experienced maths teachers, and the proof tends to spark a good discussion." },
+  { type: "text", content: "Wikipedia has a page about [nested radicals](https://en.wikipedia.org/wiki/Nested_radical) — expressions where a square root contains another square root. That page is full of advanced maths — but we're only looking at one small corner of it, and we'll keep it simple." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia says: \"It is not immediately obvious\" that these two are equal." },
     { type: "text", content: "In school notation, proving this requires you to know special rules about roots. But with our notation, it's just a puzzle. Let's solve it — you only need one thing you probably already know:" },
     { type: "formula", lines: ["(a + b) ↑ 2 = a ↑ 2 + 2 × a × b + b ↑ 2"], label: "The \"square of a sum\" rule, which works in any notation." },
@@ -764,14 +774,14 @@ const en: Block[] = [
     { type: "text", content: "The entire proof hinged on one moment: seeing that (2 ↓ 2) ↑ 2 = 2, because ↓ and ↑ cancel. In school notation, that same step would be written as (√2)² = 2. Can you see the cancellation there? Not really — √ and ² look nothing alike. But ↓ and ↑? They're the same arrow, pointing opposite ways. The cancellation is staring you in the face." },
     { type: "text", content: "That's the point of the whole article. Better notation doesn't just look nicer — it makes hard things easy to see." },
     { type: "text", content: "You can both sit back down now." },
-  ] },
+  { type: "pageLink", page: "main", label: "← Back to the article" },
 ];
 
 /* ══════════════════════════════════════════════════════ */
 /* ── Dutch content                                   ── */
 /* ══════════════════════════════════════════════════════ */
 
-const nl: Block[] = [
+const nlIntro: Block[] = [
   { type: "text", content: "Een onderzoeker in Amsterdam keek het wiskundehuiswerk van zijn zoon na. De opdracht ging over machten, wortels en logaritmen. Hij bekeek de formules en dacht:" },
   { type: "quote", content: "\"Waarom maken ze iets simpels zo moeilijk?\"" },
   { type: "text", content: "Die vraag werd een [boek](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf), en dit interactieve artikel is daarop gebaseerd. We laten je een patroon zien dat al in je hoofd zit — je hebt het alleen nog niet opgemerkt — en dan laten we zien hoe een kleine verandering in notatie dat patroon zichtbaar maakt." },
@@ -803,8 +813,6 @@ const nl: Block[] = [
   { type: "formula", lines: ["³√8 = 2"], label: "Lees als: \"de derdemachtswortel van 8 is 2.\"" },
   { type: "text", content: "En als je het antwoord 8 en het grondtal 2 kent, en je wilt de exponent (3) terugvinden? Dat heet een logaritme:" },
   { type: "formula", lines: ["log₂(8) = 3"], label: "Lees als: \"het logaritme met grondtal 2 van 8 is 3.\"" },
-  { type: "text", content: "Zet nu alle drie de notaties onder elkaar:" },
-  { type: "formula", lines: ["2³ = 8", "³√8 = 2", "log₂(8) = 3"], label: "Drie manieren om dezelfde relatie te schrijven: de macht, de wortel en de logaritme." },
   { type: "text", content: "Lijken die drie op elkaar? Zien ze eruit als familie?" },
   { type: "text", content: "Nee. De eerste gebruikt een klein verhoogd getal. De tweede een √-teken met een indexcijfer. De derde spelt het woord \"log\" en zet het grondtal als subscript. Drie compleet verschillende systemen voor drie bewerkingen die elkaars omgekeerde bewerking zouden moeten zijn." },
   { type: "text", content: "Dat is het probleem: de wiskunde volgt nog steeds hetzelfde patroon, maar door deze drie heel verschillende tekens zie je dat patroon veel minder goed." },
@@ -813,7 +821,7 @@ const nl: Block[] = [
   { type: "heading", content: "Wat als we het repareren?" },
   { type: "text", content: "De oplossing is verrassend simpel. In plaats van drie verschillende systemen, gebruik drie symbolen die op variaties van elkaar lijken:" },
   { type: "symbols" },
-  { type: "text", content: "Laten we diezelfde relatie herschrijven. Klik op de knop om de transformatie te zien:" },
+  { type: "text", content: "Laten we diezelfde relatie herschrijven:" },
   { type: "notationTransform" },
   { type: "text", content: "Zeg het hardop: \"2 omhoog 3 is 8\", \"8 omlaag 3 is 2\", \"8 dubbel-omlaag 2 is 3.\" De symbolen gaan omhoog, omlaag, dubbel-omlaag — een familie die je kunt zien." },
   { type: "text", content: "En het patroon klopt nu op alle drie de niveaus:" },
@@ -844,11 +852,12 @@ const nl: Block[] = [
   { type: "text", content: "In schoolnotatie zou die eerste opheffing geschreven worden als ³√(5³) = 5, en de tweede als log₅(5³) = 3. Maar kijk ernaar: kun je zien dat ³√ en ³ elkaar opheffen? Of dat log₅ en 5³ elkaar opheffen? Niet echt — ze zien er compleet anders uit. Met ↓ en ↑ is de opheffing zichtbaar: het zijn hetzelfde symbool dat de andere kant op wijst. En ⇓ en ↑ werken op dezelfde manier. Dat is het hele punt van de notatie: ze labelt niet alleen de bewerkingen — ze laat zien hoe ze zich tot elkaar verhouden." },
 
   // ── Voorbeelden intro ──
-  { type: "heading", content: "Drie problemen, een patroon" },
-  { type: "text", content: "Theorie is één ding. Laten we kijken of het standhoudt in de echte wereld — met drie problemen uit drie totaal verschillende werelden: geld, muziek en geologie. Op school zou elk probleem een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste manier van terugrekenen (↓ of ⇓)." },
+  { type: "heading", content: "Vier voorbeelden, een patroon" },
+  { type: "text", content: "Theorie is één ding. Laten we kijken of het standhoudt in de echte wereld — met voorbeelden uit geld, muziek, geologie en volksgezondheid. Op school zou elk een andere techniek vereisen. Met onze notatie volgen ze allemaal hetzelfde patroon: stel een vergelijking op met ↑, kijk welk getal ontbreekt, en kies de juiste manier van terugrekenen (↓ of ⇓)." },
   { type: "examplesIntro" },
+];
 
-  // ── Sparen ──
+const nlSavings: Block[] = [
   { type: "heading", content: "Sparen" },
   { type: "text", content: "Stel, je zet €100 op een spaarrekening. De bank geeft 3% rente per jaar. Wat gebeurt er?" },
 
@@ -893,8 +902,9 @@ const nl: Block[] = [
 
   { type: "text", content: "Probeer het zelf — klik op m, r of n om te kiezen wat je wilt vinden, en verschuif de rest om het antwoord live te zien veranderen:" },
   { type: "savingsExplorer" },
+];
 
-  // ── Piano ──
+const nlPiano: Block[] = [
   { type: "heading", content: "Hoe klinkt een piano?" },
   { type: "text", content: "Sla een C aan op de piano. Die noot trilt 262 keer per seconde (262 Hz)." },
   { type: "text", content: "Sla nu de C een octaaf hoger aan. Die trilt precies twee keer zo snel: 524 Hz." },
@@ -911,8 +921,9 @@ const nl: Block[] = [
   { type: "try", expr: "2↓12" },
   { type: "text", content: "Ongeveer 1.0595. Elke pianotoets is dus ruwweg 6% hoger in toonhoogte." },
   { type: "text", content: "Op school zou het antwoord ¹²√2 zijn. Hetzelfde getal — maar probeer daar maar eens uit af te lezen waar het vandaan komt. Met de notatie spiegelt de vergelijking r ↑ 12 = 2 direct wat de piano doet, en ↓ geeft je het antwoord in één stap." },
+];
 
-  // ── Aardbevingen ──
+const nlEarthquakes: Block[] = [
   { type: "heading", content: "Aardbevingen en de Richterschaal" },
   { type: "text", content: "Je hebt vast weleens de Richterschaal op het nieuws gehoord. Een aardbeving van magnitude 3 voel je amper, magnitude 7 kan een stad verwoesten. Maar het verschil tussen 3 en 7 is niet \"een beetje meer\" — het is enorm." },
   { type: "text", content: "Wetenschappers hebben de Richterschaal zo ontworpen dat elke stap van 1 magnitude precies 10 ↑ 1.5 keer meer energie betekent:" },
@@ -937,8 +948,9 @@ const nl: Block[] = [
   { type: "text", content: "Ongeveer 0.2. Dat betekent dat een aardbeving van magnitude 7.2 ruwweg twee keer zoveel energie vrijmaakt als een van 7.0. Laten we kijken hoe dat eruitziet:" },
   { type: "earthquakeViz" },
   { type: "text", content: "Elke kleine stap van 0.2 verdubbelt de energie. Van 5.0 naar 6.0 is maar één getal op de schaal, maar het betekent 32 keer meer energie. De Richterschaal verbergt een machtsrelatie — en het ⇓-symbool is wat je in staat stelt die te doorzien." },
+];
 
-  // ── Jouw beurt ──
+const nlMainClosing: Block[] = [
   { type: "heading", content: "Jouw beurt" },
   { type: "text", content: "De calculator op deze pagina ondersteunt ↑, ↓ en ⇓. Hier zijn een paar dingen om te ontdekken:" },
   { type: "challenge", title: "De driehoek van omgekeerd rekenen", description: "Deze drie uitdrukkingen beschrijven allemaal dezelfde relatie: 2¹⁰ = 1024. Controleer ze allemaal.", items: [
@@ -954,14 +966,27 @@ const nl: Block[] = [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 halveringen, oftewel zo'n 38.000 jaar" },
   ] },
 
-  // ── Herkomst ──
+  { type: "heading", content: "Hoe weten we dat het klopt?" },
+  { type: "text", content: "De notatie is geen truc — elk symbool is gedefinieerd om overeen te komen met gewone schoolwiskunde. Een macht ↑ is machtsverheffen, ↓ is een wortel, en ⇓ is een logaritme. De calculator op deze site gebruikt precies die definities." },
+  { type: "formula", lines: ["2 ↑ 3 = 8  ↔  2³ = 8", "8 ↓ 3 = 2  ↔  ³√8 = 2", "8 ⇓ 2 = 3  ↔  log₂(8) = 3"], label: "Dezelfde relaties, twee notaties. Probeer de linkerkant — het antwoord hoort overeen te komen met wat je al kent." },
+  { type: "try", expr: "2↑3" },
+  { type: "try", expr: "8↓3" },
+  { type: "try", expr: "8⇓2" },
+  { type: "text", content: "Elke \"probeer\"-knop op deze site loopt door dezelfde parser en evaluator. Geautomatiseerde tests controleren dat gemengde uitdrukkingen (zoals 2↑3+1) de verwachte uitkomst geven, en dat omgekeerde bewerkingen elkaar opheffen: (5↑3)↓3 = 5 en (5↑3)⇓5 = 3." },
+  { type: "try", expr: "(5↑3)↓3" },
+  { type: "try", expr: "(5↑3)⇓5" },
+  { type: "text", content: "De semantiek staat beschreven in de language spec van het project (grammatica, operatorvolgorde en compatibiliteitsnotities). Als een resultaat ooit verkeerd lijkt, is dat een bug — geen eigenschap van de notatie." },
+  { type: "pageLink", page: "validation", label: "Lezersessies: feedback vanuit drie perspectieven →" },
+
   { type: "heading", content: "Waar dit vandaan komt" },
   { type: "text", content: "Deze notatie is ontwikkeld door Steven Pemberton, een informaticus bij CWI Amsterdam. Zijn boek begint helemaal bij het begin — tellen met streepjes — en bouwt op via optellen, vermenigvuldigen en machten, en laat zien dat elk niveau hetzelfde patroon volgt. De notatie is niet willekeurig: die is ontworpen om dat patroon zichtbaar te maken." },
   { type: "text", content: "Als deze notatie iets voor je heeft opgehelderd — of als je het wilt delen met een leerling of docent — het volledige boek van Steven Pemberton is [beschikbaar als PDF](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)." },
+  { type: "pageLink", page: "appendix", label: "Bijlage: Een bewijs dat simpel wordt →" },
+];
 
-  // ── Bewijs (bijlage) ──
-  { type: "collapsible", title: "Bijlage: Een bewijs dat simpel wordt", blocks: [
-    { type: "text", content: "NB — Dit stuk is voor wiskundedocenten en wiskundeliefhebbers. Deel het met ze — deze notatie verrast zelfs ervaren wiskundedocenten, en het bewijs leidt vaak tot een goed gesprek." },
+const nlAppendix: Block[] = [
+  { type: "heading", content: "Bijlage: Een bewijs dat simpel wordt" },
+  { type: "text", content: "NB — Dit stuk is voor wiskundedocenten en wiskundeliefhebbers. Deel het met ze — deze notatie verrast zelfs ervaren wiskundedocenten, en het bewijs leidt vaak tot een goed gesprek." },
     { type: "text", content: "Wikipedia heeft een pagina over [geneste wortels](https://en.wikipedia.org/wiki/Nested_radical) — uitdrukkingen waarin een wortel nóg een wortel bevat. Die pagina staat vol met zware wiskunde — maar wij pakken er slechts één klein voorbeeldje uit en houden het simpel." },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "Wikipedia zegt: \"Het is niet meteen duidelijk\" dat deze twee gelijk zijn." },
     { type: "text", content: "In schoolnotatie moet je speciale regels over wortels kennen om dit te bewijzen. Maar met onze notatie is het gewoon een puzzel. We hebben maar één ding nodig dat je waarschijnlijk al kent:" },
@@ -1008,11 +1033,11 @@ const nl: Block[] = [
     { type: "heading3", content: "Waarom dit ertoe doet" },
     { type: "text", content: "Het hele bewijs draaide om één moment: zien dat (2 ↓ 2) ↑ 2 = 2, omdat ↓ en ↑ elkaar opheffen. In schoolnotatie zou diezelfde stap geschreven worden als (√2)² = 2. Kun je daar de opheffing zien? Niet echt — √ en ² lijken nergens op elkaar. Maar ↓ en ↑? Het is dezelfde pijl, de andere kant op. De opheffing springt je in het gezicht." },
     { type: "text", content: "Dat is het punt van dit hele artikel. Betere notatie is niet alleen mooier — het maakt moeilijke dingen makkelijk te zien." },
-    { type: "text", content: "Jullie mogen nu allebei weer rustig gaan zitten." },
-  ] },
+  { type: "text", content: "Jullie mogen nu allebei weer rustig gaan zitten." },
+  { type: "pageLink", page: "main", label: "← Terug naar het artikel" },
 ];
 
-const zh: Block[] = [
+const zhIntro: Block[] = [
   { type: "text", content: "阿姆斯特丹的一位研究者在看他儿子的数学作业。题目是幂、根和对数。他看完后想：" },
   { type: "quote", content: "\"为什么这么简单的东西要写得这么难？\"" },
   { type: "text", content: "这个问题后来写成了一本[书](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。这篇互动文章就基于那本书。我们会先指出你心里其实已经有的一种模式——只是还没留意到——再说明：只要稍微改一下写法，这个模式就会变得一眼可见。" },
@@ -1040,8 +1065,6 @@ const zh: Block[] = [
   { type: "formula", lines: ["³√8 = 2"], label: "读作：8 的立方根是 2" },
   { type: "text", content: "如果你知道结果是 8、底数是 2，想找回指数 3？那叫对数：" },
   { type: "formula", lines: ["log₂(8) = 3"], label: "读作：以 2 为底，8 的对数是 3" },
-  { type: "text", content: "把三种写法摆在一起：" },
-  { type: "formula", lines: ["2³ = 8", "³√8 = 2", "log₂(8) = 3"], label: "同一个关系：幂、根、对数——却是三种写法" },
   { type: "text", content: "你觉得它们看起来像一家人吗？像同一套符号里的“逆运算”吗？" },
   { type: "text", content: "不太像。第一个是小小的上标；第二个是 √ 再加角上的指数；第三个写出 log，底数又变成下标。三套完全不同的视觉系统，却要说它们互为逆运算。" },
   { type: "text", content: "问题不在数学本身，而在写法：规律其实还在，但这三种符号让它更难一眼看出来。" },
@@ -1049,7 +1072,7 @@ const zh: Block[] = [
   { type: "heading", content: "如果我们把写法修一下？" },
   { type: "text", content: "办法出奇地简单：别用三套完全不同的样子，改用三个“彼此像变体”的符号：" },
   { type: "symbols" },
-  { type: "text", content: "下面把同一个关系改写。点按钮看变换：" },
+  { type: "text", content: "下面把同一个关系改写：" },
   { type: "notationTransform" },
   { type: "text", content: "试着读出来：“2 上 3 等于 8”“8 下 3 等于 2”“8 双下 2 等于 3”。符号往上、往下、双往下——一眼能看出是一家人。" },
   { type: "text", content: "表格里每一层也都对齐同一种结构：" },
@@ -1079,10 +1102,12 @@ const zh: Block[] = [
   { type: "try", expr: "(5↑3)⇓5" },
   { type: "text", content: "在学校写法里，前一种抵消会写成 ³√(5³) = 5，后一种写成 log₅(5³) = 3。你一眼能看出 ³√ 和 ³ 在互消吗？能看出 log₅ 和 5³ 在互消吗？其实很难——它们长得太不像。用 ↓ 和 ↑，互消是看得见的：同一支箭头，方向相反。⇓ 和 ↑ 也是同一思路。记号的用处不只是“起名”，而是让你看见关系。" },
 
-  { type: "heading", content: "三个问题，一个模式" },
-  { type: "text", content: "理论是一回事，现实里也要站得住脚。下面用三个来自完全不同世界的问题：存钱、钢琴、地震。在学校，它们常常像三种不同技巧：“把指数挪下来”“写根号”“取对数再相除”。用本文的记号，它们都走同一条路：先写成 a ↑ b = c，看缺的是左边还是右边，再选 ↓ 或 ⇓。" },
+  { type: "heading", content: "四个例题，一个模式" },
+  { type: "text", content: "理论是一回事，现实里也要站得住脚。下面用来自金融、音乐、地质和公共卫生的例题。在学校，它们常常像不同技巧：“把指数挪下来”“写根号”“取对数再相除”。用本文的记号，它们都走同一条路：先写成 a ↑ b = c，看缺的是左边还是右边，再选 ↓ 或 ⇓。" },
   { type: "examplesIntro" },
+];
 
+const zhSavings: Block[] = [
   { type: "heading", content: "存钱" },
   { type: "text", content: "想象你在银行存 100 元，年利率 3%。会发生什么？" },
   { type: "heading3", content: "一步一步写出公式" },
@@ -1121,7 +1146,9 @@ const zh: Block[] = [
   { type: "text", content: "三个问题。旧写法里，每一个都像不同口诀：“把指数挪下来”“写根号”“取对数再除”。在新记号里，每一步都是同一动作：对照规则卡，选对逆运算（↓ 或 ⇓），代进去。结束。" },
   { type: "text", content: "你也可以亲手试：点 m、r、n 选择要求哪一个，再拖动别的量，看答案怎么跟着变：" },
   { type: "savingsExplorer" },
+];
 
+const zhPiano: Block[] = [
   { type: "heading", content: "钢琴怎么调音？" },
   { type: "text", content: "在钢琴上弹一个 C，它的频率大约是每秒振动 262 次（262 Hz）。" },
   { type: "text", content: "再弹高一个八度的 C，频率正好快一倍：524 Hz。" },
@@ -1138,7 +1165,9 @@ const zh: Block[] = [
   { type: "try", expr: "2↓12" },
   { type: "text", content: "大约 1.0595。所以每个琴键的音高大约比前一个高 6%。" },
   { type: "text", content: "在学校会写成 ¹²√2。数字一样，却很难看出它从钢琴的“12 步翻倍”里长出来。用新记号，r ↑ 12 = 2 直接照抄钢琴在做什么，而 ↓ 一步就把 r 求出来。" },
+];
 
+const zhEarthquakes: Block[] = [
   { type: "heading", content: "地震与里氏震级" },
   { type: "text", content: "新闻里常听到里氏震级。3 级你可能几乎感觉不到，7 级却能毁城。3 到 7 不是“稍微大一点”，背后的能量差非常巨大。" },
   { type: "text", content: "科学家把里氏震级设计成：每增加 1 级，能量正好变成原来的 10 ↑ 1.5 倍：" },
@@ -1162,7 +1191,9 @@ const zh: Block[] = [
   { type: "text", content: "大约 0.2。意思是 7.2 级地震释放的能量大约 7.0 级的两倍。看图感受一下：" },
   { type: "earthquakeViz" },
   { type: "text", content: "震级上每挪大约 0.2，能量就翻一倍。从 5.0 到 6.0 只是刻度上 +1，能量却大约 ×32。里氏震级藏着一个幂关系——⇓ 正好帮你把它看穿。" },
+];
 
+const zhMainClosing: Block[] = [
   { type: "heading", content: "轮到你了" },
   { type: "text", content: "本页的计算器支持 ↑、↓、⇓。可以试试下面几题：" },
   { type: "challenge", title: "逆运算三角形", description: "下面三个式子描述同一个关系：2¹⁰ = 1024。请都验证一下。", items: [
@@ -1177,8 +1208,28 @@ const zh: Block[] = [
   { type: "challenge", title: "放射性衰变", description: "有些物质会慢慢衰变。碳-14 是其中之一：每过 5730 年，大约剩一半。一开始是 100%。减半一次后，剩 0.5（= 50%）。减半两次：0.5 × 0.5 = 0.5 ↑ 2 = 0.25（= 25%）。减半 n 次后，剩下 0.5 ↑ n。问题：减半多少次后，只剩 1%（= 0.01）？也就是求 n，使 0.5 ↑ n = 0.01。↑ 右边的 n 未知，所以用 ⇓：", items: [
     { expr: "0.01⇓0.5", hint: "≈ 6.6 次减半，约 3.8 万年" },
   ] },
-  { type: "collapsible", title: "附录：一个更容易看懂的证明", blocks: [
-    { type: "text", content: "说明：这一段给数学老师、数学爱好者，以及想深挖的同学。欢迎转给他们——这套记号常常让有经验的老师也眼前一亮，这个证明也很适合拿来讨论。" },
+
+  { type: "heading", content: "我们怎么知道它是对的？" },
+  { type: "text", content: "这套记号不是文字游戏——每个符号都按普通数学来定义。↑ 是乘方，↓ 是开根，⇓ 是对数。本站的计算器就按这些定义计算。" },
+  { type: "formula", lines: ["2 ↑ 3 = 8  ↔  2³ = 8", "8 ↓ 3 = 2  ↔  ³√8 = 2", "8 ⇓ 2 = 3  ↔  log₂(8) = 3"], label: "同一关系，两种写法。试左边——结果应和你已知的学校写法一致。" },
+  { type: "try", expr: "2↑3" },
+  { type: "try", expr: "8↓3" },
+  { type: "try", expr: "8⇓2" },
+  { type: "text", content: "页面上每个“试试看”按钮都走同一套解析器和求值器。自动化测试会检查混合表达式（如 2↑3+1）是否给出预期结果，并检查逆运算是否互消：(5↑3)↓3 = 5，(5↑3)⇓5 = 3。" },
+  { type: "try", expr: "(5↑3)↓3" },
+  { type: "try", expr: "(5↑3)⇓5" },
+  { type: "text", content: "语义写在项目的 language spec 里（语法、运算符优先级和兼容性说明）。如果某次结果看起来不对，那是程序 bug，不是记号本身的问题。" },
+  { type: "pageLink", page: "validation", label: "读者试读：三个视角的反馈 →" },
+
+  { type: "heading", content: "这种写法来自哪里" },
+  { type: "text", content: "这套记号由阿姆斯特丹 CWI 的计算机科学家 Steven Pemberton 发展出来。他的《Numbers》从最基础开始——用木棍数数——一路搭到加法、乘法、幂，并说明每一层都重复同一种结构。记号不是随意画的，而是为了让这个结构显形。" },
+  { type: "text", content: "如果这套写法让你豁然开朗，或者你想把它分享给同学、老师，Steven Pemberton 的完整著作可以在这里下载：[Numbers（PDF）](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。" },
+  { type: "pageLink", page: "appendix", label: "附录：一个更容易看懂的证明 →" },
+];
+
+const zhAppendix: Block[] = [
+  { type: "heading", content: "附录：一个更容易看懂的证明" },
+  { type: "text", content: "说明：这一段给数学老师、数学爱好者，以及想深挖的同学。欢迎转给他们——这套记号常常让有经验的老师也眼前一亮，这个证明也很适合拿来讨论。" },
     { type: "text", content: "维基百科有“[嵌套根式](https://en.wikipedia.org/wiki/Nested_radical)”条目——根号里还套着根号的那种式子。那一页整体很难，我们只取其中一个很小的角落，尽量保持简单。" },
     { type: "formula", lines: ["√(3 + 2√2) = 1 + √2"], label: "维基百科会说：这两边“并不显然”相等" },
     { type: "text", content: "用学校写法证明，往往要先背一堆关于根号的技巧。换成我们的记号，它更像一道拼图。我们只需要一件你很可能已经会的东西：" },
@@ -1225,38 +1276,151 @@ const zh: Block[] = [
     { type: "heading3", content: "为什么这很重要" },
     { type: "text", content: "整段证明最关键的一步，是看出 (2 ↓ 2) ↑ 2 = 2：↓ 与 ↑ 互消。学校写法会写成 (√2)² = 2——你能从符号上“看见”互消吗？√ 和 ² 长得不像。但 ↓ 和 ↑？同一支箭头，方向相反，互消就在眼前。" },
     { type: "text", content: "这也是全文的主旨：更好的记号不只是好看，而是让难事变容易看见。" },
-    { type: "text", content: "好了，你们都可以坐下了。" },
-  ] },
+  { type: "text", content: "好了，你们都可以坐下了。" },
+  { type: "pageLink", page: "main", label: "← 返回文章" },
+];
 
-  { type: "heading", content: "这种写法来自哪里" },
-  { type: "text", content: "这套记号由阿姆斯特丹 CWI 的计算机科学家 Steven Pemberton 发展出来。他的《Numbers》从最基础开始——用木棍数数——一路搭到加法、乘法、幂，并说明每一层都重复同一种结构。记号不是随意画的，而是为了让这个结构显形。" },
-  { type: "text", content: "如果这套写法让你豁然开朗，或者你想把它分享给同学、老师，Steven Pemberton 的完整著作可以在这里下载：[Numbers（PDF）](https://homepages.cwi.nl/~steven/Talks/2019/11-21-dijkstra/Numbers.pdf)。" },
+const enValidation: Block[] = [
+  { type: "heading", content: "Reader testing" },
+  { type: "text", content: "Early readers tried the article from different backgrounds. Below is their feedback — in their own words where possible." },
+
+  { type: "heading", content: "VWO year 2 — student" },
+  { type: "text", content: "A second-year pre-university student who has not yet met logarithms in class, reading the Dutch version of the article." },
+  { type: "quote", content: "I get the arrows, but not the other notation." },
+  { type: "text", content: "The word \"inverse\" is unclear. The parallel with addition and subtraction does not jump out at once. She relies heavily on the calculator and takes considerably longer than the planned 15 minutes." },
+
+  { type: "heading", content: "Applied mathematics, year 1 — student" },
+  { type: "text", content: "A first-year applied-mathematics student reads the Chinese version of the article. He does not see himself as the intended audience. Conventional notation is not difficult for him to follow — he prefers examples that use letters only, not numbers. He does think the arrow notation could help a secondary-school student grasp the pattern. Once you go further with the subject, conventional notation still has to be learned — but for the basics, this new notation may already be enough." },
+
+  { type: "heading", content: "Lower-secondary maths — former teacher" },
+  { type: "text", content: "A former lower-secondary mathematics teacher sees a different pattern in the classroom: students often push back on abstract letter examples, while applied, numeric stories (savings, piano tuning, earthquakes) tend to hold attention." },
+
+  { type: "pageLink", page: "main", label: "← Back to article" },
+];
+
+const nlValidation: Block[] = [
+  { type: "heading", content: "Lezersessies" },
+  { type: "text", content: "Vroege lezers probeerden het artikel vanuit verschillende achtergronden. Hieronder staat hun feedback — waar mogelijk in hun eigen woorden." },
+
+  { type: "heading", content: "VWO 2 — scholier" },
+  { type: "text", content: "Een scholier uit 2e klas VWO die logaritmen in de les nog niet kent, leest de Nederlandse versie van het artikel." },
+  { type: "quote", content: "Ik snap de pijltjes wel, maar die ander niet." },
+  { type: "text", content: "Het woord \"inverse\" is onduidelijk. Het patroon met optellen en aftrekken springt er niet meteen uit. Zij gebruikt de calculator intensief en doet aanzienlijk langer dan de geplande 15 minuten." },
+
+  { type: "heading", content: "Toegepaste wiskunde, jaar 1 — student" },
+  { type: "text", content: "Een student eerstejaars toegepaste wiskunde leest de Chinese versie van het artikel. Hij ziet zichzelf niet als de beoogde doelgroep. De conventionele notatie vindt hij overigens niet moeilijk om te begrijpen — hij heeft liever voorbeelden die alleen met letters werken, niet met getallen. Wel denkt hij dat de pijlnotatie voor een middelbare scholier kan helpen om het patroon te begrijpen. Op het moment dat je hier dieper mee doorgaat, moet de conventionele notatie volgens hem alsnog geleerd worden — maar voor de basis kan deze vernieuwde notatie al voldoende zijn." },
+
+  { type: "heading", content: "Onderbouw wiskunde — voormalig docent" },
+  { type: "text", content: "Een voormalig wiskundedocent in de onderbouw ziet in de klas een ander patroon: leerlingen haken vaak af bij abstracte lettervoorbeelden, terwijl toegepaste, numerieke verhalen (sparen, piano, aardbevingen) de aandacht beter vasthouden." },
+
+  { type: "pageLink", page: "main", label: "← Terug naar artikel" },
+];
+
+const zhValidation: Block[] = [
+  { type: "heading", content: "读者试读" },
+  { type: "text", content: "早期读者来自不同背景。下面是他们的反馈——尽可能保留原话。" },
+
+  { type: "heading", content: "高中二年级（荷兰预科轨）— 学生" },
+  { type: "text", content: "一名尚未在课上接触对数的荷兰预科高二学生，阅读荷兰语版文章。" },
+  { type: "quote", content: "箭头我懂，但另一种写法不懂。" },
+  { type: "text", content: "“逆运算”一词令人困惑，与加减法的类比一时看不明白。她大量依赖计算器，用时明显超过计划的 15 分钟。" },
+
+  { type: "heading", content: "应用数学大一 — 学生" },
+  { type: "text", content: "一名应用数学大一学生阅读中文版文章。他不认为自己属于目标读者。常规写法对他来说并不难懂——他更喜欢只用字母、不用数字的例题。但他认为箭头记号有助于中学生理解这个模式。若继续深入，常规写法仍须学习——不过在基础阶段，这套新记号或许已经够用。" },
+
+  { type: "heading", content: "初中数学 — 前教师" },
+  { type: "text", content: "一位曾任初中数学教师的人观察到：学生常对抽象字母例题失去兴趣，而应用型数字故事（储蓄、钢琴、地震）更能留住注意力。" },
+
+  { type: "pageLink", page: "main", label: "← 返回文章" },
 ];
 
 /* ── Page ── */
 
-const heroEn = {
-  title: "Why Powers, Roots, and Logarithms Are Really the Same Pattern",
-  byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
-  audience: "For students, teachers, and the simply curious. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.",
-  time: "15 min read",
-};
-const heroNl = {
-  title: "Waarom machten, wortels en logaritmen eigenlijk hetzelfde patroon zijn",
-  byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
-  audience: "Voor leerlingen, docenten en iedereen die gewoon nieuwsgierig is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.",
-  time: "15 min lezen",
-};
-const heroZh = {
-  title: "为什么幂、根和对数里藏着同一个模式",
-  byline: "一篇关于幂、根和对数的互动文章：它们其实在讲同一件事",
-  audience: "给学生、老师和好奇的人。你不需要先学过对数——会算 3 + 5 就可以读到最后。",
-  time: "15 分钟阅读",
-};
+const audienceEn = "For students, teachers, and the simply curious. No prior knowledge of logarithms needed — if you can do 3 + 5, you can follow this to the end.";
+const audienceNl = "Voor leerlingen, docenten en iedereen die gewoon nieuwsgierig is. Geen voorkennis van logaritmen nodig — als je 3 + 5 kunt uitrekenen, kun je dit artikel tot het einde volgen.";
+const audienceZh = "给学生、老师和好奇的人。你不需要先学过对数——会算 3 + 5 就可以读到最后。";
 
-export function InteractiveBlogPage({ initialLanguage }: { initialLanguage: Language }) {
+registerArticleContent({
+  en: {
+    intro: enIntro,
+    savings: enSavings,
+    piano: enPiano,
+    earthquakes: enEarthquakes,
+    mainClosing: enMainClosing,
+    appendix: enAppendix,
+    validation: enValidation,
+    heroes: {
+      main: {
+        title: "Why Powers, Roots, and Logarithms Are Really the Same Pattern",
+        byline: "An interactive article about powers, roots, and logarithms — and why they're secretly the same thing",
+        audience: audienceEn,
+        time: "8 min read",
+      },
+      savings: { title: "Saving money", byline: "Compound interest with ↑, ↓, and ⇓", audience: audienceEn, time: "6 min read" },
+      piano: { title: "What does a piano sound like?", byline: "Twelve equal steps, one power law", audience: audienceEn, time: "4 min read" },
+      earthquakes: { title: "Earthquakes and the Richter scale", byline: "Energy hiding behind small numbers", audience: audienceEn, time: "4 min read" },
+      appendix: { title: "Appendix: A proof that becomes simple", byline: "Nested radicals with visible cancellation", audience: audienceEn, time: "5 min read" },
+      validation: { title: "Reader testing", byline: "Feedback from three perspectives", audience: audienceEn, time: "2 min read" },
+    },
+  },
+  nl: {
+    intro: nlIntro,
+    savings: nlSavings,
+    piano: nlPiano,
+    earthquakes: nlEarthquakes,
+    mainClosing: nlMainClosing,
+    appendix: nlAppendix,
+    validation: nlValidation,
+    heroes: {
+      main: {
+        title: "Waarom machten, wortels en logaritmen eigenlijk hetzelfde patroon zijn",
+        byline: "Een interactief artikel over machten, wortels en logaritmen — en waarom ze stiekem hetzelfde zijn",
+        audience: audienceNl,
+        time: "8 min lezen",
+      },
+      savings: { title: "Sparen", byline: "Samengestelde rente met ↑, ↓ en ⇓", audience: audienceNl, time: "6 min lezen" },
+      piano: { title: "Hoe klinkt een piano?", byline: "Twaalf gelijke stappen, één machtswet", audience: audienceNl, time: "4 min lezen" },
+      earthquakes: { title: "Aardbevingen en de Richterschaal", byline: "Energie achter kleine getallen", audience: audienceNl, time: "4 min lezen" },
+      appendix: { title: "Bijlage: Een bewijs dat simpel wordt", byline: "Geneste wortels met zichtbare opheffing", audience: audienceNl, time: "5 min lezen" },
+      validation: { title: "Lezersessies", byline: "Feedback vanuit drie perspectieven", audience: audienceNl, time: "2 min lezen" },
+    },
+  },
+  zh: {
+    intro: zhIntro,
+    savings: zhSavings,
+    piano: zhPiano,
+    earthquakes: zhEarthquakes,
+    mainClosing: zhMainClosing,
+    appendix: zhAppendix,
+    validation: zhValidation,
+    heroes: {
+      main: {
+        title: "为什么幂、根和对数里藏着同一个模式",
+        byline: "一篇关于幂、根和对数的互动文章：它们其实在讲同一件事",
+        audience: audienceZh,
+        time: "8 分钟阅读",
+      },
+      savings: { title: "存钱", byline: "用 ↑、↓、⇓ 看复利", audience: audienceZh, time: "6 分钟阅读" },
+      piano: { title: "钢琴怎么调音？", byline: "十二等分，一条幂律", audience: audienceZh, time: "4 分钟阅读" },
+      earthquakes: { title: "地震与里氏震级", byline: "小数字背后的能量", audience: audienceZh, time: "4 分钟阅读" },
+      appendix: { title: "附录：一个更容易看懂的证明", byline: "嵌套根式里的可见互消", audience: audienceZh, time: "5 分钟阅读" },
+      validation: { title: "读者试读", byline: "三个视角的反馈", audience: audienceZh, time: "2 分钟阅读" },
+    },
+  },
+});
+
+export function InteractiveBlogPage({
+  initialLanguage,
+  page = "main",
+}: {
+  initialLanguage: Language;
+  page?: ArticlePage;
+}) {
   const router = useRouter();
   const pathname = usePathname();
+  const blocks = getArticleBlocks(initialLanguage, page);
+  const hero = getArticleHero(initialLanguage, page);
+  const backLink = getBackLink(initialLanguage, page);
   const {
     language,
     theme,
@@ -1264,18 +1428,13 @@ export function InteractiveBlogPage({ initialLanguage }: { initialLanguage: Lang
     mobileCalc,
     setMobileCalc,
     fabPulsed,
-    hero,
-    blocks,
     toc,
   } = useInteractiveArticleModel({
     initialLanguage,
-    heroEn,
-    heroNl,
-    heroZh,
-    enBlocks: en,
-    nlBlocks: nl,
-    zhBlocks: zh,
+    hero,
+    blocks,
   });
+  const sectionNav = headingItemsFromBlocks(blocks);
   const calcModel = useCalculatorModel();
   const [showLanguageCue, setShowLanguageCue] = useState(false);
 
@@ -1346,6 +1505,12 @@ export function InteractiveBlogPage({ initialLanguage }: { initialLanguage: Lang
       </header>
       <div className="storyBody">
         <div className="storyArticle">
+          {backLink && (
+            <Link href={backLink.href} className="articleBackLink">
+              {backLink.label}
+            </Link>
+          )}
+          <StickySectionNav items={sectionNav} />
           {blocks.map((block, i) => (
             <RevealBlock key={i}>
               <RenderBlock block={block} lang={language} />

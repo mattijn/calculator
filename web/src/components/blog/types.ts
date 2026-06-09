@@ -1,5 +1,14 @@
 export type Language = "en" | "nl" | "zh";
 
+export type ArticlePage = "main" | "savings" | "piano" | "earthquakes" | "appendix" | "validation";
+
+export type HeroContent = {
+  title: string;
+  byline: string;
+  audience: string;
+  time: string;
+};
+
 export type Block =
   | { type: "text"; content: string }
   | { type: "quote"; content: string }
@@ -21,4 +30,5 @@ export type Block =
   | { type: "challenge"; title: string; description: string; items: { expr: string; hint?: string }[] }
   | { type: "notationTransform" }
   | { type: "savingsExplorer" }
-  | { type: "repeatedMultViz" };
+  | { type: "repeatedMultViz" }
+  | { type: "pageLink"; page: "appendix" | "main" | "validation"; label: string };
